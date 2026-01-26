@@ -1,0 +1,61 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { authService } from '@/services/api';
+import { useLogout } from '@/hooks/use-api';
+import { Building2, LogOut, LayoutDashboard } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+export function Header() {
+  const router = useRouter();
+  const logout = useLogout();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(!!authService.getCurrentUser());
+  }, []);
+
+  const handleLogout = async () => {
+    await logout.mutateAsync();
+    setIsAuthenticated(false);
+    router.push('/login');
+  };
+
+  return (
+    <header className="border-b">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold">
+          <Building2 className="h-6 w-6" />
+          EquipRent
+        </Link>
+
+        <nav className="flex items-center gap-4">
+          <Link href="/">
+            <Button variant="ghost">Equipamentos</Button>
+          </Link>
+          
+          {isAuthenticated ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="ghost">
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            </>
+          ) : (
+            <Link href="/login">
+              <Button>Entrar</Button>
+            </Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}

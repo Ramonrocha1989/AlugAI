@@ -1,0 +1,173 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useLogin, useRegister } from '@/hooks/use-api';
+import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from '@/lib/validations';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+
+export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const router = useRouter();
+  const login = useLogin();
+  const register = useRegister();
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onLogin = async (data: LoginFormData) => {
+    try {
+      await login.mutateAsync(data);
+      router.push('/dashboard');
+    } catch (error) {
+      alert('Erro ao fazer login');
+    }
+  };
+
+  const onRegister = async (data: RegisterFormData) => {
+    try {
+      await register.mutateAsync(data);
+      router.push('/dashboard');
+    } catch (error) {
+      alert('Erro ao fazer cadastro');
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-16 flex justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>{isLogin ? 'Login' : 'Cadastro'}</CardTitle>
+          <CardDescription>
+            {isLogin
+              ? 'Entre com suas credenciais'
+              : 'Crie sua conta para começar'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLogin ? (
+            <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...loginForm.register('email')}
+                />
+                {loginForm.formState.errors.email && (
+                  <p className="text-sm text-destructive mt-1">
+                    {loginForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...loginForm.register('password')}
+                />
+                {loginForm.formState.errors.password && (
+                  <p className="text-sm text-destructive mt-1">
+                    {loginForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={login.isPending}
+              >
+                {login.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Entrar
+              </Button>
+
+              <Button
+                type="button"
+                variant="link"
+                className="w-full"
+                onClick={() => setIsLogin(false)}
+              >
+                Não tem conta? Cadastre-se
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+              <div>
+                <Label htmlFor="companyName">Nome da Empresa</Label>
+                <Input
+                  id="companyName"
+                  {...registerForm.register('companyName')}
+                />
+                {registerForm.formState.errors.companyName && (
+                  <p className="text-sm text-destructive mt-1">
+                    {registerForm.formState.errors.companyName.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...registerForm.register('email')}
+                />
+                {registerForm.formState.errors.email && (
+                  <p className="text-sm text-destructive mt-1">
+                    {registerForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...registerForm.register('password')}
+                />
+                {registerForm.formState.errors.password && (
+                  <p className="text-sm text-destructive mt-1">
+                    {registerForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={register.isPending}
+              >
+                {register.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Cadastrar
+              </Button>
+
+              <Button
+                type="button"
+                variant="link"
+                className="w-full"
+                onClick={() => setIsLogin(true)}
+              >
+                Já tem conta? Faça login
+              </Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
