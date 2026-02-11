@@ -15,7 +15,12 @@ export function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    setIsAuthenticated(!!authService.getCurrentUser());
+    const checkAuth = () => {
+      setIsAuthenticated(!!authService.getCurrentUser());
+    };
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
   }, [pathname]);
 
   const handleLogout = async () => {
