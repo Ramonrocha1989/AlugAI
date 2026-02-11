@@ -222,4 +222,26 @@ export const authService = {
     const stored = localStorage.getItem('currentUser');
     return stored ? JSON.parse(stored) : null;
   },
+
+  // Solicita recuperação de senha
+  forgotPassword: async (email: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      console.log(`Email de recuperação enviado para: ${email}`);
+      return;
+    }
+    
+    await api.post('/auth/forgot-password', { email });
+  },
+
+  // Reseta a senha com token
+  resetPassword: async (token: string, password: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      console.log(`Senha resetada com token: ${token}`);
+      return;
+    }
+    
+    await api.post('/auth/reset-password', { token, password });
+  },
 };

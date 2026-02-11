@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -84,6 +85,14 @@ export default function LoginPage() {
                     {loginForm.formState.errors.password.message}
                   </p>
                 )}
+              </div>
+
+              <div className="flex justify-end">
+                <Link href="/forgot-password">
+                  <Button type="button" variant="link" className="px-0 text-sm">
+                    Esqueci minha senha
+                  </Button>
+                </Link>
               </div>
 
               <Button

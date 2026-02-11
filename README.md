@@ -22,6 +22,8 @@ MVP de marketplace B2B para aluguel de equipamentos de construção, desenvolvid
 │   │   ├── new-equipment/      # Cadastro de equipamento
 │   │   └── page.tsx            # Lista de equipamentos do usuário
 │   ├── equipment/[id]/         # Detalhes do equipamento
+│   ├── forgot-password/        # Recuperação de senha
+│   ├── reset-password/         # Reset de senha com token
 │   ├── login/                  # Login e cadastro
 │   ├── layout.tsx              # Layout raiz
 │   ├── page.tsx                # Página inicial
@@ -65,6 +67,8 @@ MVP de marketplace B2B para aluguel de equipamentos de construção, desenvolvid
 ### 3. Autenticação
 - Formulário de login
 - Formulário de cadastro
+- **Recuperação de senha (Esqueci minha senha)**
+- **Reset de senha com token**
 - Validação com Zod
 - Persistência em localStorage (mock)
 
