@@ -19,8 +19,8 @@ export function Header() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    await logout.mutateAsync();
     setIsAuthenticated(false);
+    await logout.mutateAsync();
     router.push('/login');
   };
 
