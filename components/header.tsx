@@ -20,8 +20,8 @@ export function Header() {
 
   const handleLogout = async () => {
     setIsAuthenticated(false);
-    await logout.mutateAsync();
     router.push('/login');
+    await logout.mutateAsync();
   };
 
   return (
