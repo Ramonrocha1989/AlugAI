@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
-import { LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
@@ -13,20 +13,23 @@ export function Header() {
   const pathname = usePathname();
   const logout = useLogout();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{ companyName: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
-      setIsAuthenticated(!!authService.getCurrentUser());
+      const currentUser = authService.getCurrentUser();
+      setIsAuthenticated(!!currentUser);
+      setUser(currentUser);
     };
     checkAuth();
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
   }, [pathname]);
 
-  const handleLogout = async () => {
-    setIsAuthenticated(false);
-    router.push('/login');
-    await logout.mutateAsync();
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    logout.mutateAsync();
+    window.location.href = '/login';
   };
 
   return (
