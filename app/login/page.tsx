@@ -15,6 +15,7 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const router = useRouter();
   const login = useLogin();
   const register = useRegister();
@@ -39,7 +40,7 @@ export default function LoginPage() {
   const onRegister = async (data: RegisterFormData) => {
     try {
       await register.mutateAsync(data);
-      router.push('/dashboard');
+      setShowVerificationMessage(true);
     } catch (error) {
       alert('Erro ao fazer cadastro');
     }
@@ -57,7 +58,19 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLogin ? (
+          {showVerificationMessage ? (
+            <div className="space-y-4 text-center">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-800 font-medium">Cadastro realizado com sucesso!</p>
+                <p className="text-sm text-green-600 mt-2">
+                  Enviamos um email de verificação para você. Por favor, verifique sua caixa de entrada e clique no link para ativar sua conta.
+                </p>
+              </div>
+              <Button onClick={() => router.push('/login')} className="w-full">
+                Ir para Login
+              </Button>
+            </div>
+          ) : isLogin ? (
             <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>

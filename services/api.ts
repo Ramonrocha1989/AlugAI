@@ -244,4 +244,15 @@ export const authService = {
     
     await api.post('/auth/reset-password', { token, password });
   },
+
+  // Verifica email com token
+  verifyEmail: async (token: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      console.log(`Email verificado com token: ${token}`);
+      return;
+    }
+    
+    await api.post('/auth/verify-email', { token });
+  },
 };
