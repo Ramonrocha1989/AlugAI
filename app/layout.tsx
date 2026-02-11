@@ -7,7 +7,7 @@ import { Header } from "@/components/header";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "EquipRent - Marketplace de Aluguel de Equipamentos",
+  title: "MercadoMáquina - Marketplace de Aluguel de Equipamentos",
   description: "Marketplace B2B para aluguel de equipamentos de construção",
 };
 

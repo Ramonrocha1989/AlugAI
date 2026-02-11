@@ -1,21 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
-import { Building2, LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const logout = useLogout();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     setIsAuthenticated(!!authService.getCurrentUser());
-  }, []);
+  }, [pathname]);
 
   const handleLogout = async () => {
     await logout.mutateAsync();
@@ -26,9 +27,8 @@ export function Header() {
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-          <Building2 className="h-6 w-6" />
-          EquipRent
+        <Link href="/" className="flex items-center">
+          <img src="/logo.svg" alt="EquipRent" className="h-12" />
         </Link>
 
         <nav className="flex items-center gap-4">
