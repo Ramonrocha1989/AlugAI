@@ -6,8 +6,10 @@ import { MachineCard } from '@/components/machine-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MachineFilters } from '@/types/machine';
-import { Search, Loader2, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, STATES_SUL } from '@/lib/constants';
+
+type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
@@ -15,6 +17,7 @@ export default function HomePage() {
   const [category, setCategory] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
   
   // Filtros avançados
   const [minPrice, setMinPrice] = useState('');
@@ -70,11 +73,30 @@ export default function HomePage() {
     setAcceptsGrains(false);
     setIsVerifiedSeller(false);
     setFilters({});
+    setSortBy('recent');
   };
 
   const hasActiveFilters = search || state || category || businessType || minPrice || maxPrice || 
     minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
     acceptsTradeDown || acceptsGrains || isVerifiedSeller;
+
+  // Ordenação
+  const sortedMachines = machines ? [...machines].sort((a, b) => {
+    switch (sortBy) {
+      case 'recent':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'price-asc':
+        return a.price - b.price;
+      case 'price-desc':
+        return b.price - a.price;
+      case 'hours-asc':
+        return (a.engineHours || 0) - (b.engineHours || 0);
+      case 'year-desc':
+        return b.yearModel - a.yearModel;
+      default:
+        return 0;
+    }
+  }) : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -283,29 +305,57 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Barra de Resultados e Ordenação */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-sm text-muted-foreground">
+          {isLoading ? (
+            'Carregando...'
+          ) : (
+            <>
+              <span className="font-semibold text-foreground">{sortedMachines.length}</span> máquinas encontradas
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="price-asc">Menor preço</option>
+            <option value="price-desc">Maior preço</option>
+            <option value="hours-asc">Menos horas de uso</option>
+            <option value="year-desc">Mais novos (ano)</option>
+          </select>
+        </div>
+      </div>
+
       {/* Lista de máquinas */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-sm text-muted-foreground">Buscando máquinas...</p>
+        </div>
+      ) : sortedMachines.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedMachines.map((machine) => (
+            <MachineCard key={machine.id} machine={machine} />
+          ))}
         </div>
       ) : (
-        <>
-          <div className="mb-4 text-sm text-muted-foreground">
-            {machines?.length || 0} máquinas encontradas
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {machines?.map((machine) => (
-              <MachineCard key={machine.id} machine={machine} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {!isLoading && machines?.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            Nenhuma máquina encontrada com os filtros aplicados.
+        <div className="text-center py-12 bg-muted rounded-lg">
+          <p className="text-lg font-semibold mb-2">Nenhuma máquina encontrada</p>
+          <p className="text-muted-foreground mb-4">
+            Tente ajustar os filtros ou limpar a busca
           </p>
+          {hasActiveFilters && (
+            <Button variant="outline" onClick={handleClearFilters}>
+              Limpar filtros
+            </Button>
+          )}
         </div>
       )}
     </div>
