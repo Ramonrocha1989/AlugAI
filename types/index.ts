@@ -1,3 +1,7 @@
+// Re-exportar tipos de máquinas
+export * from './machine';
+
+// Tipos legados (manter por compatibilidade temporária)
 export interface Equipment {
   id: string;
   name: string;
