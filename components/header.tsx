@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
-import { LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
@@ -36,16 +36,22 @@ export function Header() {
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center">
-          <img src="/logo.svg" alt="EquipRent" className="h-12" />
+          <img src="/logo.svg" alt="Mercado Máquina" className="h-12" />
         </Link>
 
         <nav className="flex items-center gap-4">
           <Link href="/">
-            <Button variant="ghost">Equipamentos</Button>
+            <Button variant="ghost">Máquinas</Button>
           </Link>
           
           {isAuthenticated ? (
             <>
+              <Link href="/verification">
+                <Button variant="ghost" className="text-green-600 hover:text-green-700">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Ser Verificado
+                </Button>
+              </Link>
               <Link href="/dashboard">
                 <Button variant="ghost">
                   <LayoutDashboard className="h-4 w-4 mr-2" />
