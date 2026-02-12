@@ -6,7 +6,7 @@ import { MachineCard } from '@/components/machine-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MachineFilters } from '@/types/machine';
-import { Search, MapPin, Loader2, Filter } from 'lucide-react';
+import { Search, Loader2, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, STATES_SUL } from '@/lib/constants';
 
 export default function HomePage() {
@@ -14,6 +14,21 @@ export default function HomePage() {
   const [state, setState] = useState('');
   const [category, setCategory] = useState('');
   const [businessType, setBusinessType] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Filtros avançados
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minYear, setMinYear] = useState('');
+  const [maxYear, setMaxYear] = useState('');
+  const [minEngineHours, setMinEngineHours] = useState('');
+  const [maxEngineHours, setMaxEngineHours] = useState('');
+  const [minPower, setMinPower] = useState('');
+  const [maxPower, setMaxPower] = useState('');
+  const [acceptsTradeDown, setAcceptsTradeDown] = useState(false);
+  const [acceptsGrains, setAcceptsGrains] = useState(false);
+  const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
+  
   const [filters, setFilters] = useState<MachineFilters>({});
 
   const { data: machines, isLoading } = useMachines(filters);
@@ -24,6 +39,17 @@ export default function HomePage() {
       state: state || undefined,
       category: category as any || undefined,
       businessType: businessType as any || undefined,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      minYear: minYear ? Number(minYear) : undefined,
+      maxYear: maxYear ? Number(maxYear) : undefined,
+      minEngineHours: minEngineHours ? Number(minEngineHours) : undefined,
+      maxEngineHours: maxEngineHours ? Number(maxEngineHours) : undefined,
+      minPower: minPower ? Number(minPower) : undefined,
+      maxPower: maxPower ? Number(maxPower) : undefined,
+      acceptsTradeDown: acceptsTradeDown || undefined,
+      acceptsGrains: acceptsGrains || undefined,
+      isVerifiedSeller: isVerifiedSeller || undefined,
     });
   };
 
@@ -32,8 +58,23 @@ export default function HomePage() {
     setState('');
     setCategory('');
     setBusinessType('');
+    setMinPrice('');
+    setMaxPrice('');
+    setMinYear('');
+    setMaxYear('');
+    setMinEngineHours('');
+    setMaxEngineHours('');
+    setMinPower('');
+    setMaxPower('');
+    setAcceptsTradeDown(false);
+    setAcceptsGrains(false);
+    setIsVerifiedSeller(false);
     setFilters({});
   };
+
+  const hasActiveFilters = search || state || category || businessType || minPrice || maxPrice || 
+    minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
+    acceptsTradeDown || acceptsGrains || isVerifiedSeller;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -46,6 +87,7 @@ export default function HomePage() {
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6 mb-8">
+        {/* Filtros Básicos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -97,9 +139,146 @@ export default function HomePage() {
           </Button>
         </div>
 
-        {(search || state || category || businessType) && (
-          <Button variant="outline" size="sm" onClick={handleClearFilters}>
-            Limpar filtros
+        {/* Toggle Filtros Avançados */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="mb-4"
+        >
+          {showAdvanced ? (
+            <>
+              <ChevronUp className="h-4 w-4 mr-2" />
+              Ocultar filtros avançados
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4 mr-2" />
+              Mostrar filtros avançados
+            </>
+          )}
+        </Button>
+
+        {/* Filtros Avançados */}
+        {showAdvanced && (
+          <div className="border-t pt-4 space-y-4">
+            {/* Faixa de Preço */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Faixa de Preço (R$)</label>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="number"
+                  placeholder="Mínimo"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Máximo"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Faixa de Ano */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Ano do Modelo</label>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="number"
+                  placeholder="De (ex: 2015)"
+                  value={minYear}
+                  onChange={(e) => setMinYear(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Até (ex: 2024)"
+                  value={maxYear}
+                  onChange={(e) => setMaxYear(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Faixa de Horas de Motor - CAMPO DE OURO */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                ⭐ Horas de Motor
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="number"
+                  placeholder="Mínimo (ex: 0)"
+                  value={minEngineHours}
+                  onChange={(e) => setMinEngineHours(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Máximo (ex: 5000)"
+                  value={maxEngineHours}
+                  onChange={(e) => setMaxEngineHours(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Faixa de Potência */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Potência (cv)</label>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="number"
+                  placeholder="Mínimo (ex: 75)"
+                  value={minPower}
+                  onChange={(e) => setMinPower(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Máximo (ex: 200)"
+                  value={maxPower}
+                  onChange={(e) => setMaxPower(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Checkboxes */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Opções de Negociação</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptsTradeDown}
+                    onChange={(e) => setAcceptsTradeDown(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">Aceita troca</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptsGrains}
+                    onChange={(e) => setAcceptsGrains(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">Aceita grãos como pagamento</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isVerifiedSeller}
+                    onChange={(e) => setIsVerifiedSeller(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">Apenas vendedores verificados</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasActiveFilters && (
+          <Button variant="outline" size="sm" onClick={handleClearFilters} className="mt-4">
+            Limpar todos os filtros
           </Button>
         )}
       </div>
