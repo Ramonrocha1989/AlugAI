@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
 
@@ -19,6 +19,7 @@ export default function NewMachinePage() {
   const createMachine = useCreateMachine();
   const [step, setStep] = useState(1);
   const [imageUrl, setImageUrl] = useState('');
+  const [receiveWhatsApp, setReceiveWhatsApp] = useState(true);
   
   const [formData, setFormData] = useState<Partial<CreateMachineData>>({
     images: [],
@@ -73,6 +74,12 @@ export default function NewMachinePage() {
   const handleSubmit = async () => {
     try {
       await createMachine.mutateAsync(formData as CreateMachineData);
+      
+      // Mostrar confirmação WhatsApp
+      if (receiveWhatsApp && formData.ownerPhone) {
+        alert(`✅ Anúncio publicado com sucesso!\n\n📱 Você receberá propostas no WhatsApp: ${formData.ownerPhone}`);
+      }
+      
       router.push('/dashboard');
     } catch (error) {
       alert('Erro ao cadastrar máquina');
@@ -82,7 +89,7 @@ export default function NewMachinePage() {
   const canProceed = () => {
     switch (step) {
       case 1: return formData.businessType && formData.category;
-      case 2: return formData.manufacturer && formData.model && formData.yearModel;
+      case 2: return formData.manufacturer && formData.model && formData.yearModel && formData.serialNumber; // Chassi obrigatório
       case 3: return formData.images && formData.images.length > 0;
       case 4: return formData.price && formData.state && formData.city;
       case 5: return formData.name && formData.description && formData.description.length >= 50;
@@ -240,13 +247,24 @@ export default function NewMachinePage() {
                 </div>
               </div>
 
-              <div>
-                <Label>Número de Série/Chassi (opcional)</Label>
+              {/* Chassi OBRIGATÓRIO */}
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <div className="flex items-start gap-2 mb-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <Label className="text-blue-900">Número de Série/Chassi (Obrigatório)</Label>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Para sua segurança e dos compradores, o número de série é obrigatório. 
+                      Isso reduz fraudes e aumenta a confiança no anúncio.
+                    </p>
+                  </div>
+                </div>
                 <Input
                   value={formData.serialNumber || ''}
                   onChange={(e) => updateFormData({ serialNumber: e.target.value })}
-                  placeholder="Para verificação"
+                  placeholder="Ex: JD6125J2018BR001234"
                   className="mt-2"
+                  required
                 />
               </div>
             </div>
@@ -258,7 +276,7 @@ export default function NewMachinePage() {
               <div>
                 <Label>Fotos da Máquina (1 a 10)</Label>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Sugestão: lateral completa, painel de horas, pneus/esteiras, motor
+                  📸 Sugestão: lateral completa, painel de horas, pneus/esteiras, motor, <strong>número de série</strong>
                 </p>
                 <div className="flex gap-2 mb-3">
                   <Input
@@ -439,8 +457,17 @@ export default function NewMachinePage() {
                 </div>
               </div>
 
-              <div>
-                <Label>WhatsApp (opcional)</Label>
+              {/* WhatsApp */}
+              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                <div className="flex items-start gap-2 mb-3">
+                  <MessageCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <Label className="text-green-900">WhatsApp para Contato</Label>
+                    <p className="text-xs text-green-700 mt-1">
+                      Receba propostas direto no seu WhatsApp!
+                    </p>
+                  </div>
+                </div>
                 <Input
                   value={formData.ownerPhone || ''}
                   onChange={(e) => updateFormData({ ownerPhone: e.target.value })}
@@ -467,11 +494,35 @@ export default function NewMachinePage() {
                   <p><strong>Ano:</strong> {formData.yearModel}</p>
                   {formData.engineHours && <p><strong>Horas:</strong> {formData.engineHours}h</p>}
                   {formData.power && <p><strong>Potência:</strong> {formData.power} cv</p>}
+                  <p><strong>Chassi:</strong> {formData.serialNumber}</p>
                   <p><strong>Preço:</strong> R$ {formData.price?.toLocaleString('pt-BR')}</p>
                   <p><strong>Localização:</strong> {formData.city}, {formData.state}</p>
                   <p><strong>Fotos:</strong> {formData.images?.length || 0}</p>
+                  {formData.ownerPhone && <p><strong>WhatsApp:</strong> {formData.ownerPhone}</p>}
                 </div>
               </div>
+
+              {/* Confirmação WhatsApp */}
+              {formData.ownerPhone && (
+                <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={receiveWhatsApp}
+                      onChange={(e) => setReceiveWhatsApp(e.target.checked)}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-green-900">
+                        📱 Deseja receber propostas direto no WhatsApp {formData.ownerPhone}?
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Compradores interessados poderão entrar em contato diretamente pelo WhatsApp
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              )}
 
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
                 <p className="text-sm">
