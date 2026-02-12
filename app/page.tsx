@@ -5,9 +5,10 @@ import { useMachines } from '@/hooks/use-machines';
 import { MachineCard } from '@/components/machine-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MachineFilters } from '@/types/machine';
 import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
-import { CATEGORIES, BUSINESS_TYPES, STATES_SUL } from '@/lib/constants';
+import { CATEGORIES, BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
 
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
 
@@ -18,6 +19,7 @@ export default function HomePage() {
   const [businessType, setBusinessType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [selectedCulture, setSelectedCulture] = useState('');
   
   // Filtros avançados
   const [minPrice, setMinPrice] = useState('');
@@ -56,6 +58,42 @@ export default function HomePage() {
     });
   };
 
+  const handleCultureFilter = (culture: string) => {
+    setSelectedCulture(culture);
+    
+    // Lógica de filtro por cultura
+    let categoryFilter = '';
+    let searchTerm = '';
+    
+    switch (culture) {
+      case 'Arroz':
+        categoryFilter = 'TRACTORS';
+        searchTerm = 'arroz';
+        break;
+      case 'Soja':
+        categoryFilter = 'TRACTORS';
+        searchTerm = 'soja';
+        break;
+      case 'Milho':
+        categoryFilter = 'HARVESTERS';
+        searchTerm = 'milho';
+        break;
+      case 'Pecuária Leiteira':
+      case 'Pecuária de Corte':
+        categoryFilter = 'HAYMAKING';
+        break;
+      default:
+        break;
+    }
+    
+    setCategory(categoryFilter);
+    setSearch(searchTerm);
+    setFilters({
+      category: categoryFilter as any || undefined,
+      search: searchTerm || undefined,
+    });
+  };
+
   const handleClearFilters = () => {
     setSearch('');
     setState('');
@@ -72,13 +110,14 @@ export default function HomePage() {
     setAcceptsTradeDown(false);
     setAcceptsGrains(false);
     setIsVerifiedSeller(false);
+    setSelectedCulture('');
     setFilters({});
     setSortBy('recent');
   };
 
   const hasActiveFilters = search || state || category || businessType || minPrice || maxPrice || 
     minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
-    acceptsTradeDown || acceptsGrains || isVerifiedSeller;
+    acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
 
   // Ordenação
   const sortedMachines = machines ? [...machines].sort((a, b) => {
@@ -105,6 +144,26 @@ export default function HomePage() {
         <p className="text-muted-foreground">
           Compre, venda, alugue ou troque máquinas agrícolas e de construção
         </p>
+      </div>
+
+      {/* Filtro Rápido por Cultura - DIFERENCIAL DO SUL */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm font-medium">🌾 Filtro por Cultura:</span>
+          <Badge variant="secondary" className="text-xs">Diferencial do Sul</Badge>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {CULTURES.map((culture) => (
+            <Button
+              key={culture}
+              variant={selectedCulture === culture ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleCultureFilter(culture)}
+            >
+              {culture}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Filtros */}
@@ -313,6 +372,7 @@ export default function HomePage() {
           ) : (
             <>
               <span className="font-semibold text-foreground">{sortedMachines.length}</span> máquinas encontradas
+              {selectedCulture && <span className="ml-2">para <strong>{selectedCulture}</strong></span>}
             </>
           )}
         </div>
