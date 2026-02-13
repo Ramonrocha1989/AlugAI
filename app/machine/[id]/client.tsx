@@ -56,10 +56,10 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(
       `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\n\n` +
-      `🚜 *${machine.name}*\n` +
-      `📅 Ano: ${machine.yearModel}\n` +
-      `💰 Preço: ${price}\n` +
-      `📍 ${machine.city}, ${machine.state}\n\n` +
+      `*${machine.name}*\n` +
+      `Ano: ${machine.yearModel}\n` +
+      `Preço: ${price}\n` +
+      `Localização: ${machine.city}, ${machine.state}\n\n` +
       `Gostaria de mais informações!`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
