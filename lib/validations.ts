@@ -12,12 +12,28 @@ export const registerSchema = z.object({
 });
 
 export const equipmentSchema = z.object({
+  businessType: z.enum(['SALE', 'RENTAL', 'EXCHANGE', 'SERVICE'], { required_error: 'Tipo de negócio é obrigatório' }),
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   description: z.string().min(10, 'Descrição deve ter no mínimo 10 caracteres'),
-  dailyPrice: z.number().min(1, 'Preço deve ser maior que zero'),
-  location: z.string().min(3, 'Localização é obrigatória'),
-  category: z.string().min(3, 'Categoria é obrigatória'),
+  category: z.enum(['TRACTORS', 'HARVESTERS', 'PLANTING', 'SPRAYING', 'HAYMAKING', 'IMPLEMENTS', 'LIVESTOCK', 'CONSTRUCTION'], { required_error: 'Categoria é obrigatória' }),
+  manufacturer: z.string().min(2, 'Fabricante é obrigatório'),
+  model: z.string().min(1, 'Modelo é obrigatório'),
+  yearModel: z.number().min(1900).max(new Date().getFullYear() + 1, 'Ano inválido'),
+  power: z.number().optional(),
+  engineHours: z.number().optional(),
+  serialNumber: z.string().optional(),
+  price: z.number().min(1, 'Preço deve ser maior que zero'),
+  acceptsTradeDown: z.boolean().default(false),
+  acceptsTradeUp: z.boolean().default(false),
+  acceptsGrains: z.boolean().default(false),
+  acceptsFinancing: z.boolean().default(false),
+  state: z.string().length(2, 'Use a sigla do estado (ex: SP)'),
+  city: z.string().min(2, 'Cidade é obrigatória'),
+  zipCode: z.string().optional(),
   images: z.array(z.string().url()).min(1, 'Adicione pelo menos uma imagem'),
+  videoUrl: z.string().url().optional().or(z.literal('')),
+  quickTags: z.array(z.enum(['NEW_TIRES', 'ORIGINAL_CABIN', 'AUTHORIZED_SERVICE', 'GPS_INTEGRATED', 'AIR_CONDITIONING', 'SINGLE_OWNER', 'COMPLETE_DOCS'])).default([]),
+  ownerPhone: z.string().optional(),
 });
 
 export const forgotPasswordSchema = z.object({

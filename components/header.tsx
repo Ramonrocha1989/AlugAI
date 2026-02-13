@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { NotificationsDropdown } from '@/components/notifications-dropdown';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -49,6 +50,8 @@ export function Header() {
           
           {isAuthenticated ? (
             <>
+              <NotificationsDropdown />
+              
               <Link href="/dashboard/favorites">
                 <Button variant="ghost" className="relative">
                   <Heart className="h-4 w-4 mr-2" />

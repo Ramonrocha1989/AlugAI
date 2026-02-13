@@ -1,41 +1,41 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { equipmentService, authService } from '@/services/api';
-import { LoginCredentials, RegisterData, CreateEquipmentData } from '@/types';
+import { authService, machineService } from '@/services/machine-api';
+import { LoginCredentials, RegisterData, CreateMachineData, MachineFilters } from '@/types';
 
-// Hook para listar equipamentos
-export const useEquipments = (filters?: { search?: string; location?: string }) => {
+// Hook para listar máquinas
+export const useEquipments = (filters?: MachineFilters) => {
   return useQuery({
-    queryKey: ['equipments', filters],
-    queryFn: () => equipmentService.getAll(filters),
+    queryKey: ['machines', filters],
+    queryFn: () => machineService.getAll(filters),
   });
 };
 
-// Hook para buscar equipamento por ID
+// Hook para buscar máquina por ID
 export const useEquipment = (id: string) => {
   return useQuery({
-    queryKey: ['equipment', id],
-    queryFn: () => equipmentService.getById(id),
+    queryKey: ['machine', id],
+    queryFn: () => machineService.getById(id),
     enabled: !!id,
   });
 };
 
-// Hook para listar equipamentos do usuário
+// Hook para listar máquinas do usuário
 export const useMyEquipments = () => {
   return useQuery({
-    queryKey: ['my-equipments'],
-    queryFn: () => equipmentService.getMyEquipments(),
+    queryKey: ['my-machines'],
+    queryFn: () => machineService.getMyMachines(),
   });
 };
 
-// Hook para criar equipamento
+// Hook para criar máquina
 export const useCreateEquipment = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: CreateEquipmentData) => equipmentService.create(data),
+    mutationFn: (data: CreateMachineData) => machineService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['equipments'] });
-      queryClient.invalidateQueries({ queryKey: ['my-equipments'] });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
     },
   });
 };
