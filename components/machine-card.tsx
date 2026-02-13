@@ -6,6 +6,7 @@ import { Machine } from '@/types/machine';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/favorite-button';
+import { RatingBadge } from '@/components/rating-badge';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { MapPin, Calendar, Gauge, Clock, CheckCircle2 } from 'lucide-react';
 
@@ -27,7 +28,6 @@ export function MachineCard({ machine }: MachineCardProps) {
   return (
     <Link href={`/machine/${machine.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
-        {/* Imagem */}
         <div className="relative h-48 w-full bg-muted">
           <Image
             src={machine.images[0] || '/placeholder.jpg'}
@@ -46,14 +46,12 @@ export function MachineCard({ machine }: MachineCardProps) {
               {BUSINESS_TYPES[machine.businessType]}
             </Badge>
           </div>
-          {/* Botão de Favorito */}
           <div className="absolute bottom-2 right-2">
             <FavoriteButton machineId={machine.id} size="sm" />
           </div>
         </div>
 
         <CardContent className="p-4">
-          {/* Título e Categoria */}
           <div className="mb-2">
             <h3 className="font-semibold text-lg line-clamp-1">{machine.name}</h3>
             <p className="text-sm text-muted-foreground">
@@ -61,7 +59,6 @@ export function MachineCard({ machine }: MachineCardProps) {
             </p>
           </div>
 
-          {/* Informações Técnicas */}
           <div className="space-y-1.5 mb-3">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -90,7 +87,6 @@ export function MachineCard({ machine }: MachineCardProps) {
             </div>
           </div>
 
-          {/* Tags Rápidas */}
           {machine.quickTags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
               {machine.quickTags.slice(0, 2).map((tag) => (
@@ -106,7 +102,6 @@ export function MachineCard({ machine }: MachineCardProps) {
             </div>
           )}
 
-          {/* Opções de Negociação */}
           <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
             {machine.acceptsTradeDown && <span>• Aceita troca</span>}
             {machine.acceptsGrains && <span>• Aceita grãos</span>}
@@ -115,13 +110,18 @@ export function MachineCard({ machine }: MachineCardProps) {
         </CardContent>
 
         <CardFooter className="p-4 pt-0">
-          <div className="w-full">
-            <p className="text-2xl font-bold text-primary">
-              {formatPrice(machine.price, machine.businessType)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {machine.ownerName}
-            </p>
+          <div className="w-full flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold text-primary">
+                {formatPrice(machine.price, machine.businessType)}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-muted-foreground">
+                  {machine.ownerName}
+                </p>
+                <RatingBadge userId={machine.ownerId} showCount={false} />
+              </div>
+            </div>
           </div>
         </CardFooter>
       </Card>

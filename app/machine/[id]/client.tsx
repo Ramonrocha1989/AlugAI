@@ -1,20 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ReviewsList } from '@/components/reviews-list';
+import { ReviewModal } from '@/components/review-modal';
+import { RatingBadge } from '@/components/rating-badge';
+import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { 
-  ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2
+  ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star
 } from 'lucide-react';
 
 export default function MachineDetailsClient({ params }: { params: { id: string } }) {
   const router = useRouter();
   const id = params.id;
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const { data: machine, isLoading } = useMachine(id);
   const incrementViews = useIncrementViews();
@@ -41,6 +46,9 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     );
   }
 
+  const currentUser = authService.getCurrentUser();
+  const isOwner = currentUser?.user?.id === machine.ownerId;
+
   const formatPrice = (price: number, businessType: string) => {
     const formatted = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -55,14 +63,23 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     const phone = machine.ownerPhone || '5551999887766';
     const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(
-      `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\n\n` +
-      `*${machine.name}*\n` +
-      `Ano: ${machine.yearModel}\n` +
-      `Preço: ${price}\n` +
-      `Localização: ${machine.city}, ${machine.state}\n\n` +
+      `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\\n\\n` +
+      `*${machine.name}*\\n` +
+      `Ano: ${machine.yearModel}\\n` +
+      `Preço: ${price}\\n` +
+      `Localização: ${machine.city}, ${machine.state}\\n\\n` +
       `Gostaria de mais informações!`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  };
+
+  const handleReview = () => {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    setShowReviewModal(true);
   };
 
   return (
@@ -183,6 +200,16 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               </div>
             </CardContent>
           </Card>
+
+          {/* Seção de Avaliações */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Avaliações</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReviewsList machineId={machine.id} />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-6">
@@ -192,7 +219,10 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold text-lg">{machine.ownerName}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-semibold text-lg">{machine.ownerName}</p>
+                  <RatingBadge userId={machine.ownerId} />
+                </div>
                 <p className="text-sm text-muted-foreground">{machine.owner.email}</p>
               </div>
 
@@ -200,6 +230,13 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Falar no WhatsApp
               </Button>
+
+              {!isOwner && (
+                <Button onClick={handleReview} variant="outline" className="w-full">
+                  <Star className="h-4 w-4 mr-2" />
+                  Avaliar Vendedor
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -236,6 +273,15 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
           </Card>
         </div>
       </div>
+
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        reviewedUserId={machine.ownerId}
+        reviewedUserName={machine.ownerName}
+        machineId={machine.id}
+        machineName={machine.name}
+      />
     </div>
   );
 }
