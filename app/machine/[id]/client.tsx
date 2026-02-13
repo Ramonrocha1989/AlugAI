@@ -53,8 +53,14 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
 
   const handleWhatsApp = () => {
     const phone = machine.ownerPhone || '5551999887766';
+    const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(
-      `Olá! Tenho interesse na máquina: ${machine.name} (${machine.yearModel})`
+      `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\n\n` +
+      `🚜 *${machine.name}*\n` +
+      `📅 Ano: ${machine.yearModel}\n` +
+      `💰 Preço: ${price}\n` +
+      `📍 ${machine.city}, ${machine.state}\n\n` +
+      `Gostaria de mais informações!`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
