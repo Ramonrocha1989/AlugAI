@@ -47,7 +47,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
   }
 
   const currentUser = authService.getCurrentUser();
-  const isOwner = currentUser?.user?.id === machine.ownerId;
+  const isOwner = currentUser?.id === machine.ownerId;
 
   const formatPrice = (price: number, businessType: string) => {
     const formatted = new Intl.NumberFormat('pt-BR', {
