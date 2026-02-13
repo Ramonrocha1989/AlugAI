@@ -3,15 +3,18 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
-import { LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { useFavorites } from '@/hooks/use-favorites';
+import { LogOut, LayoutDashboard, Shield, Heart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
+  const { data: favorites = [] } = useFavorites();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ companyName: string } | null>(null);
 
@@ -46,6 +49,20 @@ export function Header() {
           
           {isAuthenticated ? (
             <>
+              <Link href="/dashboard/favorites">
+                <Button variant="ghost" className="relative">
+                  <Heart className="h-4 w-4 mr-2" />
+                  Favoritos
+                  {favorites.length > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {favorites.length}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
               <Link href="/verification">
                 <Button variant="ghost" className="text-green-600 hover:text-green-700">
                   <Shield className="h-4 w-4 mr-2" />

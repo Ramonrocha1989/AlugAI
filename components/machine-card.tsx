@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Machine } from '@/types/machine';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { FavoriteButton } from '@/components/favorite-button';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { MapPin, Calendar, Gauge, Clock, CheckCircle2 } from 'lucide-react';
 
@@ -44,6 +45,10 @@ export function MachineCard({ machine }: MachineCardProps) {
             <Badge variant="secondary" className="bg-white/90">
               {BUSINESS_TYPES[machine.businessType]}
             </Badge>
+          </div>
+          {/* Botão de Favorito */}
+          <div className="absolute bottom-2 right-2">
+            <FavoriteButton machineId={machine.id} size="sm" />
           </div>
         </div>
 
