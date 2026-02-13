@@ -241,7 +241,9 @@ export const authService = {
   getCurrentUser: (): User | null => {
     if (typeof window === 'undefined') return null;
     const stored = localStorage.getItem('currentUser');
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed.user || parsed;
   },
 
   forgotPassword: async (email: string): Promise<void> => {
