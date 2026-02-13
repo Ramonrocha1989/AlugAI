@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useInfiniteMachines } from '@/hooks/use-infinite-machines';
+import { useState } from 'react';
+import { useMachines } from '@/hooks/use-machines';
 import { MachineCard } from '@/components/machine-card';
-import { MachineSkeletonGrid } from '@/components/machine-skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +22,7 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedCulture, setSelectedCulture] = useState('');
   
+  // Filtros avançados
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [minYear, setMinYear] = useState('');
@@ -36,35 +36,8 @@ export default function HomePage() {
   const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
   
   const [filters, setFilters] = useState<MachineFilters>({});
-  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { 
-    data, 
-    isLoading, 
-    fetchNextPage, 
-    hasNextPage, 
-    isFetchingNextPage 
-  } = useInfiniteMachines(filters);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const allMachines = data?.pages.flatMap(page => page.data) || [];
-  const totalMachines = data?.pages[0]?.meta.total || 0;
+  const { data: machines, isLoading } = useMachines(filters);
 
   const handleSearch = () => {
     const newFilters: MachineFilters = {
@@ -87,6 +60,7 @@ export default function HomePage() {
     
     setFilters(newFilters);
     
+    // Track analytics
     if (search) analytics.trackSearch(search);
     if (category) analytics.trackFilterUsed('category', category);
     if (state) analytics.trackFilterUsed('state', state);
@@ -97,6 +71,7 @@ export default function HomePage() {
   const handleCultureFilter = (culture: string) => {
     setSelectedCulture(culture);
     
+    // Lógica de filtro por cultura
     let categoryFilter = '';
     let searchTerm = '';
     
@@ -156,7 +131,8 @@ export default function HomePage() {
     minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
     acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
 
-  const sortedMachines = allMachines ? [...allMachines].sort((a, b) => {
+  // Ordenação
+  const sortedMachines = machines ? [...machines].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -182,6 +158,7 @@ export default function HomePage() {
         </p>
       </div>
 
+      {/* Filtro Rápido por Cultura - DIFERENCIAL DO SUL */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-sm font-medium">🌾 Filtro por Cultura:</span>
@@ -201,7 +178,9 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Filtros */}
       <div className="bg-card border rounded-lg p-6 mb-8">
+        {/* Filtros Básicos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -253,6 +232,7 @@ export default function HomePage() {
           </Button>
         </div>
 
+        {/* Toggle Filtros Avançados */}
         <Button
           variant="ghost"
           size="sm"
@@ -272,8 +252,10 @@ export default function HomePage() {
           )}
         </Button>
 
+        {/* Filtros Avançados */}
         {showAdvanced && (
           <div className="border-t pt-4 space-y-4">
+            {/* Faixa de Preço */}
             <div>
               <label className="text-sm font-medium mb-2 block">Faixa de Preço (R$)</label>
               <div className="grid grid-cols-2 gap-4">
@@ -292,6 +274,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Faixa de Ano */}
             <div>
               <label className="text-sm font-medium mb-2 block">Ano do Modelo</label>
               <div className="grid grid-cols-2 gap-4">
@@ -310,6 +293,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Faixa de Horas de Motor - CAMPO DE OURO */}
             <div>
               <label className="text-sm font-medium mb-2 block">
                 ⭐ Horas de Motor
@@ -330,6 +314,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Faixa de Potência */}
             <div>
               <label className="text-sm font-medium mb-2 block">Potência (cv)</label>
               <div className="grid grid-cols-2 gap-4">
@@ -348,6 +333,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Checkboxes */}
             <div>
               <label className="text-sm font-medium mb-2 block">Opções de Negociação</label>
               <div className="space-y-2">
@@ -390,13 +376,14 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Barra de Resultados e Ordenação */}
       <div className="flex items-center justify-between mb-6">
         <div className="text-sm text-muted-foreground">
           {isLoading ? (
             'Carregando...'
           ) : (
             <>
-              <span className="font-semibold text-foreground">{totalMachines}</span> máquinas encontradas
+              <span className="font-semibold text-foreground">{sortedMachines.length}</span> máquinas encontradas
               {selectedCulture && <span className="ml-2">para <strong>{selectedCulture}</strong></span>}
             </>
           )}
@@ -418,28 +405,18 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Lista de máquinas */}
       {isLoading ? (
-        <MachineSkeletonGrid count={6} />
+        <div className="flex flex-col justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-sm text-muted-foreground">Buscando máquinas...</p>
+        </div>
       ) : sortedMachines.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedMachines.map((machine) => (
-              <MachineCard key={machine.id} machine={machine} />
-            ))}
-          </div>
-
-          <div ref={loadMoreRef} className="py-8 flex justify-center">
-            {isFetchingNextPage && (
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Carregando mais máquinas...</p>
-              </div>
-            )}
-            {!hasNextPage && sortedMachines.length > 0 && (
-              <p className="text-sm text-muted-foreground">Você viu todas as máquinas disponíveis</p>
-            )}
-          </div>
-        </>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedMachines.map((machine) => (
+            <MachineCard key={machine.id} machine={machine} />
+          ))}
+        </div>
       ) : (
         <div className="text-center py-12 bg-muted rounded-lg">
           <p className="text-lg font-semibold mb-2">Nenhuma máquina encontrada</p>
