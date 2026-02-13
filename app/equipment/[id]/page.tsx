@@ -6,7 +6,7 @@ import { useEquipment } from '@/hooks/use-api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Building2, Calendar, Loader2, ArrowLeft } from 'lucide-react';
-import { authService } from '@/services/api';
+import { authService } from '@/services/machine-api';
 
 export default function EquipmentDetailPage() {
   const params = useParams();
@@ -50,7 +50,6 @@ export default function EquipmentDetailPage() {
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Galeria de imagens */}
         <div className="space-y-4">
           <div className="relative h-96 w-full rounded-lg overflow-hidden">
             <Image
@@ -76,14 +75,13 @@ export default function EquipmentDetailPage() {
           )}
         </div>
 
-        {/* Informações */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{equipment.name}</h1>
             <div className="flex items-center gap-4 text-muted-foreground">
               <div className="flex items-center">
                 <MapPin className="h-4 w-4 mr-1" />
-                {equipment.location}
+                {equipment.city}, {equipment.state}
               </div>
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-1" />
@@ -95,7 +93,7 @@ export default function EquipmentDetailPage() {
           <Card>
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-primary mb-2">
-                R$ {equipment.dailyPrice}
+                R$ {equipment.price.toLocaleString('pt-BR')}
                 <span className="text-lg font-normal text-muted-foreground">/dia</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
@@ -114,7 +112,7 @@ export default function EquipmentDetailPage() {
                 Disponibilidade
               </h2>
               <p className="text-sm text-muted-foreground">
-                Disponível para aluguel imediato
+                {equipment.available ? 'Disponível para aluguel imediato' : 'Indisponível no momento'}
               </p>
             </CardContent>
           </Card>
