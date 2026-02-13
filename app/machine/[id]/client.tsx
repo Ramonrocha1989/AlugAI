@@ -12,6 +12,7 @@ import { ReviewModal } from '@/components/review-modal';
 import { RatingBadge } from '@/components/rating-badge';
 import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
+import { analytics } from '@/lib/analytics';
 import { 
   ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star
 } from 'lucide-react';
@@ -27,6 +28,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
   useEffect(() => {
     if (machine) {
       incrementViews.mutate(machine.id);
+      analytics.trackMachineView(machine.id, machine.name, machine.category);
     }
   }, [machine?.id]);
 
@@ -60,6 +62,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
   };
 
   const handleWhatsApp = () => {
+    analytics.trackWhatsAppClick(machine.name, machine.price, machine.ownerName);
     const phone = machine.ownerPhone || '5551999887766';
     const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(

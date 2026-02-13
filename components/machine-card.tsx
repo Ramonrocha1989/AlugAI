@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/favorite-button';
 import { RatingBadge } from '@/components/rating-badge';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
+import { analytics } from '@/lib/analytics';
 import { MapPin, Calendar, Gauge, Clock, CheckCircle2 } from 'lucide-react';
 
 interface MachineCardProps {
@@ -26,7 +27,10 @@ export function MachineCard({ machine }: MachineCardProps) {
   };
 
   return (
-    <Link href={`/machine/${machine.id}`}>
+    <Link 
+      href={`/machine/${machine.id}`}
+      onClick={() => analytics.trackMachineView(machine.id, machine.name, machine.category)}
+    >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
         <div className="relative h-48 w-full bg-muted">
           <Image
@@ -47,7 +51,7 @@ export function MachineCard({ machine }: MachineCardProps) {
             </Badge>
           </div>
           <div className="absolute bottom-2 right-2">
-            <FavoriteButton machineId={machine.id} size="sm" />
+            <FavoriteButton machineId={machine.id} machineName={machine.name} size="sm" />
           </div>
         </div>
 

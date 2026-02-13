@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MachineFilters } from '@/types/machine';
+import { analytics } from '@/lib/analytics';
 import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
 
@@ -39,7 +40,7 @@ export default function HomePage() {
   const { data: machines, isLoading } = useMachines(filters);
 
   const handleSearch = () => {
-    setFilters({
+    const newFilters: MachineFilters = {
       search: search || undefined,
       state: state || undefined,
       category: category as any || undefined,
@@ -55,7 +56,16 @@ export default function HomePage() {
       acceptsTradeDown: acceptsTradeDown || undefined,
       acceptsGrains: acceptsGrains || undefined,
       isVerifiedSeller: isVerifiedSeller || undefined,
-    });
+    };
+    
+    setFilters(newFilters);
+    
+    // Track analytics
+    if (search) analytics.trackSearch(search);
+    if (category) analytics.trackFilterUsed('category', category);
+    if (state) analytics.trackFilterUsed('state', state);
+    if (businessType) analytics.trackFilterUsed('businessType', businessType);
+    if (minPrice || maxPrice) analytics.trackFilterUsed('price', `${minPrice || 0}-${maxPrice || 'max'}`);
   };
 
   const handleCultureFilter = (culture: string) => {
@@ -92,6 +102,8 @@ export default function HomePage() {
       category: categoryFilter as any || undefined,
       search: searchTerm || undefined,
     });
+    
+    analytics.trackFilterUsed('culture', culture);
   };
 
   const handleClearFilters = () => {

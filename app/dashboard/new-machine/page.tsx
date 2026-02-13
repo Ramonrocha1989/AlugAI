@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { analytics } from '@/lib/analytics';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
@@ -74,6 +75,11 @@ export default function NewMachinePage() {
   const handleSubmit = async () => {
     try {
       await createMachine.mutateAsync(formData as CreateMachineData);
+      
+      analytics.trackMachineCreate(
+        formData.category || 'unknown',
+        formData.businessType || 'unknown'
+      );
       
       // Mostrar confirmação WhatsApp
       if (receiveWhatsApp && formData.ownerPhone) {

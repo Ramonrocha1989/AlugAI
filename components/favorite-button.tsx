@@ -4,15 +4,17 @@ import { Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIsFavorited, useToggleFavorite } from '@/hooks/use-favorites';
 import { authService } from '@/services/machine-api';
+import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
 interface FavoriteButtonProps {
   machineId: string;
+  machineName?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function FavoriteButton({ machineId, className, size = 'md' }: FavoriteButtonProps) {
+export function FavoriteButton({ machineId, machineName, className, size = 'md' }: FavoriteButtonProps) {
   const router = useRouter();
   const isFavorited = useIsFavorited(machineId);
   const { toggle, isLoading } = useToggleFavorite();
@@ -39,7 +41,14 @@ export function FavoriteButton({ machineId, className, size = 'md' }: FavoriteBu
       return;
     }
 
+    const willBeFavorited = !isFavorited;
     toggle(machineId);
+    
+    if (willBeFavorited) {
+      analytics.trackFavoriteAdd(machineId, machineName || 'Unknown');
+    } else {
+      analytics.trackFavoriteRemove(machineId, machineName || 'Unknown');
+    }
   };
 
   return (

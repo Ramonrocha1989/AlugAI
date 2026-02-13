@@ -5,6 +5,7 @@ import { useCreateReview } from '@/hooks/use-reviews';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { StarRating } from '@/components/star-rating';
+import { analytics } from '@/lib/analytics';
 import { X, Loader2 } from 'lucide-react';
 
 interface ReviewModalProps {
@@ -40,6 +41,8 @@ export function ReviewModal({
         rating,
         comment: comment.trim() || undefined,
       });
+
+      analytics.trackReviewCreate(rating, !!comment.trim());
 
       onClose();
       setRating(5);
