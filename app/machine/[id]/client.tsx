@@ -240,13 +240,26 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="font-semibold text-lg">{machine.ownerName}</p>
+                  <button 
+                    onClick={() => router.push(`/profile/${machine.ownerId}`)}
+                    className="font-semibold text-lg hover:text-primary transition-colors"
+                  >
+                    {machine.ownerName}
+                  </button>
                   <RatingBadge userId={machine.ownerId} />
                 </div>
                 <p className="text-sm text-muted-foreground">{machine.owner.email}</p>
               </div>
 
-              <Button onClick={handleWhatsApp} className="w-full" size="lg">
+              <Button 
+                onClick={() => router.push(`/profile/${machine.ownerId}`)}
+                variant="outline" 
+                className="w-full"
+              >
+                Ver Perfil do Vendedor
+              </Button>
+
+              <Button onClick={handleWhatsApp} variant="outline" className="w-full" size="lg">
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Falar no WhatsApp
               </Button>
