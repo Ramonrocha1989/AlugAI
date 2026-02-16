@@ -1,20 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMyMachines, useDeleteMachine } from '@/hooks/use-machines';
+import { useMyMachines } from '@/hooks/use-machines';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Edit, Trash2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { authService } from '@/services/machine-api';
-import { Machine } from '@/types/machine';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { data: machines, isLoading } = useMyMachines();
-  const deleteMachine = useDeleteMachine();
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
@@ -22,25 +19,6 @@ export default function DashboardPage() {
       router.push('/login');
     }
   }, [router]);
-
-  const handleDelete = async (machine: Machine) => {
-    if (!confirm(`Tem certeza que deseja deletar "${machine.name}"?`)) {
-      return;
-    }
-
-    setDeletingId(machine.id);
-    try {
-      await deleteMachine.mutateAsync(machine.id);
-    } catch (error: any) {
-      if (error.response?.status === 403) {
-        alert('Você não tem permissão para deletar esta máquina');
-      } else {
-        alert('Erro ao deletar máquina');
-      }
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -66,32 +44,7 @@ export default function DashboardPage() {
       ) : machines && machines.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {machines.map((machine) => (
-            <div key={machine.id} className="relative">
-              <MachineCard machine={machine} />
-              <div className="absolute top-2 left-2 flex gap-2 z-10">
-                <Link href={`/dashboard/edit-machine/${machine.id}`}>
-                  <Button size="sm" variant="secondary">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                </Link>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDelete(machine)}
-                  disabled={deletingId === machine.id}
-                >
-                  {deletingId === machine.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Deletar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+            <MachineCard key={machine.id} machine={machine} />
           ))}
         </div>
       ) : (

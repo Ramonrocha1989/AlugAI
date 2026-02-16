@@ -164,15 +164,6 @@ export const machineService = {
     return newMachine;
   },
 
-  update: async (id: string, data: Partial<CreateMachineData>): Promise<Machine> => {
-    const { data: updatedMachine } = await api.put<Machine>(`/machines/${id}`, data);
-    return updatedMachine;
-  },
-
-  remove: async (id: string): Promise<void> => {
-    await api.delete(`/machines/${id}`);
-  },
-
   getMyMachines: async (): Promise<Machine[]> => {
     if (USE_MOCK) {
       await delay(300);
@@ -285,3 +276,12 @@ export const authService = {
     await api.post('/auth/verify-email', { token });
   },
 };
+
+  update: async (id: string, data: Partial<CreateMachineData>): Promise<Machine> => {
+    const { data: updatedMachine } = await api.put<Machine>(`/machines/${id}`, data);
+    return updatedMachine;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/machines/${id}`);
+  },

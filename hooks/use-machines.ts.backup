@@ -40,35 +40,6 @@ export function useCreateMachine() {
   });
 }
 
-// Hook para editar máquina
-export function useUpdateMachine() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateMachineData> }) => 
-      machineService.update(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
-      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
-      queryClient.invalidateQueries({ queryKey: ['machine', variables.id] });
-    },
-  });
-}
-
-// Hook para deletar máquina
-export function useDeleteMachine() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => machineService.remove(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
-      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
-      queryClient.removeQueries({ queryKey: ['machine', id] });
-    },
-  });
-}
-
 // Hook para incrementar visualizações
 export function useIncrementViews() {
   return useMutation({
