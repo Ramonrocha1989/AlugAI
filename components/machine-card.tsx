@@ -47,21 +47,24 @@ export function MachineCard({ machine }: MachineCardProps) {
                 PREMIUM
               </Badge>
             )}
-            {machine.ownerPlan === 'lojista' && (
-              <Badge variant="verified" className="flex items-center gap-1">
-                <Award className="h-3 w-3" />
-                VERIFICADO
-              </Badge>
-            )}
             <Badge variant="secondary" className="bg-white/90">
               {BUSINESS_TYPES[machine.businessType]}
             </Badge>
           </div>
-          {machine.isFeatured && (
-            <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
-              ⭐ Destaque
-            </div>
-          )}
+          {/* Badges lado direito */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+            {machine.isVerifiedSeller && (
+              <Badge className="bg-green-500 text-white flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                VERIFICADO
+              </Badge>
+            )}
+            {machine.isFeatured && (
+              <div className="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
+                ⭐ Destaque
+              </div>
+            )}
+          </div>
           <div className="absolute bottom-2 right-2">
             <FavoriteButton machineId={machine.id} machineName={machine.name} size="sm" />
           </div>
