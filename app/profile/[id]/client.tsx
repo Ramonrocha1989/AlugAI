@@ -90,7 +90,7 @@ export default function ProfileClient({ params }: { params: { id: string } }) {
             </CardContent>
           </Card>
 
-          {reviews && reviews.length > 0 && (
+          {reviews && reviews.reviews && reviews.reviews.length > 0 && (
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle>Avaliações Recebidas</CardTitle>
@@ -99,7 +99,7 @@ export default function ProfileClient({ params }: { params: { id: string } }) {
                 {loadingReviews ? (
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 ) : (
-                  reviews.slice(0, 5).map((review) => (
+                  reviews.reviews.slice(0, 5).map((review) => (
                     <div key={review.id} className="border-b last:border-0 pb-4 last:pb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex">
