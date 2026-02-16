@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { Equipment } from '@/types';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Star, Award } from 'lucide-react';
 
 interface EquipmentCardProps {
   equipment: Equipment;
@@ -19,6 +20,21 @@ export function EquipmentCard({ equipment }: EquipmentCardProps) {
           fill
           className="object-cover"
         />
+        {/* Badges */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {equipment.isPremium && (
+            <Badge variant="premium" className="flex items-center gap-1">
+              <Star className="h-3 w-3" />
+              PREMIUM
+            </Badge>
+          )}
+          {equipment.ownerPlan === 'lojista' && (
+            <Badge variant="verified" className="flex items-center gap-1">
+              <Award className="h-3 w-3" />
+              VERIFICADO
+            </Badge>
+          )}
+        </div>
       </div>
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-2 line-clamp-1">

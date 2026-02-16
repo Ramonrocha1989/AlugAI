@@ -12,12 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function NewEquipmentPage() {
   const router = useRouter();
   const createEquipment = useCreateEquipment();
   const [imageUrl, setImageUrl] = useState('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const form = useForm<EquipmentFormData>({
     resolver: zodResolver(equipmentSchema),
@@ -43,9 +45,13 @@ export default function NewEquipmentPage() {
     try {
       await createEquipment.mutateAsync(data);
       router.push('/dashboard');
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao cadastrar equipamento');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        setShowUpgradeModal(true);
+      } else {
+        console.error('Erro:', error);
+        alert('Erro ao cadastrar equipamento');
+      }
     }
   };
 
@@ -230,6 +236,8 @@ export default function NewEquipmentPage() {
           </form>
         </CardContent>
       </Card>
+
+      <UpgradeLimitModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
     </div>
   );
 }

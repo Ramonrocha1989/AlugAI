@@ -194,6 +194,14 @@ export const machineService = {
     
     await api.post(`/machines/${id}/view`);
   },
+
+  trackWhatsApp: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/track-whatsapp`);
+  },
+
+  markLead: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/mark-lead`);
+  },
 };
 
 export const authService = {

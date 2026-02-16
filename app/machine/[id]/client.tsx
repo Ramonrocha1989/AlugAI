@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
+import { machineService } from '@/services/machine-api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,9 +68,23 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     return businessType === 'RENTAL' ? `${formatted}/dia` : formatted;
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
+    try {
+      await machineService.trackWhatsApp(machine.id);
+    } catch (error) {
+      console.error('Erro ao rastrear:', error);
+    }
+    
     analytics.trackWhatsAppClick(machine.name, machine.price, machine.ownerName);
-    const phone = machine.ownerPhone || '5551999887766';
+    
+    // Remove caracteres não numéricos do telefone
+    const phone = machine.ownerPhone?.replace(/\D/g, '') || '';
+    
+    if (!phone) {
+      alert('Telefone do vendedor não cadastrado');
+      return;
+    }
+    
     const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(
       `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\n\n` +
@@ -79,7 +94,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
       `Localização: ${machine.city}, ${machine.state}\n\n` +
       `Gostaria de mais informações!`
     );
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
   };
 
   const handleReview = () => {

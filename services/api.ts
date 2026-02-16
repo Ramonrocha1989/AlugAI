@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Equipment, User, LoginCredentials, RegisterData, CreateEquipmentData } from '@/types';
+import { Equipment, User, LoginCredentials, RegisterData, CreateEquipmentData, Plan } from '@/types';
 import { mockEquipments } from '@/lib/mock-data';
 
 // Configuração do cliente Axios
@@ -60,6 +60,14 @@ const getUserEquipments = (userId: string): Equipment[] => {
 const saveUserEquipments = (userId: string, equipments: Equipment[]) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(`equipments_${userId}`, JSON.stringify(equipments));
+};
+
+export const planService = {
+  // Lista planos disponíveis
+  getAll: async (): Promise<Plan[]> => {
+    const { data } = await api.get<Plan[]>('/plans');
+    return data;
+  },
 };
 
 export const equipmentService = {
@@ -156,6 +164,16 @@ export const equipmentService = {
     // Backend real
     const { data } = await api.get<Equipment[]>('/equipments/my');
     return data;
+  },
+
+  // Rastreia clique no WhatsApp
+  trackWhatsApp: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/track-whatsapp`);
+  },
+
+  // Marca lead qualificado
+  markLead: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/mark-lead`);
   },
 };
 

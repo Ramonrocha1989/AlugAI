@@ -3,9 +3,11 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useEquipment } from '@/hooks/use-api';
+import { equipmentService } from '@/services/api';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Building2, Calendar, Loader2, ArrowLeft } from 'lucide-react';
+import { MapPin, Building2, Calendar, Loader2, ArrowLeft, Eye, MessageCircle, Star, Award } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 
 export default function EquipmentDetailPage() {
@@ -13,13 +15,24 @@ export default function EquipmentDetailPage() {
   const router = useRouter();
   const { data: equipment, isLoading } = useEquipment(params.id as string);
 
-  const handleRentalRequest = () => {
+  const handleRentalRequest = async () => {
     const user = authService.getCurrentUser();
     if (!user) {
       router.push('/login');
       return;
     }
-    alert('Solicitação de aluguel enviada! (Funcionalidade mock)');
+    
+    // Rastreia clique no WhatsApp
+    try {
+      await equipmentService.trackWhatsApp(params.id as string);
+    } catch (error) {
+      console.error('Erro ao rastrear clique:', error);
+    }
+    
+    // Abre WhatsApp (substitua pelo número real)
+    const phone = equipment?.ownerPhone || '5511999999999';
+    const message = encodeURIComponent(`Olá! Tenho interesse na máquina: ${equipment?.name}`);
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
 
   if (isLoading) {
@@ -77,6 +90,20 @@ export default function EquipmentDetailPage() {
 
         <div className="space-y-6">
           <div>
+            <div className="flex items-center gap-2 mb-2">
+              {equipment.isPremium && (
+                <Badge variant="premium" className="flex items-center gap-1">
+                  <Star className="h-3 w-3" />
+                  PREMIUM
+                </Badge>
+              )}
+              {equipment.ownerPlan === 'lojista' && (
+                <Badge variant="verified" className="flex items-center gap-1">
+                  <Award className="h-3 w-3" />
+                  VENDEDOR VERIFICADO
+                </Badge>
+              )}
+            </div>
             <h1 className="text-3xl font-bold mb-2">{equipment.name}</h1>
             <div className="flex items-center gap-4 text-muted-foreground">
               <div className="flex items-center">
@@ -88,6 +115,22 @@ export default function EquipmentDetailPage() {
                 {equipment.ownerName}
               </div>
             </div>
+            {(equipment.views || equipment.whatsappClicks) && (
+              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                {equipment.views && (
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    {equipment.views} visualizações
+                  </div>
+                )}
+                {equipment.whatsappClicks && (
+                  <div className="flex items-center gap-1">
+                    <MessageCircle className="h-4 w-4" />
+                    {equipment.whatsappClicks} contatos
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <Card>
@@ -100,7 +143,7 @@ export default function EquipmentDetailPage() {
                 Categoria: {equipment.category}
               </p>
               <Button onClick={handleRentalRequest} className="w-full" size="lg">
-                Solicitar Aluguel
+                Contatar via WhatsApp
               </Button>
             </CardContent>
           </Card>

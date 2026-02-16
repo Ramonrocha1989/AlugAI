@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMyMachines, useDeleteMachine } from '@/hooks/use-machines';
+import { machineService } from '@/services/machine-api';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Edit, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Loader2, Edit, Trash2, Eye, MessageCircle, CheckCircle } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 import { Machine } from '@/types/machine';
 
@@ -39,6 +41,17 @@ export default function DashboardPage() {
       }
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleMarkLead = async (machineId: string) => {
+    try {
+      await machineService.markLead(machineId);
+      alert('Lead marcado como qualificado!');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Erro ao marcar lead:', error);
+      alert(`Erro: ${error.response?.data?.message || 'Não foi possível marcar o lead. Verifique o backend.'}`);
     }
   };
 
@@ -89,6 +102,40 @@ export default function DashboardPage() {
                       Deletar
                     </>
                   )}
+                </Button>
+              </div>
+              
+              {/* Estatísticas */}
+              <div className="mt-3 p-3 bg-muted rounded-lg space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Eye className="h-4 w-4" />
+                    Visualizações
+                  </span>
+                  <Badge variant="secondary">{machine.views || 0}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <MessageCircle className="h-4 w-4" />
+                    Cliques WhatsApp
+                  </span>
+                  <Badge variant="secondary">{machine.whatsappClicks || 0}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <CheckCircle className="h-4 w-4" />
+                    Leads Qualificados
+                  </span>
+                  <Badge variant="secondary">{machine.qualifiedLeads || 0}</Badge>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full mt-2"
+                  onClick={() => handleMarkLead(machine.id)}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Marcar Lead Qualificado
                 </Button>
               </div>
             </div>

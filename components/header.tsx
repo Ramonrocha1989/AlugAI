@@ -9,7 +9,7 @@ import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
-import { LogOut, LayoutDashboard, Shield, Heart, FileText } from 'lucide-react';
+import { LogOut, LayoutDashboard, Shield, Heart, FileText, CreditCard } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
@@ -101,6 +101,12 @@ export function Header() {
                 <Button variant="ghost" className="text-green-600 hover:text-green-700">
                   <Shield className="h-4 w-4 mr-2" />
                   Ser Verificado
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Planos
                 </Button>
               </Link>
               <Link href="/dashboard">

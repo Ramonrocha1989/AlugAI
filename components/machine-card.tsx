@@ -9,7 +9,7 @@ import { FavoriteButton } from '@/components/favorite-button';
 import { RatingBadge } from '@/components/rating-badge';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
-import { MapPin, Calendar, Gauge, Clock, CheckCircle2 } from 'lucide-react';
+import { MapPin, Calendar, Gauge, Clock, CheckCircle2, Star, Award } from 'lucide-react';
 
 interface MachineCardProps {
   machine: Machine;
@@ -39,22 +39,29 @@ export function MachineCard({ machine }: MachineCardProps) {
             fill
             className="object-cover"
           />
-          {machine.isVerifiedSeller && (
-            <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Verificado
-            </div>
-          )}
-          {machine.isFeatured && (
-            <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1" style={{ top: machine.isVerifiedSeller ? '3rem' : '0.5rem' }}>
-              ⭐ Destaque
-            </div>
-          )}
-          <div className="absolute top-2 left-2">
+          {/* Badges de Monetização */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {machine.isPremium && (
+              <Badge variant="premium" className="flex items-center gap-1">
+                <Star className="h-3 w-3" />
+                PREMIUM
+              </Badge>
+            )}
+            {machine.ownerPlan === 'lojista' && (
+              <Badge variant="verified" className="flex items-center gap-1">
+                <Award className="h-3 w-3" />
+                VERIFICADO
+              </Badge>
+            )}
             <Badge variant="secondary" className="bg-white/90">
               {BUSINESS_TYPES[machine.businessType]}
             </Badge>
           </div>
+          {machine.isFeatured && (
+            <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
+              ⭐ Destaque
+            </div>
+          )}
           <div className="absolute bottom-2 right-2">
             <FavoriteButton machineId={machine.id} machineName={machine.name} size="sm" />
           </div>

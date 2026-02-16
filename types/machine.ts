@@ -74,6 +74,12 @@ export interface Machine {
   updatedAt: string;
   views: number;
   
+  // Monetização (NOVOS CAMPOS)
+  isPremium?: boolean;
+  whatsappClicks?: number;
+  qualifiedLeads?: number;
+  ownerPlan?: 'free' | 'lojista';
+  
   // Owner aninhado (retornado pelo backend)
   owner: {
     id: string;

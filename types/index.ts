@@ -13,6 +13,11 @@ export interface Equipment {
   ownerName: string;
   category: string;
   available: boolean;
+  isPremium?: boolean;
+  views?: number;
+  whatsappClicks?: number;
+  qualifiedLeads?: number;
+  ownerPlan?: 'free' | 'lojista';
 }
 
 export interface User {
@@ -20,6 +25,16 @@ export interface User {
   email: string;
   companyName: string;
   token?: string;
+  plan?: 'free' | 'lojista';
+  maxAds?: number;
+}
+
+export interface Plan {
+  id: 'free' | 'lojista';
+  name: string;
+  price: number;
+  maxAds: number;
+  features: string[];
 }
 
 export interface LoginCredentials {
