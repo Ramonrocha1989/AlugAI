@@ -66,6 +66,7 @@ export interface Machine {
   ownerName: string;
   ownerPhone?: string;
   isVerifiedSeller: boolean;
+  isFeatured?: boolean;
   
   // Metadados
   available: boolean;

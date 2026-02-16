@@ -32,13 +32,13 @@ export function Header() {
   
   const totalNotifications = pendingReceived + updatedSent;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ companyName: string } | null>(null);
+  const [user, setUser] = useState<{ companyName: string; role?: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
       const currentUser = authService.getCurrentUser();
       setIsAuthenticated(!!currentUser);
-      setUser(currentUser);
+      setUser(currentUser?.user || currentUser);
     };
     checkAuth();
     window.addEventListener('storage', checkAuth);
@@ -112,6 +112,13 @@ export function Header() {
                   Perfil
                 </Button>
               </Link>
+              {user?.role === 'ADMIN' && (
+                <Link href="/admin">
+                  <Button variant="ghost" className="text-purple-600 hover:text-purple-700">
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair

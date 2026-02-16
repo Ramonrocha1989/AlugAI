@@ -45,6 +45,11 @@ export function MachineCard({ machine }: MachineCardProps) {
               Verificado
             </div>
           )}
+          {machine.isFeatured && (
+            <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1" style={{ top: machine.isVerifiedSeller ? '3rem' : '0.5rem' }}>
+              ⭐ Destaque
+            </div>
+          )}
           <div className="absolute top-2 left-2">
             <Badge variant="secondary" className="bg-white/90">
               {BUSINESS_TYPES[machine.businessType]}

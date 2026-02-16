@@ -157,6 +157,11 @@ export default function HomePage() {
     acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
 
   const sortedMachines = allMachines ? [...allMachines].sort((a, b) => {
+    // Sempre priorizar máquinas destacadas
+    if (a.isFeatured && !b.isFeatured) return -1;
+    if (!a.isFeatured && b.isFeatured) return 1;
+    
+    // Depois aplicar ordenação escolhida
     switch (sortBy) {
       case 'recent':
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
