@@ -11,6 +11,7 @@ import { ReviewsList } from '@/components/reviews-list';
 import { ReviewModal } from '@/components/review-modal';
 import { RatingBadge } from '@/components/rating-badge';
 import { ShareButtons } from '@/components/share-buttons';
+import { ImageLightbox } from '@/components/image-lightbox';
 import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
@@ -22,6 +23,8 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
   const router = useRouter();
   const id = params.id;
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const { data: machine, isLoading } = useMachine(id);
   const incrementViews = useIncrementViews();
@@ -86,6 +89,11 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     setShowReviewModal(true);
   };
 
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
@@ -99,7 +107,10 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardContent className="p-0">
-              <div className="relative h-96 w-full bg-muted">
+              <div 
+                className="relative h-96 w-full bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openLightbox(0)}
+              >
                 <Image
                   src={machine.images[0] || '/placeholder.jpg'}
                   alt={machine.name}
@@ -121,7 +132,11 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               {machine.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2 p-4">
                   {machine.images.slice(1, 5).map((img, idx) => (
-                    <div key={idx} className="relative h-24 bg-muted rounded">
+                    <div 
+                      key={idx} 
+                      className="relative h-24 bg-muted rounded cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => openLightbox(idx + 1)}
+                    >
                       <Image src={img} alt={`Imagem ${idx + 2}`} fill className="object-cover rounded" />
                     </div>
                   ))}
@@ -285,6 +300,13 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
           </Card>
         </div>
       </div>
+
+      <ImageLightbox
+        images={machine.images}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
 
       <ReviewModal
         isOpen={showReviewModal}
