@@ -38,7 +38,9 @@ export function Header() {
     const checkAuth = () => {
       const currentUser = authService.getCurrentUser();
       setIsAuthenticated(!!currentUser);
-      setUser(currentUser?.user || currentUser);
+      // Extrair user se vier aninhado
+      const userData = (currentUser as any)?.user || currentUser;
+      setUser(userData);
     };
     checkAuth();
     window.addEventListener('storage', checkAuth);
