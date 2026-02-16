@@ -12,17 +12,19 @@ import { ReviewModal } from '@/components/review-modal';
 import { RatingBadge } from '@/components/rating-badge';
 import { ShareButtons } from '@/components/share-buttons';
 import { ImageLightbox } from '@/components/image-lightbox';
+import { ProposalModal } from '@/components/proposal-modal';
 import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
 import { 
-  ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star
+  ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star, DollarSign
 } from 'lucide-react';
 
 export default function MachineDetailsClient({ params }: { params: { id: string } }) {
   const router = useRouter();
   const id = params.id;
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showProposalModal, setShowProposalModal] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -265,6 +267,18 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               </Button>
 
               {!isOwner && (
+                <Button 
+                  onClick={() => setShowProposalModal(true)} 
+                  variant="default" 
+                  className="w-full"
+                  size="lg"
+                >
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  Fazer Proposta
+                </Button>
+              )}
+
+              {!isOwner && (
                 <Button onClick={handleReview} variant="outline" className="w-full">
                   <Star className="h-4 w-4 mr-2" />
                   Avaliar Vendedor
@@ -328,6 +342,14 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
         reviewedUserName={machine.ownerName}
         machineId={machine.id}
         machineName={machine.name}
+      />
+
+      <ProposalModal
+        isOpen={showProposalModal}
+        onClose={() => setShowProposalModal(false)}
+        machineId={machine.id}
+        machineName={machine.name}
+        machinePrice={machine.price}
       />
     </div>
   );

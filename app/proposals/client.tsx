@@ -1,0 +1,285 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
+import {
+  useReceivedProposals,
+  useSentProposals,
+  useAcceptProposal,
+  useRejectProposal,
+  useCancelProposal,
+} from '@/hooks/use-proposals';
+import { proposalsService } from '@/services/proposals-api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { CounterProposalModal } from '@/components/counter-proposal-modal';
+import { Proposal } from '@/types/proposal';
+import { Loader2, Package, CheckCircle, XCircle, Clock, ArrowLeftRight, MessageCircle } from 'lucide-react';
+
+const STATUS_CONFIG = {
+  PENDING: { label: 'Pendente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  ACCEPTED: { label: 'Aceita', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  REJECTED: { label: 'Recusada', color: 'bg-red-100 text-red-800', icon: XCircle },
+  COUNTERED: { label: 'Contra-proposta', color: 'bg-blue-100 text-blue-800', icon: ArrowLeftRight },
+};
+
+export default function ProposalsClient() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const tab = searchParams.get('tab') || 'received';
+  
+  const [counterProposal, setCounterProposal] = useState<Proposal | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  const { data: received, isLoading: loadingReceived } = useReceivedProposals();
+  const { data: sent, isLoading: loadingSent } = useSentProposals();
+  const acceptProposal = useAcceptProposal();
+  const rejectProposal = useRejectProposal();
+  const cancelProposal = useCancelProposal();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const proposals = tab === 'received' ? received : sent;
+  const isLoading = tab === 'received' ? loadingReceived : loadingSent;
+
+  // Marcar propostas como vistas quando a página carrega
+  useEffect(() => {
+    if (proposals && proposals.length > 0) {
+      const markPromises = proposals
+        .filter(proposal => {
+          const needsView = tab === 'received' 
+            ? proposal.viewedByReceiver === false
+            : proposal.viewedBySender === false;
+          return needsView;
+        })
+        .map(proposal => proposalsService.markAsViewed(proposal.id));
+      
+      if (markPromises.length > 0) {
+        Promise.all(markPromises).then(() => {
+          // Refetch após marcar como vistas
+          if (tab === 'received') {
+            queryClient.invalidateQueries({ queryKey: ['proposals', 'received'] });
+          } else {
+            queryClient.invalidateQueries({ queryKey: ['proposals', 'sent'] });
+          }
+        }).catch(() => {});
+      }
+    }
+  }, [proposals, tab]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(price);
+  };
+
+  const handleAccept = async (id: string) => {
+    if (confirm('Aceitar esta proposta?')) {
+      await acceptProposal.mutateAsync(id);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (confirm('Recusar esta proposta?')) {
+      await rejectProposal.mutateAsync(id);
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    if (confirm('Cancelar esta proposta?')) {
+      await cancelProposal.mutateAsync(id);
+    }
+  };
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Minhas Propostas</h1>
+
+      <div className="flex gap-2 mb-6">
+        <Button
+          variant={tab === 'received' ? 'default' : 'outline'}
+          onClick={() => router.push('/proposals?tab=received')}
+        >
+          Recebidas
+        </Button>
+        <Button
+          variant={tab === 'sent' ? 'default' : 'outline'}
+          onClick={() => router.push('/proposals?tab=sent')}
+        >
+          Enviadas
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : !proposals || proposals.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">
+              Nenhuma proposta {tab === 'received' ? 'recebida' : 'enviada'}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {proposals.map((proposal) => {
+            const status = STATUS_CONFIG[proposal.status];
+            const StatusIcon = status.icon;
+            const isReceived = tab === 'received';
+            const otherUser = isReceived ? proposal.sender : proposal.receiver;
+
+            return (
+              <Card key={proposal.id}>
+                <CardContent className="p-6">
+                  <div className="flex gap-4">
+                    <div className="relative h-24 w-24 flex-shrink-0 bg-muted rounded overflow-hidden">
+                      <Image
+                        src={proposal.machine.images[0] || '/placeholder.jpg'}
+                        alt={proposal.machine.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-lg">{proposal.machine.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {isReceived ? 'De' : 'Para'}: {otherUser.name}
+                          </p>
+                        </div>
+                        <Badge className={status.color}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {status.label}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Preço Anunciado</p>
+                          <p className="font-semibold">{formatPrice(proposal.machine.price)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Proposta</p>
+                          <p className="font-semibold text-primary">{formatPrice(proposal.proposedPrice)}</p>
+                        </div>
+                      </div>
+
+                      {proposal.counterPrice && (
+                        <div className="bg-blue-50 p-3 rounded mb-3">
+                          <p className="text-xs text-muted-foreground mb-1">Contra-proposta</p>
+                          <p className="font-semibold text-blue-600">{formatPrice(proposal.counterPrice)}</p>
+                          {proposal.counterMessage && (
+                            <p className="text-sm mt-2">{proposal.counterMessage}</p>
+                          )}
+                        </div>
+                      )}
+
+                      <p className="text-sm mb-3">{proposal.message}</p>
+
+                      <div className="flex gap-2">
+                        {isReceived && proposal.status === 'PENDING' && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAccept(proposal.id)}
+                              disabled={acceptProposal.isPending}
+                            >
+                              Aceitar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setCounterProposal(proposal)}
+                            >
+                              Contra-propor
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleReject(proposal.id)}
+                              disabled={rejectProposal.isPending}
+                            >
+                              Recusar
+                            </Button>
+                          </>
+                        )}
+
+                        {!isReceived && proposal.status === 'PENDING' && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleCancel(proposal.id)}
+                            disabled={cancelProposal.isPending}
+                          >
+                            Cancelar
+                          </Button>
+                        )}
+
+                        {proposal.status === 'COUNTERED' && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => {
+                              const phone = isReceived ? proposal.sender.phone : proposal.receiver.phone;
+                              const otherName = isReceived ? proposal.sender.name : proposal.receiver.name;
+                              const message = encodeURIComponent(
+                                `Olá ${otherName}! Sobre a proposta da *${proposal.machine.name}*:\n\n` +
+                                `Proposta inicial: ${formatPrice(proposal.proposedPrice)}\n` +
+                                `Contra-proposta: ${formatPrice(proposal.counterPrice!)}\n\n` +
+                                `Vamos negociar?`
+                              );
+                              if (phone) {
+                                window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+                              } else {
+                                window.open(`https://wa.me/?text=${message}`, '_blank');
+                              }
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Negociar no WhatsApp
+                          </Button>
+                        )}
+
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => router.push(`/machine/${proposal.machineId}`)}
+                        >
+                          Ver Anúncio
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {counterProposal && (
+        <CounterProposalModal
+          isOpen={true}
+          onClose={() => setCounterProposal(null)}
+          proposal={counterProposal}
+        />
+      )}
+    </div>
+  );
+}

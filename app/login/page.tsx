@@ -142,6 +142,23 @@ export default function LoginPage() {
               </div>
 
               <div>
+                <Label htmlFor="phone">Telefone (WhatsApp)</Label>
+                <Input
+                  id="phone"
+                  placeholder="51999887766"
+                  {...registerForm.register('phone')}
+                />
+                {registerForm.formState.errors.phone && (
+                  <p className="text-sm text-destructive mt-1">
+                    {registerForm.formState.errors.phone.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Formato: DDD + número (ex: 51999887766)
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"

@@ -1,0 +1,88 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { proposalsService } from '@/services/proposals-api';
+import { CreateProposalData, CounterProposalData } from '@/types/proposal';
+
+// Hook para listar propostas recebidas
+export function useReceivedProposals() {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+  
+  return useQuery({
+    queryKey: ['proposals', 'received'],
+    queryFn: () => proposalsService.getAll('received'),
+    refetchInterval: 30000,
+    enabled: isAuthenticated,
+  });
+}
+
+// Hook para listar propostas enviadas
+export function useSentProposals() {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+  
+  return useQuery({
+    queryKey: ['proposals', 'sent'],
+    queryFn: () => proposalsService.getAll('sent'),
+    refetchInterval: 30000,
+    enabled: isAuthenticated,
+  });
+}
+
+// Hook para criar proposta
+export function useCreateProposal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateProposalData) => proposalsService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals', 'sent'] });
+    },
+  });
+}
+
+// Hook para aceitar proposta
+export function useAcceptProposal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => proposalsService.accept(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+    },
+  });
+}
+
+// Hook para recusar proposta
+export function useRejectProposal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => proposalsService.reject(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+    },
+  });
+}
+
+// Hook para contra-proposta
+export function useCounterProposal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CounterProposalData }) =>
+      proposalsService.counter(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+    },
+  });
+}
+
+// Hook para cancelar proposta
+export function useCancelProposal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => proposalsService.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals', 'sent'] });
+    },
+  });
+}

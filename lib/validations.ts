@@ -9,6 +9,7 @@ export const registerSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   companyName: z.string().min(3, 'Nome da empresa deve ter no mínimo 3 caracteres'),
+  phone: z.string().regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: 51999887766'),
 });
 
 export const equipmentSchema = z.object({

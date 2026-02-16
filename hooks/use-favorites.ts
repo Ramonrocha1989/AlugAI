@@ -1,11 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesService } from '@/services/favorites-api';
 
-// Hook para listar IDs dos favoritos
+// Hook para listar favoritos
 export function useFavorites() {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+  
   return useQuery({
     queryKey: ['favorites'],
     queryFn: () => favoritesService.list(),
+    enabled: isAuthenticated,
   });
 }
 

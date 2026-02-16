@@ -8,7 +8,8 @@ import { NotificationsDropdown } from '@/components/notifications-dropdown';
 import { authService } from '@/services/api';
 import { useLogout } from '@/hooks/use-api';
 import { useFavorites } from '@/hooks/use-favorites';
-import { LogOut, LayoutDashboard, Shield, Heart } from 'lucide-react';
+import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
+import { LogOut, LayoutDashboard, Shield, Heart, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
@@ -16,6 +17,20 @@ export function Header() {
   const pathname = usePathname();
   const logout = useLogout();
   const { data: favorites = [] } = useFavorites();
+  const { data: receivedProposals = [] } = useReceivedProposals();
+  const { data: sentProposals = [] } = useSentProposals();
+  
+  // Propostas recebidas não vistas e pendentes
+  const pendingReceived = receivedProposals.filter(p => 
+    p.status === 'PENDING' && p.viewedByReceiver === false
+  ).length;
+  
+  // Propostas enviadas com resposta não vista
+  const updatedSent = sentProposals.filter(p => 
+    ['ACCEPTED', 'REJECTED', 'COUNTERED'].includes(p.status) && p.viewedBySender === false
+  ).length;
+  
+  const totalNotifications = pendingReceived + updatedSent;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ companyName: string } | null>(null);
 
@@ -66,6 +81,20 @@ export function Header() {
                   )}
                 </Button>
               </Link>
+              <Link href="/proposals">
+                <Button variant="ghost" className="relative">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Propostas
+                  {totalNotifications > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {totalNotifications}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
               <Link href="/verification">
                 <Button variant="ghost" className="text-green-600 hover:text-green-700">
                   <Shield className="h-4 w-4 mr-2" />
@@ -76,6 +105,11 @@ export function Header() {
                 <Button variant="ghost">
                   <LayoutDashboard className="h-4 w-4 mr-2" />
                   Dashboard
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="ghost">
+                  Perfil
                 </Button>
               </Link>
               <Button variant="outline" onClick={handleLogout}>
