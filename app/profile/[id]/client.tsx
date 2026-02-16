@@ -120,7 +120,7 @@ export default function ProfileClient({ params }: { params: { id: string } }) {
                       </div>
                       <p className="text-sm">{review.comment}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Por {review.reviewerName}
+                        Por {review.reviewer?.name || 'Anônimo'}
                       </p>
                     </div>
                   ))
