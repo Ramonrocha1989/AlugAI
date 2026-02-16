@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReviewsList } from '@/components/reviews-list';
 import { ReviewModal } from '@/components/review-modal';
 import { RatingBadge } from '@/components/rating-badge';
+import { ShareButtons } from '@/components/share-buttons';
 import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
@@ -84,6 +85,8 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     }
     setShowReviewModal(true);
   };
+
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -204,7 +207,6 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
             </CardContent>
           </Card>
 
-          {/* Seção de Avaliações */}
           <Card>
             <CardHeader>
               <CardTitle>Avaliações</CardTitle>
@@ -240,6 +242,13 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
                   Avaliar Vendedor
                 </Button>
               )}
+
+              <ShareButtons
+                title={machine.name}
+                description={machine.description}
+                url={shareUrl}
+                price={formatPrice(machine.price, machine.businessType)}
+              />
             </CardContent>
           </Card>
 
