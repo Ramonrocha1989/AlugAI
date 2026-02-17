@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { planService } from '@/services/api';
-import { PaymentModal } from '@/components/payment-modal';
+import { CheckoutButton } from '@/components/checkout-button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
@@ -61,28 +61,22 @@ export default function PricingPage() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
-                variant={plan.id === 'lojista' ? 'default' : 'outline'}
-                disabled={plan.id === 'free'}
-                onClick={() => handleSelectPlan(plan)}
-              >
-                {plan.id === 'free' ? 'Plano Atual' : 'Fazer Upgrade'}
-              </Button>
+              {plan.id === 'free' ? (
+                <Button className="w-full" variant="outline" disabled>
+                  Plano Atual
+                </Button>
+              ) : (
+                <CheckoutButton
+                  planName={plan.name}
+                  planPrice={plan.price}
+                  planDescription={plan.features.join(', ')}
+                  planType="lojista"
+                />
+              )}
             </CardFooter>
           </Card>
         ))}
       </div>
-
-      {selectedPlan && (
-        <PaymentModal
-          open={!!selectedPlan}
-          onOpenChange={(open) => !open && setSelectedPlan(null)}
-          planId={selectedPlan.id}
-          planName={selectedPlan.name}
-          planPrice={selectedPlan.price}
-        />
-      )}
     </div>
   );
 }
