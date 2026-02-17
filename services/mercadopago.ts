@@ -39,3 +39,4 @@ export const mercadoPagoService = {
     return result;
   },
 };
+
