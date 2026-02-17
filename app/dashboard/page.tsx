@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useMyMachines, useDeleteMachine } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
+import { DashboardAnalytics } from '@/components/dashboard-analytics';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -79,7 +80,12 @@ export default function DashboardPage() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : machines && machines.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
+          {/* Analytics Dashboard */}
+          <DashboardAnalytics machines={machines} />
+
+          {/* Lista de Máquinas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {machines.map((machine) => (
             <div key={machine.id} className="relative">
               <MachineCard machine={machine} />
@@ -143,6 +149,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+        </>
       ) : (
         <div className="text-center py-12 bg-muted rounded-lg">
           <h3 className="text-xl font-semibold mb-2">
