@@ -13,12 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
+import { ImageUpload } from '@/components/image-upload';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function NewEquipmentPage() {
   const router = useRouter();
   const createEquipment = useCreateEquipment();
-  const [imageUrl, setImageUrl] = useState('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const form = useForm<EquipmentFormData>({
@@ -43,29 +43,25 @@ export default function NewEquipmentPage() {
 
   const onSubmit = async (data: EquipmentFormData) => {
     try {
-      await createEquipment.mutateAsync(data);
+      // Limpar arrays de valores vazios/undefined
+      const payload = {
+        ...data,
+        images: (data.images || []).filter(img => img && typeof img === 'string' && img.trim()),
+        quickTags: (data.quickTags || []).filter(tag => tag),
+      };
+      
+      console.log('Payload antes de enviar:', JSON.stringify(payload, null, 2));
+      
+      await createEquipment.mutateAsync(payload);
       router.push('/dashboard');
     } catch (error: any) {
       if (error.response?.status === 403) {
         setShowUpgradeModal(true);
       } else {
-        console.error('Erro:', error);
+        console.error('Erro completo:', error.response?.data || error);
         alert('Erro ao cadastrar equipamento');
       }
     }
-  };
-
-  const handleAddImage = () => {
-    if (imageUrl) {
-      const currentImages = form.getValues('images') || [];
-      form.setValue('images', [...currentImages, imageUrl]);
-      setImageUrl('');
-    }
-  };
-
-  const handleRemoveImage = (index: number) => {
-    const currentImages = form.getValues('images') || [];
-    form.setValue('images', currentImages.filter((_, i) => i !== index));
   };
 
   return (
@@ -211,22 +207,13 @@ export default function NewEquipmentPage() {
             </div>
 
             <div>
-              <Label>Imagens (URLs)</Label>
-              <div className="flex gap-2 mb-2">
-                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Cole a URL da imagem" />
-                <Button type="button" onClick={handleAddImage}>Adicionar</Button>
-              </div>
+              <Label>Imagens</Label>
+              <ImageUpload
+                images={form.watch('images') || []}
+                onChange={(images) => form.setValue('images', images)}
+                maxImages={5}
+              />
               {form.formState.errors.images && <p className="text-sm text-destructive mt-1">{form.formState.errors.images.message}</p>}
-              {form.watch('images')?.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  {form.watch('images').map((url, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      <span className="flex-1 truncate">{url}</span>
-                      <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveImage(index)}>Remover</Button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             <Button type="submit" className="w-full" size="lg" disabled={createEquipment.isPending}>

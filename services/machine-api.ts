@@ -11,6 +11,21 @@ const api = axios.create({
   },
   // Tratar 4xx como resposta válida (não loga erro no console)
   validateStatus: () => true,
+  // Transformar dados antes de enviar
+  transformRequest: [(data) => {
+    if (data && typeof data === 'object') {
+      // Converter arrays esparsos em arrays densos
+      const cleanData = { ...data };
+      if (cleanData.images) {
+        cleanData.images = Array.from(cleanData.images).filter(img => img);
+      }
+      if (cleanData.quickTags) {
+        cleanData.quickTags = Array.from(cleanData.quickTags).filter(tag => tag);
+      }
+      return JSON.stringify(cleanData);
+    }
+    return data;
+  }],
 });
 
 // Remover filtro de console (não funciona para logs do navegador)
@@ -171,7 +186,22 @@ export const machineService = {
       return newMachine;
     }
     
-    const { data: newMachine } = await api.post<Machine>('/machines', data);
+    // Converter para array denso (sem buracos) para evitar serialização como objeto
+    const images = Array.isArray(data.images) 
+      ? data.images.filter(img => img && typeof img === 'string' && img.trim())
+      : [];
+    
+    const quickTags = Array.isArray(data.quickTags)
+      ? data.quickTags.filter(tag => tag)
+      : [];
+    
+    const payload = {
+      ...data,
+      images,
+      quickTags,
+    };
+    
+    const { data: newMachine } = await api.post<Machine>('/machines', payload);
     return newMachine;
   },
 

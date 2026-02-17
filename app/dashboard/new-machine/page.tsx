@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ImageUpload } from '@/components/image-upload';
 import { analytics } from '@/lib/analytics';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
@@ -287,34 +288,11 @@ export default function NewMachinePage() {
                 <p className="text-sm text-muted-foreground mb-3">
                   📸 Sugestão: lateral completa, painel de horas, pneus/esteiras, motor, <strong>número de série</strong>
                 </p>
-                <div className="flex gap-2 mb-3">
-                  <Input
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="Cole a URL da imagem"
-                  />
-                  <Button type="button" onClick={handleAddImage}>
-                    Adicionar
-                  </Button>
-                </div>
-                {formData.images && formData.images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {formData.images.map((url, index) => (
-                      <div key={index} className="relative border rounded p-2">
-                        <img src={url} alt={`Foto ${index + 1}`} className="w-full h-32 object-cover rounded" />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-3 right-3"
-                        >
-                          Remover
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ImageUpload
+                  images={formData.images || []}
+                  onChange={(images) => updateFormData({ images })}
+                  maxImages={10}
+                />
               </div>
 
               <div>
