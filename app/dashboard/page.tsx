@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMyMachines, useDeleteMachine } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
+import { useToast } from '@/components/toast-provider';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { Machine } from '@/types/machine';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const { data: machines, isLoading } = useMyMachines();
   const deleteMachine = useDeleteMachine();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -33,11 +35,12 @@ export default function DashboardPage() {
     setDeletingId(machine.id);
     try {
       await deleteMachine.mutateAsync(machine.id);
+      showToast('Máquina deletada com sucesso!', 'success');
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert('Você não tem permissão para deletar esta máquina');
+        showToast('Você não tem permissão para deletar esta máquina', 'error');
       } else {
-        alert('Erro ao deletar máquina');
+        showToast('Erro ao deletar máquina', 'error');
       }
     } finally {
       setDeletingId(null);
@@ -47,11 +50,10 @@ export default function DashboardPage() {
   const handleMarkLead = async (machineId: string) => {
     try {
       await machineService.markLead(machineId);
-      alert('Lead marcado como qualificado!');
+      showToast('Lead marcado como qualificado!', 'success');
       window.location.reload();
     } catch (error: any) {
-      console.error('Erro ao marcar lead:', error);
-      alert(`Erro: ${error.response?.data?.message || 'Não foi possível marcar o lead. Verifique o backend.'}`);
+      showToast(error.response?.data?.message || 'Não foi possível marcar o lead', 'error');
     }
   };
 

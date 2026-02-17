@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForgotPassword } from '@/hooks/use-api';
+import { useToast } from '@/components/toast-provider';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import Link from 'next/link';
 export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
   const forgotPassword = useForgotPassword();
 
   const form = useForm<ForgotPasswordFormData>({
@@ -27,7 +29,7 @@ export default function ForgotPasswordPage() {
       await forgotPassword.mutateAsync(data.email);
       setSuccess(true);
     } catch (error) {
-      alert('Erro ao solicitar recuperação de senha');
+      showToast('Erro ao solicitar recuperação de senha', 'error');
     }
   };
 

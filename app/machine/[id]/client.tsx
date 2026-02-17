@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
+import { useToast } from '@/components/toast-provider';
+import { sanitizeHTML } from '@/lib/sanitize';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +26,7 @@ import {
 
 export default function MachineDetailsClient({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const id = params.id;
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showProposalModal, setShowProposalModal] = useState(false);
@@ -72,16 +76,15 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     try {
       await machineService.trackWhatsApp(machine.id);
     } catch (error) {
-      console.error('Erro ao rastrear:', error);
+      logger.error('Erro ao rastrear:', error);
     }
     
     analytics.trackWhatsAppClick(machine.name, machine.price, machine.ownerName);
     
-    // Remove caracteres não numéricos do telefone
     const phone = machine.ownerPhone?.replace(/\D/g, '') || '';
     
     if (!phone) {
-      alert('Telefone do vendedor não cadastrado');
+      showToast('Telefone do vendedor não cadastrado', 'warning');
       return;
     }
     
@@ -183,7 +186,10 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Descrição</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{machine.description}</p>
+                <div 
+                  className="text-muted-foreground whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(machine.description) }}
+                />
               </div>
 
               {machine.quickTags.length > 0 && (

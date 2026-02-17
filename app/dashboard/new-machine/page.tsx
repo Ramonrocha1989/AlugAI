@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateMachine } from '@/hooks/use-machines';
 import { authService } from '@/services/machine-api';
+import { useToast } from '@/components/toast-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ import { CreateMachineData } from '@/types/machine';
 
 export default function NewMachinePage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const createMachine = useCreateMachine();
   const [step, setStep] = useState(1);
   const [imageUrl, setImageUrl] = useState('');
@@ -81,14 +83,15 @@ export default function NewMachinePage() {
         formData.businessType || 'unknown'
       );
       
-      // Mostrar confirmação WhatsApp
       if (receiveWhatsApp && formData.ownerPhone) {
-        alert(`✅ Anúncio publicado com sucesso!\n\n📱 Você receberá propostas no WhatsApp: ${formData.ownerPhone}`);
+        showToast(`✅ Anúncio publicado! Você receberá propostas no WhatsApp: ${formData.ownerPhone}`, 'success');
+      } else {
+        showToast('✅ Anúncio publicado com sucesso!', 'success');
       }
       
       router.push('/dashboard');
     } catch (error) {
-      alert('Erro ao cadastrar máquina');
+      showToast('Erro ao cadastrar máquina', 'error');
     }
   };
 

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useResetPassword } from '@/hooks/use-api';
+import { useToast } from '@/components/toast-provider';
 import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/validations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import { Loader2 } from 'lucide-react';
 function ResetPasswordForm() {
   const [token, setToken] = useState('');
   const router = useRouter();
+  const { showToast } = useToast();
   const searchParams = useSearchParams();
   const resetPassword = useResetPassword();
 
@@ -34,10 +36,10 @@ function ResetPasswordForm() {
   const onSubmit = async (data: ResetPasswordFormData) => {
     try {
       await resetPassword.mutateAsync({ token: data.token, password: data.password });
-      alert('Senha alterada com sucesso!');
+      showToast('✅ Senha alterada com sucesso!', 'success');
       router.push('/login');
     } catch (error) {
-      alert('Erro ao redefinir senha. Token pode estar expirado.');
+      showToast('Erro ao redefinir senha. Token pode estar expirado.', 'error');
     }
   };
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin, useRegister } from '@/hooks/use-api';
+import { useToast } from '@/components/toast-provider';
 import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from '@/lib/validations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
   const login = useLogin();
   const register = useRegister();
 
@@ -32,8 +34,14 @@ export default function LoginPage() {
     try {
       await login.mutateAsync(data);
       router.push('/dashboard');
-    } catch (error) {
-      alert('Erro ao fazer login');
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        showToast('⚠️ Muitas tentativas de login! Por segurança, bloqueamos temporariamente. Tente novamente em 15 minutos.', 'warning');
+      } else if (error.response?.status === 401) {
+        showToast('❌ Email ou senha incorretos.', 'error');
+      } else {
+        showToast('Erro ao fazer login. Tente novamente.', 'error');
+      }
     }
   };
 
@@ -41,8 +49,14 @@ export default function LoginPage() {
     try {
       await register.mutateAsync(data);
       setShowVerificationMessage(true);
-    } catch (error) {
-      alert('Erro ao fazer cadastro');
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        showToast('⚠️ Muitas tentativas de cadastro! Por segurança, bloqueamos temporariamente. Tente novamente em 1 hora.', 'warning');
+      } else if (error.response?.status === 409) {
+        showToast('❌ Este email já está cadastrado. Faça login ou use outro email.', 'error');
+      } else {
+        showToast('Erro ao fazer cadastro. Tente novamente.', 'error');
+      }
     }
   };
 

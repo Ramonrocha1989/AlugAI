@@ -9,8 +9,11 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Tratar 4xx como resposta válida (não loga erro no console)
+  validateStatus: () => true,
 });
 
+// Remover filtro de console (não funciona para logs do navegador)
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
 api.interceptors.request.use((config) => {
@@ -27,7 +30,15 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Rejeitar status de erro manualmente
+    if (response.status >= 400) {
+      const error: any = new Error(response.statusText);
+      error.response = response;
+      return Promise.reject(error);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('currentUser');
