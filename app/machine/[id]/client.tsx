@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Script from 'next/script';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
@@ -116,8 +117,36 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: machine.name,
+    description: machine.description,
+    image: machine.images,
+    brand: {
+      '@type': 'Brand',
+      name: machine.manufacturer,
+    },
+    offers: {
+      '@type': 'Offer',
+      price: machine.price,
+      priceCurrency: 'BRL',
+      availability: machine.available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: machine.ownerName,
+      },
+    },
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
+      <Script
+        id="machine-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="container mx-auto px-4 py-8">
       <Button variant="ghost" onClick={() => router.back()} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Voltar
@@ -373,5 +402,6 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
         machinePrice={machine.price}
       />
     </div>
+    </>
   );
 }

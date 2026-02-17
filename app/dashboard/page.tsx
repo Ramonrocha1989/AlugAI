@@ -85,7 +85,7 @@ export default function DashboardPage() {
           <DashboardAnalytics machines={machines} />
 
           {/* Lista de Máquinas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-32">
           {machines.map((machine) => (
             <div key={machine.id} className="relative">
               <MachineCard machine={machine} />

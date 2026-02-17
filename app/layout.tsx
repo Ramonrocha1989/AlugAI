@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ToastProvider } from "@/components/toast-provider";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { GoogleAnalytics } from "@/components/google-analytics";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,22 +26,56 @@ export const metadata: Metadata = {
     "máquinas SC",
     "máquinas PR",
   ],
+  authors: [{ name: 'Mercado Máquina' }],
+  creator: 'Mercado Máquina',
+  publisher: 'Mercado Máquina',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mercadomaquina.com'),
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
+    url: '/',
     siteName: 'Mercado Máquina',
     title: 'Mercado Máquina - Compra, Venda e Troca de Máquinas Agrícolas',
     description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
+    images: [
+      {
+        url: '/logo.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Mercado Máquina',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Mercado Máquina - Compra, Venda e Troca de Máquinas Agrícolas',
+    description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
+    images: ['/logo.svg'],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Mercado Máquina',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 };
 
@@ -67,6 +102,7 @@ export default function RootLayout({
             <main className="min-h-screen">
               {children}
             </main>
+            <Footer />
           </ToastProvider>
         </Providers>
       </body>
