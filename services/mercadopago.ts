@@ -33,11 +33,7 @@ export const mercadoPagoService = {
           pending: `${siteUrl}/payment/pending`,
         },
         external_reference: `${userId}-${planType}`,
-        locale: 'pt-BR',
-        payment_methods: {
-          installments: 12,
-        },
-      },
+      } as any,
     });
 
     return result;
