@@ -16,6 +16,7 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
+    console.log('🔍 Dados enviados:', { planName, planPrice, planDescription, planType });
     setLoading(true);
 
     try {
@@ -31,13 +32,17 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
       });
 
       const data = await response.json();
+      console.log('📦 Resposta da API:', data);
 
       if (data.init_point) {
+        console.log('✅ Redirecionando para:', data.init_point);
         window.location.href = data.init_point;
       } else {
+        console.error('❌ Erro: init_point não encontrado', data);
         alert('Erro ao criar pagamento');
       }
     } catch (error) {
+      console.error('❌ Erro ao processar:', error);
       alert('Erro ao processar pagamento');
     } finally {
       setLoading(false);
