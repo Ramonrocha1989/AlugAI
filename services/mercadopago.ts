@@ -16,6 +16,7 @@ export const mercadoPagoService = {
     const preference = new Preference(client);
     
     const externalReference = `${userId}-${planType}`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
     
     const preferenceData = {
       items: items.map(item => ({
@@ -25,6 +26,12 @@ export const mercadoPagoService = {
         currency_id: 'BRL' as any,
       })),
       external_reference: externalReference,
+      back_urls: {
+        success: `${siteUrl}/payment/success`,
+        failure: `${siteUrl}/payment/failure`,
+        pending: `${siteUrl}/payment/pending`,
+      },
+      auto_return: 'approved' as any,
     };
 
     const result = await preference.create({
