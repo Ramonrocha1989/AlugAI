@@ -19,24 +19,14 @@ export const mercadoPagoService = {
     console.log('🎯 PlanType:', planType);
     
     const preference = new Preference(client);
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
     
     const preferenceData = {
       items: items.map(item => ({
-        id: `item-${Date.now()}`,
         title: item.title,
         quantity: item.quantity,
         unit_price: item.unit_price,
         currency_id: 'BRL' as any,
-        description: item.description,
       })),
-      back_urls: {
-        success: `${siteUrl}/payment/success`,
-        failure: `${siteUrl}/payment/failure`,
-        pending: `${siteUrl}/payment/pending`,
-      },
-      external_reference: `${userId}-${planType}`,
     };
     
     console.log('📤 Dados da preferência:', JSON.stringify(preferenceData, null, 2));
@@ -46,6 +36,7 @@ export const mercadoPagoService = {
     });
     
     console.log('✅ Preferência criada com sucesso:', result.id);
+    console.log('🔗 URL de teste direto:', result.init_point);
 
     return result;
   },

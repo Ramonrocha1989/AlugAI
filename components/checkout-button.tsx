@@ -20,9 +20,27 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
     setLoading(true);
 
     try {
+      // Pegar token do usuário logado
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        alert('Você precisa estar logado para assinar um plano');
+        window.location.href = '/login';
+        return;
+      }
+
+      const { token } = JSON.parse(currentUser);
+      if (!token) {
+        alert('Token de autenticação não encontrado. Faça login novamente.');
+        window.location.href = '/login';
+        return;
+      }
+
       const response = await fetch('/api/create-preference', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           planName,
           planPrice,
