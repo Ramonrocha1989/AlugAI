@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateMachine } from '@/hooks/use-machines';
-import { authService } from '@/services/machine-api';
+import { authService, machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/image-upload';
 import { analytics } from '@/lib/analytics';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
+import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
 
@@ -24,6 +25,9 @@ export default function NewMachinePage() {
   const [step, setStep] = useState(1);
   const [imageUrl, setImageUrl] = useState('');
   const [receiveWhatsApp, setReceiveWhatsApp] = useState(true);
+  const [checkingLimit, setCheckingLimit] = useState(true);
+  const [limitError, setLimitError] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const [formData, setFormData] = useState<Partial<CreateMachineData>>({
     images: [],
@@ -35,10 +39,33 @@ export default function NewMachinePage() {
   });
 
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      router.push('/login');
-    }
+    const checkUserAndLimit = async () => {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      try {
+        const myMachines = await machineService.getMyMachines();
+        const userPlan = user.plan || 'free';
+        const maxAds = userPlan === 'free' ? 3 : 999;
+        
+        if (myMachines.length >= maxAds) {
+          setLimitError(`Limite de ${maxAds} anúncios atingido. Faça upgrade para o plano Lojista.`);
+          setShowUpgradeModal(true);
+        }
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          setLimitError(error.response?.data?.message || 'Limite de anúncios atingido');
+          setShowUpgradeModal(true);
+        }
+      } finally {
+        setCheckingLimit(false);
+      }
+    };
+
+    checkUserAndLimit();
   }, [router]);
 
   const updateFormData = (data: Partial<CreateMachineData>) => {
@@ -91,8 +118,14 @@ export default function NewMachinePage() {
       }
       
       router.push('/dashboard');
-    } catch (error) {
-      showToast('Erro ao cadastrar máquina', 'error');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        const message = error.response?.data?.message || 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.';
+        setLimitError(message);
+        setShowUpgradeModal(true);
+      } else {
+        showToast('Erro ao cadastrar máquina', 'error');
+      }
     }
   };
 
@@ -115,6 +148,31 @@ export default function NewMachinePage() {
       updateFormData({ name: title });
     }
   }, [formData.manufacturer, formData.model, formData.yearModel]);
+
+  if (checkingLimit) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Verificando limite de anúncios...</p>
+      </div>
+    );
+  }
+
+  if (limitError) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-destructive">{limitError}</p>
+        </div>
+        <UpgradeLimitModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

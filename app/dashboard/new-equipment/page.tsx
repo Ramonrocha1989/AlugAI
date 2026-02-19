@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateEquipment } from '@/hooks/use-api';
-import { authService } from '@/services/machine-api';
+import { authService, machineService } from '@/services/machine-api';
 import { equipmentSchema, EquipmentFormData } from '@/lib/validations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,12 +14,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
 import { ImageUpload } from '@/components/image-upload';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function NewEquipmentPage() {
   const router = useRouter();
   const createEquipment = useCreateEquipment();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [checkingLimit, setCheckingLimit] = useState(true);
+  const [limitError, setLimitError] = useState<string | null>(null);
 
   const form = useForm<EquipmentFormData>({
     resolver: zodResolver(equipmentSchema),
@@ -35,10 +38,36 @@ export default function NewEquipmentPage() {
   });
 
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      router.push('/login');
-    }
+    const checkUserAndLimit = async () => {
+      const user = authService.getCurrentUser();
+      
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      try {
+        const myMachines = await machineService.getMyMachines();
+        
+        const userPlan = user.plan || 'free';
+        const maxAds = userPlan === 'free' ? 3 : 999;
+        
+        if (myMachines.length >= maxAds) {
+          setLimitError(`Limite de ${maxAds} anúncios atingido. Faça upgrade para o plano Lojista.`);
+          setShowUpgradeModal(true);
+        }
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          const message = error.response?.data?.message || 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.';
+          setLimitError(message);
+          setShowUpgradeModal(true);
+        }
+      } finally {
+        setCheckingLimit(false);
+      }
+    };
+
+    checkUserAndLimit();
   }, [router]);
 
   const onSubmit = async (data: EquipmentFormData) => {
@@ -50,12 +79,12 @@ export default function NewEquipmentPage() {
         quickTags: (data.quickTags || []).filter(tag => tag),
       };
       
-      console.log('Payload antes de enviar:', JSON.stringify(payload, null, 2));
-      
       await createEquipment.mutateAsync(payload);
       router.push('/dashboard');
     } catch (error: any) {
       if (error.response?.status === 403) {
+        const message = error.response?.data?.message || 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.';
+        setLimitError(message);
         setShowUpgradeModal(true);
       } else {
         console.error('Erro completo:', error.response?.data || error);
@@ -63,6 +92,31 @@ export default function NewEquipmentPage() {
       }
     }
   };
+
+  if (checkingLimit) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Verificando limite de anúncios...</p>
+      </div>
+    );
+  }
+
+  if (limitError) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2">{limitError}</AlertDescription>
+        </Alert>
+        <UpgradeLimitModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
