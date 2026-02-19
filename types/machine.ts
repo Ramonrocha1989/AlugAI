@@ -123,6 +123,8 @@ export interface CreateMachineData {
   videoUrl?: string;
   quickTags: QuickTag[];
   ownerPhone?: string;
+  isPremium?: boolean;
+  isFeatured?: boolean;
 }
 
 // Filtros de busca
