@@ -20,6 +20,9 @@ export const mercadoPagoService = {
     
     const preference = new Preference(client);
     
+    const externalReference = `${userId}-${planType}`;
+    console.log('🔗 External Reference:', externalReference);
+    
     const preferenceData = {
       items: items.map(item => ({
         title: item.title,
@@ -27,6 +30,7 @@ export const mercadoPagoService = {
         unit_price: item.unit_price,
         currency_id: 'BRL' as any,
       })),
+      external_reference: externalReference,
     };
     
     console.log('📤 Dados da preferência:', JSON.stringify(preferenceData, null, 2));
