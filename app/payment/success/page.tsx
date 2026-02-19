@@ -1,15 +1,24 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
+import { useToast } from '@/components/toast-provider';
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paymentId = searchParams.get('payment_id');
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['user'] });
+    showToast('Pagamento aprovado! Plano Lojista ativado 🎉', 'success');
+  }, [queryClient, showToast]);
 
   return (
     <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">

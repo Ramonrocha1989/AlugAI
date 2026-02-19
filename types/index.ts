@@ -27,6 +27,13 @@ export interface User {
   token?: string;
   plan?: 'free' | 'lojista';
   maxAds?: number;
+  maxPremiumAds?: number;
+  maxFeaturedAds?: number;
+  usage?: {
+    activeAds: number;
+    premiumAds: number;
+    featuredAds: number;
+  };
 }
 
 export interface Plan {

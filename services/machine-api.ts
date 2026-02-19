@@ -33,11 +33,19 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const { token } = JSON.parse(user);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    // Tentar pegar token do localStorage
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Fallback: tentar pegar do currentUser (compatibilidade)
+      const user = localStorage.getItem('currentUser');
+      if (user) {
+        const parsed = JSON.parse(user);
+        const userToken = parsed.token;
+        if (userToken) {
+          config.headers.Authorization = `Bearer ${userToken}`;
+        }
       }
     }
   }
@@ -259,9 +267,18 @@ export const authService = {
       return user;
     }
     
-    const { data } = await api.post<User>('/auth/login', credentials);
-    localStorage.setItem('currentUser', JSON.stringify(data));
-    return data;
+    const { data } = await api.post<any>('/auth/login', credentials);
+    
+    // Backend retorna { user, token }
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
+    
+    // Salvar usuário com token para compatibilidade
+    const userWithToken = { ...data.user, token: data.token };
+    localStorage.setItem('currentUser', JSON.stringify(userWithToken));
+    
+    return userWithToken;
   },
 
   register: async (data: RegisterData): Promise<User> => {
@@ -277,15 +294,24 @@ export const authService = {
       return user;
     }
     
-    const { data: user } = await api.post<User>('/auth/register', data);
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    return user;
+    const { data: response } = await api.post<any>('/auth/register', data);
+    
+    // Backend retorna { user, token }
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+    }
+    
+    const userWithToken = { ...response.user, token: response.token };
+    localStorage.setItem('currentUser', JSON.stringify(userWithToken));
+    
+    return userWithToken;
   },
 
   logout: async (): Promise<void> => {
     if (USE_MOCK) {
       await delay(200);
       localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
       return;
     }
     
@@ -293,6 +319,7 @@ export const authService = {
       await api.post('/auth/logout');
     } finally {
       localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
     }
   },
 
@@ -302,6 +329,12 @@ export const authService = {
     if (!stored) return null;
     const parsed = JSON.parse(stored);
     return parsed.user || parsed;
+  },
+
+  getMe: async (): Promise<User> => {
+    const { data } = await api.get<User>('/auth/me');
+    localStorage.setItem('currentUser', JSON.stringify(data));
+    return data;
   },
 
   forgotPassword: async (email: string): Promise<void> => {

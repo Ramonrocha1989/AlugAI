@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMyMachines, useDeleteMachine } from '@/hooks/use-machines';
+import { useMyMachines, useDeleteMachine, useUpdateMachine } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
+import { useUser } from '@/hooks/use-user';
 import { DashboardAnalytics } from '@/components/dashboard-analytics';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const { data: machines, isLoading } = useMyMachines();
+  const { data: user } = useUser();
   const deleteMachine = useDeleteMachine();
+  const updateMachine = useUpdateMachine();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +58,40 @@ export default function DashboardPage() {
       window.location.reload();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Não foi possível marcar o lead', 'error');
+    }
+  };
+
+  const togglePremium = async (machineId: string, currentValue: boolean) => {
+    try {
+      await updateMachine.mutateAsync({
+        id: machineId,
+        data: { isPremium: !currentValue },
+      });
+      showToast(currentValue ? 'Premium desativado!' : '🏆 Premium ativado!', 'success');
+      window.location.reload();
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showToast(error.response?.data?.message || 'Limite de anúncios Premium atingido (3 máximo)', 'error');
+      } else {
+        showToast('Erro ao atualizar Premium', 'error');
+      }
+    }
+  };
+
+  const toggleFeatured = async (machineId: string, currentValue: boolean) => {
+    try {
+      await updateMachine.mutateAsync({
+        id: machineId,
+        data: { isFeatured: !currentValue },
+      });
+      showToast(currentValue ? 'Destaque desativado!' : '⭐ Destaque ativado!', 'success');
+      window.location.reload();
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showToast(error.response?.data?.message || 'Limite de anúncios em Destaque atingido (5 máximo)', 'error');
+      } else {
+        showToast('Erro ao atualizar Destaque', 'error');
+      }
     }
   };
 
@@ -145,6 +182,32 @@ export default function DashboardPage() {
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Marcar Lead Qualificado
                 </Button>
+
+                {/* Botões Premium e Destaque (apenas para Lojista) */}
+                {user?.plan === 'lojista' && (
+                  <div className="space-y-2 mt-3 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant={machine.isPremium ? 'default' : 'outline'}
+                      className="w-full"
+                      onClick={() => togglePremium(machine.id, machine.isPremium || false)}
+                      disabled={!machine.isPremium && (user.usage?.premiumAds || 0) >= (user.maxPremiumAds || 3)}
+                    >
+                      {machine.isPremium ? '🏆 Premium Ativo' : 'Ativar Premium'}
+                      {!machine.isPremium && ` (${user.usage?.premiumAds || 0}/${user.maxPremiumAds || 3})`}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={machine.isFeatured ? 'default' : 'outline'}
+                      className="w-full"
+                      onClick={() => toggleFeatured(machine.id, machine.isFeatured || false)}
+                      disabled={!machine.isFeatured && (user.usage?.featuredAds || 0) >= (user.maxFeaturedAds || 5)}
+                    >
+                      {machine.isFeatured ? '⭐ Destaque Ativo' : 'Ativar Destaque'}
+                      {!machine.isFeatured && ` (${user.usage?.featuredAds || 0}/${user.maxFeaturedAds || 5})`}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -13,13 +13,9 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('currentUser');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      const token = parsed.token;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
   }
   return config;
