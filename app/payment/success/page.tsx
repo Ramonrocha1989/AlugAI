@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,10 +14,14 @@ function PaymentSuccessContent() {
   const paymentId = searchParams.get('payment_id');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const hasShownToast = useRef(false);
 
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['user'] });
-    showToast('Pagamento aprovado! Plano Lojista ativado 🎉', 'success');
+    if (!hasShownToast.current) {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      showToast('Pagamento aprovado! Plano Lojista ativado 🎉', 'success');
+      hasShownToast.current = true;
+    }
   }, [queryClient, showToast]);
 
   return (
