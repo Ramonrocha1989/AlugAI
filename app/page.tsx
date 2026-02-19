@@ -14,6 +14,17 @@ import { CATEGORIES, BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constant
 
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
 
+const getSortByParam = (sort: SortOption): string => {
+  const mapping: Record<SortOption, string> = {
+    'recent': 'created_desc',
+    'price-asc': 'price_asc',
+    'price-desc': 'price_desc',
+    'hours-asc': 'engine_hours_asc',
+    'year-desc': 'year_desc'
+  };
+  return mapping[sort];
+};
+
 export default function HomePage() {
   const [search, setSearch] = useState('');
   const [state, setState] = useState('');
@@ -44,7 +55,7 @@ export default function HomePage() {
     fetchNextPage, 
     hasNextPage, 
     isFetchingNextPage 
-  } = useInfiniteMachines(filters);
+  } = useInfiniteMachines({ ...filters, sortBy: getSortByParam(sortBy) });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -65,6 +76,10 @@ export default function HomePage() {
 
   const allMachines = data?.pages.flatMap(page => page.data) || [];
   const totalMachines = data?.pages[0]?.meta.total || 0;
+
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, sortBy: getSortByParam(sortBy) }));
+  }, [sortBy]);
 
   const handleSearch = () => {
     const newFilters: MachineFilters = {
@@ -155,28 +170,6 @@ export default function HomePage() {
   const hasActiveFilters = search || state || category || businessType || minPrice || maxPrice || 
     minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
     acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
-
-  const sortedMachines = allMachines ? [...allMachines].sort((a, b) => {
-    // Sempre priorizar máquinas destacadas
-    if (a.isFeatured && !b.isFeatured) return -1;
-    if (!a.isFeatured && b.isFeatured) return 1;
-    
-    // Depois aplicar ordenação escolhida
-    switch (sortBy) {
-      case 'recent':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'price-asc':
-        return a.price - b.price;
-      case 'price-desc':
-        return b.price - a.price;
-      case 'hours-asc':
-        return (a.engineHours || 0) - (b.engineHours || 0);
-      case 'year-desc':
-        return b.yearModel - a.yearModel;
-      default:
-        return 0;
-    }
-  }) : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -425,10 +418,10 @@ export default function HomePage() {
 
       {isLoading ? (
         <MachineSkeletonGrid count={6} />
-      ) : sortedMachines.length > 0 ? (
+      ) : allMachines.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedMachines.map((machine) => (
+            {allMachines.map((machine) => (
               <MachineCard key={machine.id} machine={machine} />
             ))}
           </div>
@@ -440,7 +433,7 @@ export default function HomePage() {
                 <p className="text-sm text-muted-foreground">Carregando mais máquinas...</p>
               </div>
             )}
-            {!hasNextPage && sortedMachines.length > 0 && (
+            {!hasNextPage && allMachines.length > 0 && (
               <p className="text-sm text-muted-foreground">Você viu todas as máquinas disponíveis</p>
             )}
           </div>

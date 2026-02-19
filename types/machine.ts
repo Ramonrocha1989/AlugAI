@@ -147,4 +147,5 @@ export interface MachineFilters {
   isVerifiedSeller?: boolean;
   page?: number;
   limit?: number;
+  sortBy?: string;
 }

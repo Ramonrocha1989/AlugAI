@@ -13,15 +13,9 @@ export interface PaymentItem {
 
 export const mercadoPagoService = {
   createPreference: async (items: PaymentItem[], userId: string, planType: 'lojista') => {
-    console.log('💳 Criando preferência Mercado Pago...');
-    console.log('📊 Items:', items);
-    console.log('👤 UserId:', userId);
-    console.log('🎯 PlanType:', planType);
-    
     const preference = new Preference(client);
     
     const externalReference = `${userId}-${planType}`;
-    console.log('🔗 External Reference:', externalReference);
     
     const preferenceData = {
       items: items.map(item => ({
@@ -32,15 +26,10 @@ export const mercadoPagoService = {
       })),
       external_reference: externalReference,
     };
-    
-    console.log('📤 Dados da preferência:', JSON.stringify(preferenceData, null, 2));
 
     const result = await preference.create({
       body: preferenceData as any,
     });
-    
-    console.log('✅ Preferência criada com sucesso:', result.id);
-    console.log('🔗 URL de teste direto:', result.init_point);
 
     return result;
   },
