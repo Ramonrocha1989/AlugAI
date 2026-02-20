@@ -266,9 +266,12 @@ export const authService = {
       body: JSON.stringify(credentials),
     });
     
-    // Salvar token e usuário
+    // Salvar tokens e usuário
     if (data.accessToken) {
-      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('accessToken', data.accessToken);
+    }
+    if (data.refreshToken) {
+      localStorage.setItem('refreshToken', data.refreshToken);
     }
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     
@@ -321,6 +324,7 @@ export const authService = {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }

@@ -8,9 +8,9 @@ export function useNotifications(params?: { read?: boolean; limit?: number }) {
   return useQuery({
     queryKey: ['notifications', params],
     queryFn: () => notificationsService.getAll(params),
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
     enabled: isAuthenticated,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -19,7 +19,8 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: ['notifications', 'unread-count'],
     queryFn: () => notificationsService.getUnreadCount(),
-    refetchInterval: 10000, // Atualiza a cada 10 segundos
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 

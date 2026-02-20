@@ -1,0 +1,44 @@
+  login: async (credentials: LoginCredentials): Promise<User> => {
+    if (USE_MOCK) {
+      await delay(500);
+      const user: User = {
+        id: '1',
+        name: 'Agropecuária Exemplo',
+        email: credentials.email,
+        role: 'USER',
+        plan: 'FREE',
+        maxAds: 3,
+        maxPremiumAds: 0,
+        maxFeaturedAds: 0,
+        isVerifiedSeller: false,
+        emailVerified: true,
+        company: {
+          id: '1',
+          name: 'Agropecuária Exemplo',
+        },
+        usage: {
+          activeAds: 0,
+          premiumAds: 0,
+          featuredAds: 0,
+        },
+      };
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      return user;
+    }
+    
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    
+    // Salvar accessToken e refreshToken
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+    }
+    if (data.refreshToken) {
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
+    
+    return data.user;
+  },

@@ -9,8 +9,9 @@ export function useReceivedProposals() {
   return useQuery({
     queryKey: ['proposals', 'received'],
     queryFn: () => proposalsService.getAll('received'),
-    refetchInterval: 30000,
     enabled: isAuthenticated,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -21,8 +22,9 @@ export function useSentProposals() {
   return useQuery({
     queryKey: ['proposals', 'sent'],
     queryFn: () => proposalsService.getAll('sent'),
-    refetchInterval: 30000,
     enabled: isAuthenticated,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 

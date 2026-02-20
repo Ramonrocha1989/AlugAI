@@ -9,6 +9,8 @@ export function useFavorites() {
     queryKey: ['favorites'],
     queryFn: () => favoritesService.list(),
     enabled: isAuthenticated,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -67,6 +69,8 @@ export function useFavoritedMachines() {
   return useQuery({
     queryKey: ['favorited-machines'],
     queryFn: () => favoritesService.listWithMachines(),
+    retry: false,
+    refetchOnWindowFocus: false,
     select: (data) => ({
       data,
       count: data.length,
