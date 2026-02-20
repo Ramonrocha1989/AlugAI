@@ -23,7 +23,7 @@ export const mercadoPagoService = {
         title: item.title,
         quantity: item.quantity,
         unit_price: item.unit_price,
-        currency_id: 'BRL' as any,
+        currency_id: 'BRL',
       })),
       external_reference: externalReference,
       back_urls: {
@@ -31,7 +31,7 @@ export const mercadoPagoService = {
         failure: `${siteUrl}/payment/failure`,
         pending: `${siteUrl}/payment/pending`,
       },
-      auto_return: 'approved' as any,
+      auto_return: 'approved',
     };
 
     const result = await preference.create({
