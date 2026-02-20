@@ -27,14 +27,9 @@ export default function DashboardPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Aguardar um pouco antes de verificar auth
+    // Não redirecionar automaticamente - deixar componente tratar
     const timer = setTimeout(() => {
-      const user = authService.getCurrentUser();
-      if (!user) {
-        window.location.href = '/login';
-      } else {
-        setIsCheckingAuth(false);
-      }
+      setIsCheckingAuth(false);
     }, 100);
     
     return () => clearTimeout(timer);
