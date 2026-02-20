@@ -318,18 +318,10 @@ export const authService = {
   },
 
   logout: async (): Promise<void> => {
-    if (USE_MOCK) {
-      await delay(200);
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('token');
-      return;
-    }
-    
-    try {
-      await apiRequest('/auth/logout', { method: 'POST' });
-    } finally {
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
     }
   },
 
