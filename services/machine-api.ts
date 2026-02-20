@@ -10,7 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Enviar cookies automaticamente
+  withCredentials: true,
   validateStatus: () => true,
   transformRequest: [(data) => {
     if (data && typeof data === 'object') {
@@ -27,14 +27,19 @@ const api = axios.create({
   }],
 });
 
-// Remover filtro de console (não funciona para logs do navegador)
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
-
-// Remover interceptor de Authorization - cookies são enviados automaticamente
+// Adicionar token do localStorage em todas as requisições axios
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => {
-    // Rejeitar status de erro manualmente
     if (response.status >= 400) {
       const error: any = new Error(response.statusText);
       error.response = response;
@@ -43,12 +48,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Não redirecionar automaticamente em erro 401
-    // Deixar componentes tratarem o erro
     return Promise.reject(error);
   }
 );
 
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getUserMachines = (userId: string): Machine[] => {
@@ -170,7 +174,6 @@ export const machineService = {
       return newMachine;
     }
     
-    // Converter para array denso (sem buracos) para evitar serialização como objeto
     const images = Array.isArray(data.images) 
       ? data.images.filter(img => img && typeof img === 'string' && img.trim())
       : [];
@@ -258,13 +261,15 @@ export const authService = {
       return user;
     }
     
-    // Backend define cookie httpOnly automaticamente
     const data = await apiRequest('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
     
-    // Salvar apenas dados não sensíveis do usuário
+    // Salvar token e usuário
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     
     return data.user;
@@ -303,7 +308,10 @@ export const authService = {
       body: JSON.stringify(data),
     });
     
-    // Salvar apenas dados não sensíveis
+    // Salvar token e usuário
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+    }
     localStorage.setItem('currentUser', JSON.stringify(response.user));
     
     return response.user;
@@ -313,6 +321,7 @@ export const authService = {
     if (USE_MOCK) {
       await delay(200);
       localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
       return;
     }
     
@@ -320,6 +329,7 @@ export const authService = {
       await apiRequest('/auth/logout', { method: 'POST' });
     } finally {
       localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
     }
   },
 
@@ -333,12 +343,9 @@ export const authService = {
 
   getMe: async (): Promise<User> => {
     const data = await apiRequest('/auth/me', { method: 'GET' });
-    // ❌ NÃO salvar no localStorage - /auth/me retorna dados sensíveis
-    // localStorage é atualizado apenas no login/register
     return data;
   },
 
-  // Buscar perfil completo (incluindo dados sensíveis)
   getProfile: async (): Promise<any> => {
     return await apiRequest('/auth/profile', { method: 'GET' });
   },
