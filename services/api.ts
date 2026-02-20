@@ -32,12 +32,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('currentUser');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
+    // Não redirecionar automaticamente - deixar componentes tratarem
     return Promise.reject(error);
   }
 );
