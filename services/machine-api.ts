@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/types/machine';
 import { User, LoginCredentials, RegisterData } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
-import { apiRequest, clearCsrfToken } from '@/lib/api';
+import { apiRequest } from '@/lib/api';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
@@ -320,7 +320,6 @@ export const authService = {
       await apiRequest('/auth/logout', { method: 'POST' });
     } finally {
       localStorage.removeItem('currentUser');
-      clearCsrfToken();
     }
   },
 
