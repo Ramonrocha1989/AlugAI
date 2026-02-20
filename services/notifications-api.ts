@@ -12,17 +12,7 @@ const api = axios.create({
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
-// Interceptor removido - não redirecionar automaticamente em 401
+// Token está em httpOnly cookie - não precisa de interceptor
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
