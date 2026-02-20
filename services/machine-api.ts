@@ -30,7 +30,7 @@ const api = axios.create({
 // Adicionar token do localStorage em todas as requisições axios
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -267,8 +267,8 @@ export const authService = {
     });
     
     // Salvar token e usuário
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    if (data.accessToken) {
+      localStorage.setItem('token', data.accessToken);
     }
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     
@@ -319,7 +319,8 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     localStorage.removeItem('currentUser');
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
