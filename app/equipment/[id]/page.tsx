@@ -18,7 +18,7 @@ export default function EquipmentDetailPage() {
   const handleRentalRequest = async () => {
     const user = authService.getCurrentUser();
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
       return;
     }
     

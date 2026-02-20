@@ -42,7 +42,7 @@ export default function NewMachinePage() {
     const checkUserAndLimit = async () => {
       const user = authService.getCurrentUser();
       if (!user) {
-        router.push('/login');
+        // router.push("/login");
         return;
       }
 

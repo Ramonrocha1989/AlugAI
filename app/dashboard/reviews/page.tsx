@@ -17,7 +17,7 @@ export default function ReviewsPage() {
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
     }
   }, [router, user]);
 

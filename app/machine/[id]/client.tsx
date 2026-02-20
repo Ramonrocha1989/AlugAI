@@ -104,7 +104,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
   const handleReview = () => {
     const user = authService.getCurrentUser();
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
       return;
     }
     setShowReviewModal(true);

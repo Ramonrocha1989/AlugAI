@@ -42,7 +42,7 @@ export default function NewEquipmentPage() {
       const user = authService.getCurrentUser();
       
       if (!user) {
-        router.push('/login');
+        // router.push("/login");
         return;
       }
 

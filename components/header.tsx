@@ -53,7 +53,7 @@ export function Header() {
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
     logout.mutateAsync();
-    window.location.href = '/login';
+    // window.location.href = "/login";
   };
 
   return (

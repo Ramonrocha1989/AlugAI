@@ -16,7 +16,7 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   if (response.status === 401) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('currentUser');
-      window.location.href = '/login';
+      // window.location.href = "/login";
     }
     const error: any = new Error('Não autenticado');
     error.response = response;

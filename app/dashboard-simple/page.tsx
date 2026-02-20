@@ -10,7 +10,7 @@ export default function DashboardSimplePage() {
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
-      window.location.href = '/login';
+      // window.location.href = "/login";
     } else {
       setUser(currentUser);
     }

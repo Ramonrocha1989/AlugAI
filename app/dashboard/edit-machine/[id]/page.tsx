@@ -22,7 +22,7 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
   useEffect(() => {
     const user = authService.getCurrentUser();
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
     }
   }, [router]);
 

@@ -37,7 +37,7 @@ function ResetPasswordForm() {
     try {
       await resetPassword.mutateAsync({ token: data.token, password: data.password });
       showToast('✅ Senha alterada com sucesso!', 'success');
-      router.push('/login');
+      // router.push("/login");
     } catch (error) {
       showToast('Erro ao redefinir senha. Token pode estar expirado.', 'error');
     }

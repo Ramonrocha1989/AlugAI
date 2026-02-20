@@ -26,7 +26,7 @@ export default function VerificationPage() {
   useEffect(() => {
     const user = authService.getCurrentUser();
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
     } else {
       setFormData(prev => ({ ...prev, email: user.email }));
     }

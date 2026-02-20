@@ -37,7 +37,7 @@ export function FavoriteButton({ machineId, machineName, className, size = 'md' 
 
     const user = authService.getCurrentUser();
     if (!user) {
-      router.push('/login');
+      // router.push("/login");
       return;
     }
 
