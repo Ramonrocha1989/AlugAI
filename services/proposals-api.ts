@@ -4,7 +4,7 @@ import { Proposal, CreateProposalData, CounterProposalData } from '@/types/propo
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   timeout: 10000,
-  withCredentials: true, // Enviar cookies automaticamente
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,7 +13,16 @@ const api = axios.create({
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Token está em httpOnly cookie - não precisa de interceptor
+// Adicionar token em todas as requisições
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
 export const proposalsService = {
   // Criar proposta
