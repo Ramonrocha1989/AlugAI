@@ -4,6 +4,7 @@ import { Machine } from '@/types/machine';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   timeout: 10000,
+  withCredentials: true, // Enviar cookies automaticamente
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,6 +21,21 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Remover interceptor que redireciona em 401
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       localStorage.removeItem('currentUser');
+//       localStorage.removeItem('token');
+//       if (typeof window !== 'undefined') {
+//         window.location.href = '/login';
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

@@ -21,9 +21,13 @@ export function useMachine(id: string) {
 
 // Hook para listar máquinas do usuário
 export function useMyMachines() {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+  
   return useQuery({
     queryKey: ['my-machines'],
     queryFn: () => machineService.getMyMachines(),
+    enabled: isAuthenticated,
+    retry: false,
   });
 }
 

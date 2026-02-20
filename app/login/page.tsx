@@ -33,7 +33,13 @@ export default function LoginPage() {
   const onLogin = async (data: LoginFormData) => {
     try {
       await login.mutateAsync(data);
-      router.push('/dashboard');
+      showToast('✅ Login realizado com sucesso!', 'success');
+      
+      // Aguardar para garantir que localStorage foi salvo
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Usar window.location para garantir redirecionamento
+      window.location.href = '/dashboard';
     } catch (error: any) {
       if (error.response?.status === 429) {
         showToast('⚠️ Muitas tentativas de login! Por segurança, bloqueamos temporariamente. Tente novamente em 15 minutos.', 'warning');

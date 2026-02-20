@@ -20,19 +20,37 @@ export interface Equipment {
   ownerPlan?: 'free' | 'lojista';
 }
 
+// Dados não sensíveis do usuário (armazenados em localStorage)
 export interface User {
   id: string;
+  name: string;
   email: string;
-  companyName: string;
-  token?: string;
-  plan?: 'free' | 'lojista';
-  maxAds?: number;
-  maxPremiumAds?: number;
-  maxFeaturedAds?: number;
-  usage?: {
+  role: string;
+  plan: string;
+  planExpiresAt?: string | null;
+  maxAds: number;
+  maxPremiumAds: number;
+  maxFeaturedAds: number;
+  isVerifiedSeller: boolean;
+  emailVerified: boolean;
+  company: {
+    id: string;
+    name: string;
+  };
+  usage: {
     activeAds: number;
     premiumAds: number;
     featuredAds: number;
+  };
+}
+
+// Dados completos do perfil (incluindo sensíveis - apenas via API)
+export interface UserProfile extends User {
+  phone: string;
+  company: {
+    id: string;
+    name: string;
+    document: string;
   };
 }
 

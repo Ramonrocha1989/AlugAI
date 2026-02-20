@@ -45,9 +45,29 @@ api.interceptors.response.use(
 // Simulação de delay de rede
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Mock de usuários
+// Mock de usuários (legado - não usado mais)
 const mockUsers: User[] = [
-  { id: '1', email: 'empresa@exemplo.com', companyName: 'Construtora Silva' },
+  { 
+    id: '1', 
+    name: 'Construtora Silva',
+    email: 'empresa@exemplo.com', 
+    role: 'USER',
+    plan: 'FREE',
+    maxAds: 3,
+    maxPremiumAds: 0,
+    maxFeaturedAds: 0,
+    isVerifiedSeller: false,
+    emailVerified: true,
+    company: {
+      id: '1',
+      name: 'Construtora Silva',
+    },
+    usage: {
+      activeAds: 0,
+      premiumAds: 0,
+      featuredAds: 0,
+    },
+  },
 ];
 
 // Mock de equipamentos do usuário (localStorage)
@@ -137,7 +157,7 @@ export const equipmentService = {
         id: Date.now().toString(),
         ...data,
         ownerId: user.id,
-        ownerName: user.companyName,
+        ownerName: user.company?.name || user.name,
         available: true,
       };
       
@@ -184,9 +204,24 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: '1',
+        name: 'Construtora Silva',
         email: credentials.email,
-        companyName: 'Construtora Silva',
-        token: 'mock-token-' + Date.now(),
+        role: 'USER',
+        plan: 'FREE',
+        maxAds: 3,
+        maxPremiumAds: 0,
+        maxFeaturedAds: 0,
+        isVerifiedSeller: false,
+        emailVerified: true,
+        company: {
+          id: '1',
+          name: 'Construtora Silva',
+        },
+        usage: {
+          activeAds: 0,
+          premiumAds: 0,
+          featuredAds: 0,
+        },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
       return user;
@@ -204,9 +239,24 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: Date.now().toString(),
+        name: data.companyName,
         email: data.email,
-        companyName: data.companyName,
-        token: 'mock-token-' + Date.now(),
+        role: 'USER',
+        plan: 'FREE',
+        maxAds: 3,
+        maxPremiumAds: 0,
+        maxFeaturedAds: 0,
+        isVerifiedSeller: false,
+        emailVerified: false,
+        company: {
+          id: Date.now().toString(),
+          name: data.companyName,
+        },
+        usage: {
+          activeAds: 0,
+          premiumAds: 0,
+          featuredAds: 0,
+        },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
       return user;

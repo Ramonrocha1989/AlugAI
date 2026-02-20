@@ -4,6 +4,7 @@ import { Notification, NotificationsResponse } from '@/types/notification';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   timeout: 10000,
+  withCredentials: true, // Enviar cookies automaticamente
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,6 +21,8 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Interceptor removido - não redirecionar automaticamente em 401
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

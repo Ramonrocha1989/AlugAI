@@ -18,18 +18,48 @@ import { Machine } from '@/types/machine';
 export default function DashboardPage() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: machines, isLoading } = useMyMachines();
-  const { data: user } = useUser();
+  const { data: machines, isLoading, error } = useMyMachines();
+  const { data: user, isLoading: userLoading, error: userError } = useUser();
   const deleteMachine = useDeleteMachine();
   const updateMachine = useUpdateMachine();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      router.push('/login');
-    }
-  }, [router]);
+    // Aguardar um pouco antes de verificar auth
+    const timer = setTimeout(() => {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        window.location.href = '/login';
+      } else {
+        setIsCheckingAuth(false);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isCheckingAuth || isLoading || userLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Se houver erro, mostrar mensagem
+  if (error || userError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Erro ao carregar dashboard</h1>
+          <p className="text-muted-foreground mb-4">Erro: {(error as any)?.message || (userError as any)?.message}</p>
+          <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleDelete = async (machine: Machine) => {
     if (!confirm(`Tem certeza que deseja deletar "${machine.name}"?`)) {
@@ -112,7 +142,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {isLoading ? (
+      {isLoading || userLoading ? (
         <div className="flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>

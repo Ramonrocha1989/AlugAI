@@ -3,10 +3,14 @@ import { notificationsService } from '@/services/notifications-api';
 
 // Hook para listar notificações
 export function useNotifications(params?: { read?: boolean; limit?: number }) {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+  
   return useQuery({
     queryKey: ['notifications', params],
     queryFn: () => notificationsService.getAll(params),
     refetchInterval: 30000, // Atualiza a cada 30 segundos
+    enabled: isAuthenticated,
+    retry: false,
   });
 }
 

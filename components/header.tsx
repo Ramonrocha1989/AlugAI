@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NotificationsDropdown } from '@/components/notifications-dropdown';
-import { authService } from '@/services/api';
+import { authService } from '@/services/machine-api';
 import { useLogout } from '@/hooks/use-api';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
@@ -16,31 +16,34 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
-  const { data: favorites = [] } = useFavorites();
-  const { data: receivedProposals = [] } = useReceivedProposals();
-  const { data: sentProposals = [] } = useSentProposals();
+  const { data: favorites = [], isError: favoritesError } = useFavorites();
+  const { data: receivedProposals = [], isError: receivedError } = useReceivedProposals();
+  const { data: sentProposals = [], isError: sentError } = useSentProposals();
   
   // Propostas recebidas não vistas e pendentes
-  const pendingReceived = receivedProposals.filter(p => 
+  const pendingReceived = !receivedError && receivedProposals ? receivedProposals.filter(p => 
     p.status === 'PENDING' && p.viewedByReceiver === false
-  ).length;
+  ).length : 0;
   
   // Propostas enviadas com resposta não vista
-  const updatedSent = sentProposals.filter(p => 
+  const updatedSent = !sentError && sentProposals ? sentProposals.filter(p => 
     ['ACCEPTED', 'REJECTED', 'COUNTERED'].includes(p.status) && p.viewedBySender === false
-  ).length;
+  ).length : 0;
   
   const totalNotifications = pendingReceived + updatedSent;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ companyName: string; role?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; company?: { name: string }; role?: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
       const currentUser = authService.getCurrentUser();
       setIsAuthenticated(!!currentUser);
-      // Extrair user se vier aninhado
-      const userData = (currentUser as any)?.user || currentUser;
-      setUser(userData);
+      
+      if (currentUser) {
+        // Extrair user se vier aninhado
+        const userData = (currentUser as any)?.user || currentUser;
+        setUser(userData);
+      }
     };
     checkAuth();
     window.addEventListener('storage', checkAuth);

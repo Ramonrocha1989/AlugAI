@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/types/machine';
 import { User, LoginCredentials, RegisterData } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
+import { apiRequest, clearCsrfToken } from '@/lib/api';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
@@ -9,12 +10,10 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // Tratar 4xx como resposta válida (não loga erro no console)
+  withCredentials: true, // Enviar cookies automaticamente
   validateStatus: () => true,
-  // Transformar dados antes de enviar
   transformRequest: [(data) => {
     if (data && typeof data === 'object') {
-      // Converter arrays esparsos em arrays densos
       const cleanData = { ...data };
       if (cleanData.images) {
         cleanData.images = Array.from(cleanData.images).filter(img => img);
@@ -31,26 +30,7 @@ const api = axios.create({
 // Remover filtro de console (não funciona para logs do navegador)
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    // Tentar pegar token do localStorage
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      // Fallback: tentar pegar do currentUser (compatibilidade)
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        const parsed = JSON.parse(user);
-        const userToken = parsed.token;
-        if (userToken) {
-          config.headers.Authorization = `Bearer ${userToken}`;
-        }
-      }
-    }
-  }
-  return config;
-});
+// Remover interceptor de Authorization - cookies são enviados automaticamente
 
 api.interceptors.response.use(
   (response) => {
@@ -63,12 +43,8 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('currentUser');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
+    // Não redirecionar automaticamente em erro 401
+    // Deixar componentes tratarem o erro
     return Promise.reject(error);
   }
 );
@@ -176,7 +152,7 @@ export const machineService = {
         id: Date.now().toString(),
         ...data,
         ownerId: user.id,
-        ownerName: user.companyName,
+        ownerName: user.company?.name || user.name,
         isVerifiedSeller: false,
         available: true,
         createdAt: new Date().toISOString(),
@@ -184,7 +160,7 @@ export const machineService = {
         views: 0,
         owner: {
           id: user.id,
-          name: user.companyName,
+          name: user.company?.name || user.name,
           email: user.email,
         },
       };
@@ -259,26 +235,39 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: '1',
+        name: 'Agropecuária Exemplo',
         email: credentials.email,
-        companyName: 'Agropecuária Exemplo',
-        token: 'mock-token-' + Date.now(),
+        role: 'USER',
+        plan: 'FREE',
+        maxAds: 3,
+        maxPremiumAds: 0,
+        maxFeaturedAds: 0,
+        isVerifiedSeller: false,
+        emailVerified: true,
+        company: {
+          id: '1',
+          name: 'Agropecuária Exemplo',
+        },
+        usage: {
+          activeAds: 0,
+          premiumAds: 0,
+          featuredAds: 0,
+        },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
       return user;
     }
     
-    const { data } = await api.post<any>('/auth/login', credentials);
+    // Backend define cookie httpOnly automaticamente
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
     
-    // Backend retorna { user, token }
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
+    // Salvar apenas dados não sensíveis do usuário
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
     
-    // Salvar usuário com token para compatibilidade
-    const userWithToken = { ...data.user, token: data.token };
-    localStorage.setItem('currentUser', JSON.stringify(userWithToken));
-    
-    return userWithToken;
+    return data.user;
   },
 
   register: async (data: RegisterData): Promise<User> => {
@@ -286,40 +275,52 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: Date.now().toString(),
+        name: data.companyName,
         email: data.email,
-        companyName: data.companyName,
-        token: 'mock-token-' + Date.now(),
+        role: 'USER',
+        plan: 'FREE',
+        maxAds: 3,
+        maxPremiumAds: 0,
+        maxFeaturedAds: 0,
+        isVerifiedSeller: false,
+        emailVerified: false,
+        company: {
+          id: Date.now().toString(),
+          name: data.companyName,
+        },
+        usage: {
+          activeAds: 0,
+          premiumAds: 0,
+          featuredAds: 0,
+        },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
       return user;
     }
     
-    const { data: response } = await api.post<any>('/auth/register', data);
+    const response = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
     
-    // Backend retorna { user, token }
-    if (response.token) {
-      localStorage.setItem('token', response.token);
-    }
+    // Salvar apenas dados não sensíveis
+    localStorage.setItem('currentUser', JSON.stringify(response.user));
     
-    const userWithToken = { ...response.user, token: response.token };
-    localStorage.setItem('currentUser', JSON.stringify(userWithToken));
-    
-    return userWithToken;
+    return response.user;
   },
 
   logout: async (): Promise<void> => {
     if (USE_MOCK) {
       await delay(200);
       localStorage.removeItem('currentUser');
-      localStorage.removeItem('token');
       return;
     }
     
     try {
-      await api.post('/auth/logout');
+      await apiRequest('/auth/logout', { method: 'POST' });
     } finally {
       localStorage.removeItem('currentUser');
-      localStorage.removeItem('token');
+      clearCsrfToken();
     }
   },
 
@@ -332,9 +333,15 @@ export const authService = {
   },
 
   getMe: async (): Promise<User> => {
-    const { data } = await api.get<User>('/auth/me');
-    localStorage.setItem('currentUser', JSON.stringify(data));
+    const data = await apiRequest('/auth/me', { method: 'GET' });
+    // ❌ NÃO salvar no localStorage - /auth/me retorna dados sensíveis
+    // localStorage é atualizado apenas no login/register
     return data;
+  },
+
+  // Buscar perfil completo (incluindo dados sensíveis)
+  getProfile: async (): Promise<any> => {
+    return await apiRequest('/auth/profile', { method: 'GET' });
   },
 
   forgotPassword: async (email: string): Promise<void> => {
