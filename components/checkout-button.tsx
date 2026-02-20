@@ -19,24 +19,11 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
     setLoading(true);
 
     try {
-      // Tentar pegar token do localStorage (prioridade)
-      let token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       
-      // Fallback: tentar pegar do currentUser
       if (!token) {
-        const currentUser = localStorage.getItem('currentUser');
-        if (!currentUser) {
-          alert('Você precisa estar logado para assinar um plano');
-          // window.location.href = "/login";
-          return;
-        }
-        const parsed = JSON.parse(currentUser);
-        token = parsed.token;
-      }
-
-      if (!token) {
-        alert('Token de autenticação não encontrado. Faça login novamente.');
-        // window.location.href = "/login";
+        alert('Você precisa estar logado para assinar um plano');
+        window.location.href = "/login";
         return;
       }
 
