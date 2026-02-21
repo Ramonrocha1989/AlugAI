@@ -61,12 +61,12 @@ export function Header() {
   return (
     <header className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center flex-shrink-0">
           <img src="/logo.svg" alt="Mercado Máquina" className="h-10 md:h-12" />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-4 flex-row">
+        <nav className="hidden lg:flex items-center gap-2 xl:gap-4 flex-row ml-auto">
           <Link href="/">
             <Button variant="ghost" size="sm">Máquinas</Button>
           </Link>
@@ -232,7 +232,7 @@ export function Header() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-1 ml-auto">
           {isAuthenticated && <NotificationsDropdown />}
           <Button
             variant="ghost"
@@ -256,22 +256,22 @@ export function Header() {
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard/favorites" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start relative min-h-[48px]">
+                  <Button variant="ghost" className="w-full justify-start min-h-[48px]">
                     <Heart className="h-4 w-4 mr-2" />
                     Favoritos
                     {favorites.length > 0 && (
-                      <Badge variant="destructive" className="ml-auto">
+                      <Badge variant="destructive" className="ml-2">
                         {favorites.length}
                       </Badge>
                     )}
                   </Button>
                 </Link>
                 <Link href="/proposals" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start relative min-h-[48px]">
+                  <Button variant="ghost" className="w-full justify-start min-h-[48px]">
                     <FileText className="h-4 w-4 mr-2" />
                     Propostas
                     {totalNotifications > 0 && (
-                      <Badge variant="destructive" className="ml-auto">
+                      <Badge variant="destructive" className="ml-2">
                         {totalNotifications}
                       </Badge>
                     )}
