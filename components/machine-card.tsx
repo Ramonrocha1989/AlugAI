@@ -31,8 +31,8 @@ export function MachineCard({ machine }: MachineCardProps) {
       href={`/machine/${machine.id}`}
       onClick={() => analytics.trackMachineView(machine.id, machine.name, machine.category)}
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
-        <div className="relative h-48 w-full bg-muted">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
+        <div className="relative h-40 sm:h-48 w-full bg-muted">
           <Image
             src={machine.images[0] || '/placeholder.jpg'}
             alt={machine.name}
@@ -42,26 +42,26 @@ export function MachineCard({ machine }: MachineCardProps) {
           {/* Badges de Monetização */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {machine.isPremium && (
-              <Badge variant="premium" className="flex items-center gap-1">
+              <Badge variant="premium" className="flex items-center gap-1 text-xs">
                 <Star className="h-3 w-3" />
-                PREMIUM
+                <span className="hidden sm:inline">PREMIUM</span>
               </Badge>
             )}
-            <Badge variant="secondary" className="bg-white/90">
+            <Badge variant="secondary" className="bg-white/90 text-xs">
               {BUSINESS_TYPES[machine.businessType]}
             </Badge>
           </div>
           {/* Badges lado direito */}
           <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
             {machine.isVerifiedSeller && (
-              <Badge className="bg-green-500 text-white flex items-center gap-1">
+              <Badge className="bg-green-500 text-white flex items-center gap-1 text-xs">
                 <CheckCircle2 className="h-3 w-3" />
-                VERIFICADO
+                <span className="hidden sm:inline">VERIFICADO</span>
               </Badge>
             )}
             {machine.isFeatured && (
               <div className="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
-                ⭐ Destaque
+                ⭐ <span className="hidden sm:inline">Destaque</span>
               </div>
             )}
           </div>
@@ -70,36 +70,36 @@ export function MachineCard({ machine }: MachineCardProps) {
           </div>
         </div>
 
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4 flex-1">
           <div className="mb-2">
-            <h3 className="font-semibold text-lg line-clamp-1">{machine.name}</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold text-base sm:text-lg line-clamp-1">{machine.name}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {CATEGORIES[machine.category]}
             </p>
           </div>
 
-          <div className="space-y-1.5 mb-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <div className="space-y-1.5 mb-2 sm:mb-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
               <span>{machine.yearModel}</span>
               {machine.engineHours && (
                 <>
                   <span className="text-muted-foreground">•</span>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                   <span>{machine.engineHours.toLocaleString('pt-BR')}h</span>
                 </>
               )}
             </div>
 
             {machine.power && (
-              <div className="flex items-center gap-2 text-sm">
-                <Gauge className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm">
+                <Gauge className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <span>{machine.power} cv</span>
               </div>
             )}
 
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
               <span className="line-clamp-1">
                 {machine.city}, {machine.state}
               </span>
@@ -107,7 +107,7 @@ export function MachineCard({ machine }: MachineCardProps) {
           </div>
 
           {machine.quickTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
               {machine.quickTags.slice(0, 2).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
                   {QUICK_TAGS[tag]}
@@ -128,14 +128,14 @@ export function MachineCard({ machine }: MachineCardProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-3 sm:p-4 pt-0">
           <div className="w-full flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold text-primary">
+            <div className="min-w-0 flex-1">
+              <p className="text-xl sm:text-2xl font-bold text-primary truncate">
                 {formatPrice(machine.price, machine.businessType)}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground truncate">
                   {machine.ownerName}
                 </p>
                 <RatingBadge userId={machine.ownerId} showCount={false} />

@@ -9,24 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-});
-
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('currentUser');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.token) {
-        config.headers.Authorization = `Bearer ${parsed.token}`;
-      }
-    }
-  }
-  return config;
-});
+import { authService } from '@/services/machine-api';
+import { apiRequest } from '@/lib/api';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres').optional(),
@@ -41,14 +25,19 @@ export default function ProfileClient() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const { data } = await api.get('/users/me');
-      return data;
+      // Buscar do localStorage (dados básicos)
+      const user = authService.getCurrentUser();
+      if (!user) throw new Error('Não autenticado');
+      return user;
     },
   });
 
   const updateProfile = useMutation({
     mutationFn: async (data: ProfileFormData) => {
-      const { data: updated } = await api.put('/users/me', data);
+      const updated = await apiRequest('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
       return updated;
     },
     onSuccess: () => {

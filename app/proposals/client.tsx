@@ -112,20 +112,21 @@ export default function ProposalsClient() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Minhas Propostas</h1>
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Minhas Propostas</h1>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-4 md:mb-6 overflow-x-auto pb-2 pt-3">
         <Button
           variant={tab === 'received' ? 'default' : 'outline'}
           onClick={() => router.push('/proposals?tab=received')}
-          className="relative"
+          className="relative whitespace-nowrap overflow-visible"
+          size="sm"
         >
           Recebidas
           {receivedNotifications > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute -top-2.5 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs z-10"
             >
               {receivedNotifications}
             </Badge>
@@ -134,13 +135,14 @@ export default function ProposalsClient() {
         <Button
           variant={tab === 'sent' ? 'default' : 'outline'}
           onClick={() => router.push('/proposals?tab=sent')}
-          className="relative"
+          className="relative whitespace-nowrap overflow-visible"
+          size="sm"
         >
           Enviadas
           {sentNotifications > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute -top-2.5 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs z-10"
             >
               {sentNotifications}
             </Badge>
@@ -171,9 +173,9 @@ export default function ProposalsClient() {
 
             return (
               <Card key={proposal.id}>
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    <div className="relative h-24 w-24 flex-shrink-0 bg-muted rounded overflow-hidden">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative h-32 sm:h-24 w-full sm:w-24 flex-shrink-0 bg-muted rounded overflow-hidden">
                       <Image
                         src={proposal.machine.images[0] || '/placeholder.jpg'}
                         alt={proposal.machine.name}
@@ -182,28 +184,28 @@ export default function ProposalsClient() {
                       />
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-lg">{proposal.machine.name}</h3>
-                          <p className="text-sm text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-base md:text-lg truncate">{proposal.machine.name}</h3>
+                          <p className="text-sm text-muted-foreground truncate">
                             {isReceived ? 'De' : 'Para'}: {otherUser.name}
                           </p>
                         </div>
-                        <Badge className={status.color}>
+                        <Badge className={`${status.color} whitespace-nowrap flex-shrink-0`}>
                           <StatusIcon className="h-3 w-3 mr-1" />
                           {status.label}
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Preço Anunciado</p>
-                          <p className="font-semibold">{formatPrice(proposal.machine.price)}</p>
+                          <p className="font-semibold text-sm md:text-base">{formatPrice(proposal.machine.price)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Proposta</p>
-                          <p className="font-semibold text-primary">{formatPrice(proposal.proposedPrice)}</p>
+                          <p className="font-semibold text-primary text-sm md:text-base">{formatPrice(proposal.proposedPrice)}</p>
                         </div>
                       </div>
 
@@ -217,15 +219,16 @@ export default function ProposalsClient() {
                         </div>
                       )}
 
-                      <p className="text-sm mb-3">{proposal.message}</p>
+                      <p className="text-sm mb-3 line-clamp-2">{proposal.message}</p>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {isReceived && proposal.status === 'PENDING' && (
                           <>
                             <Button
                               size="sm"
                               onClick={() => handleAccept(proposal.id)}
                               disabled={acceptProposal.isPending}
+                              className="min-h-[44px] sm:min-h-0"
                             >
                               Aceitar
                             </Button>
@@ -233,6 +236,7 @@ export default function ProposalsClient() {
                               size="sm"
                               variant="outline"
                               onClick={() => setCounterProposal(proposal)}
+                              className="min-h-[44px] sm:min-h-0"
                             >
                               Contra-propor
                             </Button>
@@ -241,6 +245,7 @@ export default function ProposalsClient() {
                               variant="destructive"
                               onClick={() => handleReject(proposal.id)}
                               disabled={rejectProposal.isPending}
+                              className="min-h-[44px] sm:min-h-0"
                             >
                               Recusar
                             </Button>
@@ -253,6 +258,7 @@ export default function ProposalsClient() {
                             variant="destructive"
                             onClick={() => handleCancel(proposal.id)}
                             disabled={cancelProposal.isPending}
+                            className="min-h-[44px] sm:min-h-0"
                           >
                             Cancelar
                           </Button>
@@ -262,6 +268,7 @@ export default function ProposalsClient() {
                           <Button
                             size="sm"
                             variant="default"
+                            className="w-full sm:w-auto"
                             onClick={() => {
                               const phone = isReceived ? proposal.sender.phone : proposal.receiver.phone;
                               const otherName = isReceived ? proposal.sender.name : proposal.receiver.name;

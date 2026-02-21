@@ -172,17 +172,17 @@ export default function HomePage() {
     acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Mercado Máquina</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto px-4 py-4 md:py-8 max-w-[1920px]">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold mb-2">Mercado Máquina</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Compre, venda, alugue ou troque máquinas agrícolas e de construção
         </p>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4 md:mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm font-medium">🌾 Filtro por Cultura:</span>
+          <span className="text-xs md:text-sm font-medium">🌾 Filtro por Cultura:</span>
           <Badge variant="secondary" className="text-xs">Diferencial do Sul</Badge>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -192,6 +192,7 @@ export default function HomePage() {
               variant={selectedCulture === culture ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleCultureFilter(culture)}
+              className="text-xs md:text-sm"
             >
               {culture}
             </Button>
@@ -199,8 +200,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+      <div className="bg-card border rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -245,7 +246,7 @@ export default function HomePage() {
             ))}
           </select>
 
-          <Button onClick={handleSearch} className="w-full">
+          <Button onClick={handleSearch} className="w-full md:col-span-2 lg:col-span-1">
             <Filter className="h-4 w-4 mr-2" />
             Filtrar
           </Button>
@@ -272,77 +273,81 @@ export default function HomePage() {
 
         {showAdvanced && (
           <div className="border-t pt-4 space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Faixa de Preço (R$)</label>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  type="number"
-                  placeholder="Mínimo"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  placeholder="Máximo"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Faixa de Preço (R$)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Mínimo"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Máximo"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Ano do Modelo</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="De (ex: 2015)"
+                    value={minYear}
+                    onChange={(e) => setMinYear(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Até (ex: 2024)"
+                    value={maxYear}
+                    onChange={(e) => setMaxYear(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Ano do Modelo</label>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  type="number"
-                  placeholder="De (ex: 2015)"
-                  value={minYear}
-                  onChange={(e) => setMinYear(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  placeholder="Até (ex: 2024)"
-                  value={maxYear}
-                  onChange={(e) => setMaxYear(e.target.value)}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  ⭐ Horas de Motor
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Mínimo (ex: 0)"
+                    value={minEngineHours}
+                    onChange={(e) => setMinEngineHours(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Máximo (ex: 5000)"
+                    value={maxEngineHours}
+                    onChange={(e) => setMaxEngineHours(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                ⭐ Horas de Motor
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  type="number"
-                  placeholder="Mínimo (ex: 0)"
-                  value={minEngineHours}
-                  onChange={(e) => setMinEngineHours(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  placeholder="Máximo (ex: 5000)"
-                  value={maxEngineHours}
-                  onChange={(e) => setMaxEngineHours(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Potência (cv)</label>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  type="number"
-                  placeholder="Mínimo (ex: 75)"
-                  value={minPower}
-                  onChange={(e) => setMinPower(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  placeholder="Máximo (ex: 200)"
-                  value={maxPower}
-                  onChange={(e) => setMaxPower(e.target.value)}
-                />
+              <div>
+                <label className="text-sm font-medium mb-2 block">Potência (cv)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Mínimo (ex: 75)"
+                    value={minPower}
+                    onChange={(e) => setMinPower(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Máximo (ex: 200)"
+                    value={maxPower}
+                    onChange={(e) => setMaxPower(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
@@ -388,7 +393,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="text-sm text-muted-foreground">
           {isLoading ? (
             'Carregando...'
@@ -405,7 +410,7 @@ export default function HomePage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring w-full sm:w-auto"
           >
             <option value="recent">Mais recentes</option>
             <option value="price-asc">Menor preço</option>
@@ -420,7 +425,7 @@ export default function HomePage() {
         <MachineSkeletonGrid count={6} />
       ) : allMachines.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
             {allMachines.map((machine) => (
               <MachineCard key={machine.id} machine={machine} />
             ))}

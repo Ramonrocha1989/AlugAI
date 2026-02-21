@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip } from '@/components/tooltip';
 import { Bell, Check, Trash2, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -37,21 +38,22 @@ export function NotificationsDropdown() {
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
-      >
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <Badge
-            variant="destructive"
-            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-          >
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </Badge>
-        )}
-      </button>
+    <Tooltip content="Notificações">
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </Badge>
+          )}
+        </button>
 
       {isOpen && (
         <>
@@ -59,17 +61,19 @@ export function NotificationsDropdown() {
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border z-50 max-h-[500px] flex flex-col">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold">Notificações</h3>
+          <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:right-0 sm:left-auto sm:translate-x-0 sm:top-auto mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-lg shadow-lg border z-50 max-h-[500px] flex flex-col">
+            <div className="p-3 sm:p-4 border-b flex items-center justify-between gap-2">
+              <h3 className="font-semibold text-sm sm:text-base">Notificações</h3>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleMarkAllAsRead}
                   disabled={markAllAsRead.isPending}
+                  className="text-xs sm:text-sm"
                 >
-                  Marcar todas como lidas
+                  <span className="hidden sm:inline">Marcar todas como lidas</span>
+                  <span className="sm:hidden">Marcar lidas</span>
                 </Button>
               )}
             </div>
@@ -97,7 +101,7 @@ export function NotificationsDropdown() {
                         setIsOpen(false);
                       }}
                       className={cn(
-                        'block p-4 hover:bg-gray-50 transition-colors',
+                        'block p-3 sm:p-4 hover:bg-gray-50 transition-colors',
                         !notification.read && 'bg-blue-50'
                       )}
                     >
@@ -155,6 +159,7 @@ export function NotificationsDropdown() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </Tooltip>
   );
 }
