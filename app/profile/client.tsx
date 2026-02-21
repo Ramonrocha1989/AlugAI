@@ -73,7 +73,7 @@ export default function ProfileClient() {
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Meu Perfil</h1>
 
-      {!profile.phone && (
+      {!(profile as any).phone && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
           <p className="text-yellow-800 font-medium">⚠️ Adicione seu telefone</p>
           <p className="text-sm text-yellow-700 mt-1">
@@ -129,7 +129,7 @@ export default function ProfileClient() {
               <Label htmlFor="phone">Telefone (WhatsApp)</Label>
               <Input
                 id="phone"
-                defaultValue={profile.phone ? profile.phone.replace(/^55/, '') : ''}
+                defaultValue={(profile as any).phone ? (profile as any).phone.replace(/^55/, '') : ''}
                 placeholder="51999887766"
                 {...register('phone')}
               />
