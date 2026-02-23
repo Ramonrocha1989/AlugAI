@@ -9,6 +9,7 @@ import { useToast } from '@/components/toast-provider';
 import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from '@/lib/validations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -86,7 +87,10 @@ export default function LoginPage() {
                   Enviamos um email de verificação para você. Por favor, verifique sua caixa de entrada e clique no link para ativar sua conta.
                 </p>
               </div>
-              <Button onClick={() => router.push('/login')} className="w-full">
+              <Button onClick={() => {
+                setShowVerificationMessage(false);
+                setIsLogin(true);
+              }} className="w-full">
                 Ir para Login
               </Button>
             </div>
@@ -108,9 +112,8 @@ export default function LoginPage() {
 
               <div>
                 <Label htmlFor="password">Senha</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   {...loginForm.register('password')}
                 />
                 {loginForm.formState.errors.password && (
@@ -194,9 +197,8 @@ export default function LoginPage() {
 
               <div>
                 <Label htmlFor="password">Senha</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   {...registerForm.register('password')}
                 />
                 {registerForm.formState.errors.password && (
