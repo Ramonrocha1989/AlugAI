@@ -15,6 +15,15 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
     credentials: 'include',
   });
 
+  if (response.status === 401 && typeof window !== 'undefined') {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+    throw new Error('Unauthorized');
+  }
+
   if (!response.ok) {
     const error: any = new Error(`HTTP ${response.status}`);
     error.response = response;
