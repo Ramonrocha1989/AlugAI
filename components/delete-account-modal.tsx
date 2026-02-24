@@ -32,7 +32,8 @@ export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
       reset();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || 'Erro ao solicitar exclusão. Verifique sua senha.');
+      // Erro já é tratado pelo apiRequest com toast
+      console.error('Erro ao solicitar exclusão:', error);
     },
   });
 

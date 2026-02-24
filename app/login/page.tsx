@@ -42,6 +42,11 @@ export default function LoginPage() {
       // Usar window.location para garantir redirecionamento
       window.location.href = '/dashboard';
     } catch (error: any) {
+      // Não mostrar erro se for 403 (conta deletada - já tratado pelo apiRequest)
+      if (error.response?.status === 403 || error.message?.includes('marcada para exclusão')) {
+        return; // Toast amarelo já foi mostrado pelo lib/api.ts
+      }
+      
       if (error.response?.status === 429) {
         showToast('⚠️ Muitas tentativas de login! Por segurança, bloqueamos temporariamente. Tente novamente em 15 minutos.', 'warning');
       } else if (error.response?.status === 401) {
