@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { authService } from '@/services/api';
 
-export default function ConfirmDeletePage() {
+function ConfirmDeleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -99,5 +100,21 @@ export default function ConfirmDeletePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ConfirmDeletePage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-16 max-w-md">
+        <Card>
+          <CardContent className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <ConfirmDeleteContent />
+    </Suspense>
   );
 }
