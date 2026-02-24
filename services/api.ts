@@ -17,12 +17,9 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 // Interceptor: adiciona token JWT em todas as requisições
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const { token } = JSON.parse(user);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
   }
   return config;
@@ -317,5 +314,29 @@ export const authService = {
     }
     
     await api.post('/auth/verify-email', { token });
+  },
+
+  // Solicita exclusão de conta (envia email com token)
+  requestDeleteAccount: async (password: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      console.log('Email de exclusão enviado');
+      return;
+    }
+    
+    await api.post('/auth/request-delete', { password });
+  },
+
+  // Confirma exclusão de conta via token
+  confirmDeleteAccount: async (token: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      localStorage.removeItem('currentUser');
+      console.log('Conta excluída');
+      return;
+    }
+    
+    await api.post('/auth/confirm-delete', { token });
+    localStorage.removeItem('currentUser');
   },
 };

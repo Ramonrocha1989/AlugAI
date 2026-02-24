@@ -58,8 +58,13 @@ export const resetPasswordSchema = z.object({
   path: ['confirmPassword'],
 });
 
+export const deleteAccountSchema = z.object({
+  password: z.string().min(6, 'Senha é obrigatória'),
+});
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type EquipmentFormData = z.infer<typeof equipmentSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+export type DeleteAccountFormData = z.infer<typeof deleteAccountSchema>;

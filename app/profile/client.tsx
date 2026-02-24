@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 import { apiRequest } from '@/lib/api';
+import { DeleteAccountModal } from '@/components/delete-account-modal';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres').optional(),
@@ -21,6 +23,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function ProfileClient() {
   const queryClient = useQueryClient();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
@@ -106,7 +109,7 @@ export default function ProfileClient() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle>Editar Perfil</CardTitle>
         </CardHeader>
@@ -148,6 +151,32 @@ export default function ProfileClient() {
           </form>
         </CardContent>
       </Card>
+
+      <Card className="border-destructive/50 mt-6">
+        <CardHeader>
+          <CardTitle className="text-destructive">Exclusão de Conta</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ao excluir sua conta, todos os seus dados serão permanentemente removidos após 30 dias. Esta ação não pode ser desfeita.
+            </p>
+            <Button 
+              variant="destructive" 
+              onClick={() => setShowDeleteModal(true)}
+              className="w-full sm:w-auto"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Excluir Minha Conta
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <DeleteAccountModal 
+        open={showDeleteModal} 
+        onClose={() => setShowDeleteModal(false)} 
+      />
     </div>
   );
 }
