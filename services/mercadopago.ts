@@ -20,7 +20,8 @@ export const mercadoPagoService = {
     
     const result = await preference.create({
       body: {
-        items: items.map(item => ({
+        items: items.map((item, index) => ({
+          id: `item-${index}`,
           title: item.title,
           quantity: item.quantity,
           unit_price: item.unit_price,
