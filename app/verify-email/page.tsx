@@ -29,7 +29,8 @@ function VerifyEmailContent() {
     try {
       await authService.verifyEmail(token);
       setStatus('success');
-      setMessage('Email verificado com sucesso! Você já pode fazer login.');
+      setMessage('Email verificado com sucesso! Redirecionando para o login...');
+      setTimeout(() => router.push('/login'), 2000);
     } catch (error) {
       setStatus('error');
       setMessage('Token inválido ou expirado. Solicite um novo email de verificação.');
