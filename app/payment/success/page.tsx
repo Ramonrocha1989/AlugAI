@@ -1,14 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
 export default function PaymentSuccess() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   return (
     <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[80vh]">
