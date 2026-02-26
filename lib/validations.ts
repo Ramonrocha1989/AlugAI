@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cpf, cnpj } from 'cpf-cnpj-validator';
 
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -14,6 +15,15 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
   companyName: z.string().min(3, 'Nome da empresa deve ter no mínimo 3 caracteres'),
   phone: z.string().regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: 51999887766'),
+  companyDocument: z.string()
+    .optional()
+    .refine((doc) => {
+      if (!doc) return true;
+      const clean = doc.replace(/\D/g, '');
+      if (clean.length === 11) return cpf.isValid(doc);
+      if (clean.length === 14) return cnpj.isValid(doc);
+      return false;
+    }, 'CPF ou CNPJ inválido'),
 });
 
 export const equipmentSchema = z.object({

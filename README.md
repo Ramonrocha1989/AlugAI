@@ -206,3 +206,373 @@ O projeto utiliza o design system do shadcn/ui com tema customizável via CSS va
 ## 📄 Licença
 
 MIT
+
+
+---
+
+# 📚 DOCUMENTAÇÃO COMPLETA
+
+## 🔧 Integração com Backend
+
+### Configuração
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_USE_MOCK=false  # false = backend real, true = mock
+```
+
+### Endpoints Esperados
+
+#### Autenticação
+- `POST /auth/login` - Login
+- `POST /auth/register` - Cadastro
+- `POST /auth/logout` - Logout
+- `POST /auth/forgot-password` - Recuperação de senha
+- `POST /auth/reset-password` - Reset de senha
+- `POST /auth/request-delete` - Solicitar exclusão de conta
+- `POST /auth/confirm-delete` - Confirmar exclusão
+
+#### Equipamentos/Máquinas
+- `GET /equipments` ou `/machines` - Listar
+- `GET /equipments/:id` - Detalhes
+- `POST /equipments` - Criar
+- `PUT /machines/:id` - Editar
+- `DELETE /machines/:id` - Deletar
+- `GET /equipments/my` - Minhas máquinas
+
+#### Favoritos
+- `POST /api/favorites` - Adicionar
+- `DELETE /api/favorites/:machineId` - Remover
+- `GET /api/favorites` - Listar
+- `GET /api/favorites/check/:machineId` - Verificar
+
+#### Avaliações
+- `POST /api/reviews` - Criar avaliação
+- `GET /api/reviews/user/:userId` - Listar avaliações
+- `GET /api/reviews/machine/:machineId` - Avaliações da máquina
+- `PUT /api/reviews/:id` - Editar (até 7 dias)
+- `DELETE /api/reviews/:id` - Deletar
+
+#### Verificação de Vendedor
+- `POST /api/verification/request` - Solicitar verificação
+- `GET /api/admin/verification-requests` - Listar (admin)
+- `POST /api/admin/verification-requests/:id/approve` - Aprovar (admin)
+- `POST /api/admin/verification-requests/:id/reject` - Rejeitar (admin)
+
+---
+
+## 💳 Integração Mercado Pago
+
+### Configuração
+
+```env
+# Teste
+NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=TEST-d311be20-4301-42a3-b69f-7c8674c4524f
+MERCADOPAGO_ACCESS_TOKEN=TEST-8899207110190706-021710-148052702e6c46c20f8b1e014d423079-253473469
+```
+
+### Cartões de Teste
+
+**Aprovado:**
+```
+Número: 5031 4332 1540 6351
+CVV: 123
+Validade: 11/25
+Nome: APRO
+CPF: 12345678909
+```
+
+### Webhook
+
+**URL:** `https://seudominio.com/api/webhooks/mercadopago`
+
+**Teste local com ngrok:**
+```bash
+ngrok http 3001
+```
+
+---
+
+## 🗄️ Banco de Dados
+
+### Tabelas Necessárias
+
+#### verification_requests
+```sql
+CREATE TABLE verification_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  document_type VARCHAR(10) NOT NULL,
+  document_number VARCHAR(20) NOT NULL,
+  company_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  reason TEXT,
+  status VARCHAR(20) DEFAULT 'PENDING',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### favorites
+```sql
+CREATE TABLE favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  machine_id UUID NOT NULL REFERENCES machines(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, machine_id)
+);
+```
+
+#### reviews
+```sql
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reviewer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reviewed_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  machine_id UUID REFERENCES machines(id) ON DELETE SET NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT unique_review UNIQUE(reviewer_id, reviewed_user_id, machine_id)
+);
+```
+
+#### password_reset_tokens
+```sql
+CREATE TABLE password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+---
+
+## 🔐 Segurança
+
+### Frontend
+
+✅ **Sanitização HTML** - `isomorphic-dompurify`
+```typescript
+import { sanitizeHTML } from '@/lib/sanitize';
+<div dangerouslySetInnerHTML={{ __html: sanitizeHTML(content) }} />
+```
+
+✅ **Security Headers** - `next.config.js`
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- Referrer-Policy: strict-origin-when-cross-origin
+
+✅ **Validação CPF/CNPJ**
+```bash
+npm install cpf-cnpj-validator
+```
+
+### Backend (Esperado)
+
+✅ Helmet (Security Headers)
+✅ Rate Limiting (100 req/min)
+✅ Sanitização HTML
+✅ Hash bcrypt + JWT
+✅ CSRF Protection
+
+---
+
+## 📱 Responsividade
+
+### Breakpoints
+```css
+sm: 640px   /* Tablets pequenos */
+md: 768px   /* Tablets */
+lg: 1024px  /* Notebooks */
+xl: 1280px  /* Desktops */
+```
+
+✅ Header com menu mobile
+✅ Filtros adaptáveis
+✅ Grid responsivo (1/2/3 colunas)
+✅ Cards otimizados
+
+---
+
+## ⚡ Performance
+
+### Infinite Scroll
+```typescript
+import { useInfiniteMachines } from '@/hooks/use-infinite-machines';
+const { data, fetchNextPage, hasNextPage } = useInfiniteMachines(filters);
+```
+
+### Skeleton Loading
+```typescript
+import { MachineSkeleton } from '@/components/machine-skeleton';
+{isLoading && <MachineSkeleton count={6} />}
+```
+
+### PWA
+- Instalável como app
+- `public/manifest.json`
+- `public/icon-192.png` e `icon-512.png`
+
+---
+
+## 🔍 SEO
+
+### Metadata Dinâmica
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const machine = await machineService.getById(params.id);
+  return {
+    title: `${machine.name} - ${machine.price}`,
+    description: machine.description,
+  };
+}
+```
+
+### Sitemap Dinâmico
+**URL:** `/sitemap.xml` - Atualizado a cada 1 hora
+
+### Robots.txt
+**URL:** `/robots.txt`
+
+---
+
+## 📧 Emails
+
+### Templates Necessários
+
+1. **Recuperação de Senha** - Link expira em 1 hora
+2. **Exclusão de Conta** - Link expira em 24 horas
+3. **Vendedor Verificado** - Confirmação de aprovação
+
+### Configuração (SendGrid/AWS SES)
+```env
+SENDGRID_API_KEY=xxx
+# ou
+AWS_ACCESS_KEY_ID=xxx
+AWS_SECRET_ACCESS_KEY=xxx
+```
+
+---
+
+## 🚀 Deploy
+
+### Vercel (Recomendado)
+
+```bash
+npm install -g vercel
+vercel
+```
+
+### Variáveis de Ambiente
+```
+NEXT_PUBLIC_API_URL=https://api.mercadomaquina.com
+NEXT_PUBLIC_SITE_URL=https://mercadomaquina.com
+NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=APP-xxx
+MERCADOPAGO_ACCESS_TOKEN=APP-xxx
+```
+
+### Checklist Pré-Deploy
+
+- [ ] Variáveis de ambiente configuradas
+- [ ] Credenciais de produção (Mercado Pago)
+- [ ] HTTPS ativado
+- [ ] Webhook configurado
+- [ ] Google Search Console
+- [ ] Sitemap enviado
+- [ ] Performance > 90 (Lighthouse)
+
+---
+
+## 📊 Monitoramento
+
+### Google Analytics
+Já implementado em `app/layout.tsx`
+
+### Métricas
+- Usuários ativos
+- Páginas mais visitadas
+- Taxa de conversão
+- Core Web Vitals
+
+---
+
+## 🐛 Troubleshooting
+
+### CORS Error
+Configurar backend para aceitar origem do frontend.
+
+### Token não enviado
+```javascript
+const user = localStorage.getItem('currentUser');
+console.log(user);
+```
+
+### Erro 401
+- Verificar token válido
+- Verificar formato: `Bearer <token>`
+
+---
+
+## 📝 Roadmap
+
+### Fase 1 - MVP ✅
+- [x] Autenticação
+- [x] CRUD de máquinas
+- [x] Filtros e busca
+- [x] Dashboard
+- [x] Responsividade
+
+### Fase 2 - Melhorias ✅
+- [x] Favoritos
+- [x] Avaliações
+- [x] Verificação de vendedor
+- [x] Recuperação de senha
+- [x] SEO avançado
+- [x] Performance (infinite scroll, PWA)
+
+### Fase 3 - Pagamentos ✅
+- [x] Integração Mercado Pago
+- [x] Planos (Free/Lojista)
+- [x] Webhook
+- [ ] Assinaturas recorrentes
+
+### Fase 4 - Futuro
+- [ ] Chat entre usuários
+- [ ] Notificações push
+- [ ] Sistema de propostas
+- [ ] App mobile nativo
+
+---
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch: `git checkout -b feature/nova-feature`
+3. Commit: `git commit -m 'feat: adiciona nova feature'`
+4. Push: `git push origin feature/nova-feature`
+5. Abra um Pull Request
+
+---
+
+## 📞 Suporte
+
+- Email: suporte@mercadomaquina.com
+- WhatsApp: (51) 99999-9999
+
+---
+
+## 🎓 Recursos
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [TanStack Query](https://tanstack.com/query)
+- [Tailwind CSS](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com)
+- [Mercado Pago Docs](https://www.mercadopago.com.br/developers)

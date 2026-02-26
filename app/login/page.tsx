@@ -187,6 +187,23 @@ export default function LoginPage() {
               </div>
 
               <div>
+                <Label htmlFor="companyDocument">CPF/CNPJ (opcional)</Label>
+                <Input
+                  id="companyDocument"
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  {...registerForm.register('companyDocument')}
+                />
+                {registerForm.formState.errors.companyDocument && (
+                  <p className="text-sm text-destructive mt-1">
+                    {registerForm.formState.errors.companyDocument.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pode enviar com ou sem formatação
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
