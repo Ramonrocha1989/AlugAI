@@ -174,7 +174,13 @@ export default function LoginPage() {
                 <Input
                   id="phone"
                   placeholder="51999887766"
-                  {...registerForm.register('phone')}
+                  maxLength={11}
+                  {...registerForm.register('phone', {
+                    onChange: (e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      registerForm.setValue('phone', value);
+                    }
+                  })}
                 />
                 {registerForm.formState.errors.phone && (
                   <p className="text-sm text-destructive mt-1">

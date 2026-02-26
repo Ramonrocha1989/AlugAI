@@ -104,13 +104,7 @@ export default function NewMachinePage() {
 
   const handleSubmit = async () => {
     try {
-      // Adicionar 55 ao telefone antes de enviar
-      const payload = {
-        ...formData,
-        ownerPhone: formData.ownerPhone ? `55${formData.ownerPhone}` : undefined,
-      };
-      
-      await createMachine.mutateAsync(payload as CreateMachineData);
+      await createMachine.mutateAsync(formData as CreateMachineData);
       
       analytics.trackMachineCreate(
         formData.category || 'unknown',

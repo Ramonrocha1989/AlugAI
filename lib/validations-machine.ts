@@ -61,8 +61,7 @@ export const createMachineSchema = z.object({
   
   ownerPhone: z.string()
     .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)')
-    .optional()
-    .transform((val) => val ? `55${val}` : val),
+    .optional(),
 });
 
 // Schema para filtros de busca

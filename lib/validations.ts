@@ -14,7 +14,8 @@ export const registerSchema = z.object({
     .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
     .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
   companyName: z.string().min(3, 'Nome da empresa deve ter no mínimo 3 caracteres'),
-  phone: z.string().regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: 51999887766'),
+  phone: z.string()
+    .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)'),
   companyDocument: z.string()
     .optional()
     .refine((doc) => {
