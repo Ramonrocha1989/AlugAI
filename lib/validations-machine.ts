@@ -7,7 +7,7 @@ export const createMachineSchema = z.object({
   }),
   
   name: z.string().min(5, 'Nome deve ter no mínimo 5 caracteres'),
-  description: z.string().min(50, 'Descrição deve ter no mínimo 50 caracteres'),
+  description: z.string().min(100, 'Descrição deve ter no mínimo 100 caracteres'),
   
   category: z.enum([
     'TRACTORS',
@@ -30,7 +30,10 @@ export const createMachineSchema = z.object({
   
   power: z.number().min(1).optional(),
   engineHours: z.number().min(0).optional(),
-  serialNumber: z.string().optional(),
+  serialNumber: z.string()
+    .min(6, 'Número de série deve ter no mínimo 6 caracteres')
+    .max(25, 'Número de série deve ter no máximo 25 caracteres')
+    .regex(/^[A-Z0-9-]+$/i, 'Apenas letras, números e hífens são permitidos'),
   
   price: z.number().min(1, 'Preço deve ser maior que zero'),
   
@@ -56,7 +59,10 @@ export const createMachineSchema = z.object({
     'COMPLETE_DOCS',
   ])).default([]),
   
-  ownerPhone: z.string().regex(/^55\d{10,11}$/, 'Telefone inválido (formato: 5551999887766)').optional(),
+  ownerPhone: z.string()
+    .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)')
+    .optional()
+    .transform((val) => val ? `55${val}` : val),
 });
 
 // Schema para filtros de busca

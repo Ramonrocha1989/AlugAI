@@ -104,7 +104,13 @@ export default function NewMachinePage() {
 
   const handleSubmit = async () => {
     try {
-      await createMachine.mutateAsync(formData as CreateMachineData);
+      // Adicionar 55 ao telefone antes de enviar
+      const payload = {
+        ...formData,
+        ownerPhone: formData.ownerPhone ? `55${formData.ownerPhone}` : undefined,
+      };
+      
+      await createMachine.mutateAsync(payload as CreateMachineData);
       
       analytics.trackMachineCreate(
         formData.category || 'unknown',
@@ -135,7 +141,7 @@ export default function NewMachinePage() {
       case 2: return formData.manufacturer && formData.model && formData.yearModel && formData.serialNumber; // Chassi obrigatório
       case 3: return formData.images && formData.images.length > 0;
       case 4: return formData.price && formData.state && formData.city;
-      case 5: return formData.name && formData.description && formData.description.length >= 50;
+      case 5: return formData.name && formData.description && formData.description.length >= 100;
       case 6: return true;
       default: return false;
     }
@@ -472,7 +478,7 @@ export default function NewMachinePage() {
               </div>
 
               <div>
-                <Label>Descrição Completa (mínimo 50 caracteres)</Label>
+                <Label>Descrição Completa (mínimo 100 caracteres)</Label>
                 <Textarea
                   value={formData.description || ''}
                   onChange={(e) => updateFormData({ description: e.target.value })}
@@ -481,7 +487,7 @@ export default function NewMachinePage() {
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formData.description?.length || 0} caracteres
+                  {formData.description?.length || 0} / 100 caracteres
                 </p>
               </div>
 
@@ -515,12 +521,16 @@ export default function NewMachinePage() {
                 </div>
                 <Input
                   value={formData.ownerPhone || ''}
-                  onChange={(e) => updateFormData({ ownerPhone: e.target.value })}
-                  placeholder="5554999887766"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    updateFormData({ ownerPhone: value });
+                  }}
+                  placeholder="51999887766"
+                  maxLength={11}
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Formato: 55 + DDD + número (ex: 5554999887766)
+                  Formato: DDD + número (ex: 51999887766)
                 </p>
               </div>
             </div>
