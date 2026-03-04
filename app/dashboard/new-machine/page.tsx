@@ -5,8 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useCreateMachine } from '@/hooks/use-machines';
 import { authService, machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
+import { useRealTimeValidation } from '@/hooks/use-validation';
+import { ValidationSummary } from '@/components/validation-summary';
+import { showBackendErrors } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { ValidatedInput } from '@/components/ui/validated-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -22,6 +26,7 @@ export default function NewMachinePage() {
   const router = useRouter();
   const { showToast } = useToast();
   const createMachine = useCreateMachine();
+  const { errors: validationErrors, validateField, setErrors } = useRealTimeValidation();
   const [step, setStep] = useState(1);
   const [imageUrl, setImageUrl] = useState('');
   const [receiveWhatsApp, setReceiveWhatsApp] = useState(true);
@@ -123,6 +128,10 @@ export default function NewMachinePage() {
         const message = error.response?.data?.message || 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.';
         setLimitError(message);
         setShowUpgradeModal(true);
+      } else if (error.response?.status === 400 && error.response?.data?.errors) {
+        // Tratar erros de validação do backend
+        const backendErrors = showBackendErrors(error.response.data.errors, showToast);
+        setErrors(backendErrors);
       } else {
         showToast('Erro ao cadastrar máquina', 'error');
       }
@@ -194,6 +203,16 @@ export default function NewMachinePage() {
           />
         </div>
       </div>
+
+      <ValidationSummary 
+        errors={validationErrors}
+        onFieldClick={(field) => {
+          // Scroll para o campo com erro
+          const element = document.getElementById(field);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element?.focus();
+        }}
+      />
 
       <Card>
         <CardHeader>
@@ -272,11 +291,23 @@ export default function NewMachinePage() {
                 <div>
                   <Label>Modelo</Label>
                   <Input
+                    id="model"
                     value={formData.model || ''}
-                    onChange={(e) => updateFormData({ model: e.target.value })}
+                    onChange={(e) => {
+                      updateFormData({ model: e.target.value });
+                      if (e.target.value.length >= 2) {
+                        validateField('model', e.target.value);
+                      }
+                    }}
                     placeholder="Ex: 6125J"
-                    className="mt-2"
+                    className={`mt-2 ${validationErrors.model ? 'border-destructive' : ''}`}
                   />
+                  {validationErrors.model && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">{validationErrors.model}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -284,34 +315,92 @@ export default function NewMachinePage() {
                 <div>
                   <Label>Ano do Modelo</Label>
                   <Input
+                    id="yearModel"
                     type="number"
                     value={formData.yearModel || ''}
-                    onChange={(e) => updateFormData({ yearModel: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      const year = Number(value);
+                      updateFormData({ yearModel: year });
+                      if (value) {
+                        validateField('yearModel', value);
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="2020"
-                    className="mt-2"
+                    className={`mt-2 ${validationErrors.yearModel ? 'border-destructive' : ''}`}
                   />
+                  {validationErrors.yearModel && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">{validationErrors.yearModel}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <Label>⭐ Horas de Motor</Label>
                   <Input
+                    id="engineHours"
                     type="number"
                     value={formData.engineHours || ''}
-                    onChange={(e) => updateFormData({ engineHours: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      const hours = Number(value);
+                      updateFormData({ engineHours: hours });
+                      if (value) {
+                        validateField('engineHours', value);
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="3200"
-                    className="mt-2"
+                    className={`mt-2 ${validationErrors.engineHours ? 'border-destructive' : ''}`}
                   />
+                  {validationErrors.engineHours && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">{validationErrors.engineHours}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <Label>Potência (cv)</Label>
                   <Input
+                    id="power"
                     type="number"
+                    step="0.1"
                     value={formData.power || ''}
-                    onChange={(e) => updateFormData({ power: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                      const power = parseFloat(value);
+                      updateFormData({ power: isNaN(power) ? undefined : power });
+                      if (value) {
+                        validateField('power', value);
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9.,]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="125"
-                    className="mt-2"
+                    className={`mt-2 ${validationErrors.power ? 'border-destructive' : ''}`}
                   />
+                  {validationErrors.power && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">{validationErrors.power}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -328,12 +417,22 @@ export default function NewMachinePage() {
                   </div>
                 </div>
                 <Input
+                  id="serialNumber"
                   value={formData.serialNumber || ''}
-                  onChange={(e) => updateFormData({ serialNumber: e.target.value })}
+                  onChange={(e) => {
+                    updateFormData({ serialNumber: e.target.value });
+                    validateField('serialNumber', e.target.value);
+                  }}
                   placeholder="Ex: JD6125J2018BR001234"
-                  className="mt-2"
+                  className={`mt-2 ${validationErrors.serialNumber ? 'border-destructive' : ''}`}
                   required
                 />
+                {validationErrors.serialNumber && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">{validationErrors.serialNumber}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -371,12 +470,31 @@ export default function NewMachinePage() {
               <div>
                 <Label>Preço (R$)</Label>
                 <Input
+                  id="price"
                   type="number"
                   value={formData.price || ''}
-                  onChange={(e) => updateFormData({ price: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    const price = Number(value);
+                    updateFormData({ price });
+                    if (value) {
+                      validateField('price', value);
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="285000"
-                  className="mt-2"
+                  className={`mt-2 ${validationErrors.price ? 'border-destructive' : ''}`}
                 />
+                {validationErrors.price && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">{validationErrors.price}</p>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -474,15 +592,31 @@ export default function NewMachinePage() {
               <div>
                 <Label>Descrição Completa (mínimo 100 caracteres)</Label>
                 <Textarea
+                  id="description"
                   value={formData.description || ''}
-                  onChange={(e) => updateFormData({ description: e.target.value })}
+                  onChange={(e) => {
+                    updateFormData({ description: e.target.value });
+                    validateField('description', e.target.value);
+                  }}
                   placeholder="Descreva detalhes sobre revisões, se é único dono, cultura trabalhada..."
                   rows={6}
-                  className="mt-2"
+                  className={`mt-2 ${validationErrors.description ? 'border-destructive' : ''}`}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formData.description?.length || 0} / 100 caracteres
-                </p>
+                <div className="flex justify-between items-center mt-1">
+                  <div>
+                    {validationErrors.description && (
+                      <div className="flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">{validationErrors.description}</p>
+                      </div>
+                    )}
+                  </div>
+                  <p className={`text-xs ${
+                    (formData.description?.length || 0) < 100 ? 'text-destructive' : 'text-muted-foreground'
+                  }`}>
+                    {formData.description?.length || 0} / 100 caracteres
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -514,15 +648,25 @@ export default function NewMachinePage() {
                   </div>
                 </div>
                 <Input
+                  id="phone"
                   value={formData.ownerPhone || ''}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '');
                     updateFormData({ ownerPhone: value });
+                    if (value) {
+                      validateField('phone', value);
+                    }
                   }}
                   placeholder="51999887766"
                   maxLength={11}
-                  className="mt-2"
+                  className={`mt-2 ${validationErrors.phone ? 'border-destructive' : ''}`}
                 />
+                {validationErrors.phone && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">{validationErrors.phone}</p>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Formato: DDD + número (ex: 51999887766)
                 </p>

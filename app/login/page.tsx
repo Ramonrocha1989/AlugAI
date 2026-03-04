@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -25,10 +25,14 @@ export default function LoginPage() {
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
   });
 
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur', 
+    reValidateMode: 'onChange',
   });
 
   const onLogin = async (data: LoginFormData) => {
@@ -107,11 +111,15 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   {...loginForm.register('email')}
+                  className={loginForm.formState.errors.email ? 'border-destructive' : ''}
                 />
                 {loginForm.formState.errors.email && (
-                  <p className="text-sm text-destructive mt-1">
-                    {loginForm.formState.errors.email.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {loginForm.formState.errors.email.message}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -120,11 +128,15 @@ export default function LoginPage() {
                 <PasswordInput
                   id="password"
                   {...loginForm.register('password')}
+                  className={loginForm.formState.errors.password ? 'border-destructive' : ''}
                 />
                 {loginForm.formState.errors.password && (
-                  <p className="text-sm text-destructive mt-1">
-                    {loginForm.formState.errors.password.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {loginForm.formState.errors.password.message}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -161,11 +173,15 @@ export default function LoginPage() {
                 <Input
                   id="companyName"
                   {...registerForm.register('companyName')}
+                  className={registerForm.formState.errors.companyName ? 'border-destructive' : ''}
                 />
                 {registerForm.formState.errors.companyName && (
-                  <p className="text-sm text-destructive mt-1">
-                    {registerForm.formState.errors.companyName.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.companyName.message}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -179,13 +195,18 @@ export default function LoginPage() {
                     onChange: (e) => {
                       const value = e.target.value.replace(/\D/g, '');
                       registerForm.setValue('phone', value);
+                      registerForm.trigger('phone');
                     }
                   })}
+                  className={registerForm.formState.errors.phone ? 'border-destructive' : ''}
                 />
                 {registerForm.formState.errors.phone && (
-                  <p className="text-sm text-destructive mt-1">
-                    {registerForm.formState.errors.phone.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.phone.message}
+                    </p>
+                  </div>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Formato: DDD + número (ex: 51999887766)
@@ -197,12 +218,18 @@ export default function LoginPage() {
                 <Input
                   id="companyDocument"
                   placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  {...registerForm.register('companyDocument')}
+                  {...registerForm.register('companyDocument', {
+                    onChange: () => registerForm.trigger('companyDocument')
+                  })}
+                  className={registerForm.formState.errors.companyDocument ? 'border-destructive' : ''}
                 />
                 {registerForm.formState.errors.companyDocument && (
-                  <p className="text-sm text-destructive mt-1">
-                    {registerForm.formState.errors.companyDocument.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.companyDocument.message}
+                    </p>
+                  </div>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Pode enviar com ou sem formatação
@@ -215,11 +242,15 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   {...registerForm.register('email')}
+                  className={registerForm.formState.errors.email ? 'border-destructive' : ''}
                 />
                 {registerForm.formState.errors.email && (
-                  <p className="text-sm text-destructive mt-1">
-                    {registerForm.formState.errors.email.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.email.message}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -228,12 +259,19 @@ export default function LoginPage() {
                 <PasswordInput
                   id="password"
                   {...registerForm.register('password')}
+                  className={registerForm.formState.errors.password ? 'border-destructive' : ''}
                 />
                 {registerForm.formState.errors.password && (
-                  <p className="text-sm text-destructive mt-1">
-                    {registerForm.formState.errors.password.message}
-                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.password.message}
+                    </p>
+                  </div>
                 )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Mínimo 8 caracteres, com maiúscula, minúscula e número
+                </p>
               </div>
 
               <Button
