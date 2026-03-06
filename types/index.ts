@@ -25,6 +25,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  userType: 'INDIVIDUAL' | 'COMPANY';
   role: string;
   plan: string;
   planExpiresAt?: string | null;
@@ -68,9 +69,17 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
+  userType: 'INDIVIDUAL' | 'COMPANY';
   email: string;
   password: string;
-  companyName: string;
+  phone: string;
+  // Pessoa Física
+  fullName?: string;
+  cpf?: string;
+  // Empresa
+  companyName?: string;
+  cnpj?: string;
+  responsibleName?: string;
 }
 
 export interface CreateEquipmentData {

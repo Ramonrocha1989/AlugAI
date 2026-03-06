@@ -290,8 +290,9 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: Date.now().toString(),
-        name: data.companyName,
+        name: data.userType === 'INDIVIDUAL' ? data.fullName! : data.companyName!,
         email: data.email,
+        userType: data.userType,
         role: 'USER',
         plan: 'FREE',
         maxAds: 3,
@@ -301,7 +302,7 @@ export const authService = {
         emailVerified: false,
         company: {
           id: Date.now().toString(),
-          name: data.companyName,
+          name: data.userType === 'COMPANY' ? data.companyName! : data.fullName!,
         },
         usage: {
           activeAds: 0,
@@ -313,14 +314,36 @@ export const authService = {
       return user;
     }
     
+    // Criar payload específico para cada tipo de usuário
+    let payload: any = {
+      userType: data.userType,
+      email: data.email,
+      password: data.password,
+      phone: data.phone,
+    };
+    
+    if (data.userType === 'INDIVIDUAL') {
+      // Pessoa Física - apenas campos específicos
+      payload.fullName = data.fullName;
+      if (data.cpf) payload.cpf = data.cpf;
+    } else {
+      // Empresa - apenas campos específicos
+      payload.companyName = data.companyName;
+      payload.responsibleName = data.responsibleName;
+      if (data.cnpj) payload.cnpj = data.cnpj;
+    }
+    
     const response = await apiRequest('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     
-    // Salvar token e usuário
-    if (response.token) {
-      localStorage.setItem('token', response.token);
+    // Salvar tokens corretos
+    if (response.accessToken) {
+      localStorage.setItem('accessToken', response.accessToken);
+    }
+    if (response.refreshToken) {
+      localStorage.setItem('refreshToken', response.refreshToken);
     }
     localStorage.setItem('currentUser', JSON.stringify(response.user));
     

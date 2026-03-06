@@ -12,11 +12,12 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, User, Building } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [userType, setUserType] = useState<'INDIVIDUAL' | 'COMPANY' | null>(null);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
@@ -166,24 +167,188 @@ export default function LoginPage() {
                 Não tem conta? Cadastre-se
               </Button>
             </form>
+          ) : !userType ? (
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-medium mb-2">Como você quer se cadastrar?</h3>
+                <p className="text-sm text-muted-foreground">Escolha o tipo de conta</p>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-primary/5"
+                  onClick={() => {
+                    setUserType('INDIVIDUAL');
+                    registerForm.setValue('userType', 'INDIVIDUAL');
+                  }}
+                >
+                  <User className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Pessoa Física</div>
+                    <div className="text-xs text-muted-foreground">Para uso pessoal</div>
+                  </div>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-primary/5"
+                  onClick={() => {
+                    setUserType('COMPANY');
+                    registerForm.setValue('userType', 'COMPANY');
+                  }}
+                >
+                  <Building className="h-6 w-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Empresa</div>
+                    <div className="text-xs text-muted-foreground">Para negócios</div>
+                  </div>
+                </Button>
+              </div>
+              
+              <Button
+                type="button"
+                variant="link"
+                className="w-full"
+                onClick={() => setIsLogin(true)}
+              >
+                Já tem conta? Faça login
+              </Button>
+            </div>
           ) : (
             <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-              <div>
-                <Label htmlFor="companyName">Nome da Empresa</Label>
-                <Input
-                  id="companyName"
-                  {...registerForm.register('companyName')}
-                  className={registerForm.formState.errors.companyName ? 'border-destructive' : ''}
-                />
-                {registerForm.formState.errors.companyName && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                    <p className="text-sm text-destructive">
-                      {registerForm.formState.errors.companyName.message}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  {userType === 'INDIVIDUAL' ? <User className="h-5 w-5" /> : <Building className="h-5 w-5" />}
+                  <span className="font-medium">
+                    {userType === 'INDIVIDUAL' ? 'Pessoa Física' : 'Empresa'}
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setUserType(null);
+                    registerForm.reset();
+                  }}
+                >
+                  Alterar
+                </Button>
+              </div>
+
+              {userType === 'INDIVIDUAL' ? (
+                <>
+                  <div>
+                    <Label htmlFor="fullName">Nome Completo</Label>
+                    <Input
+                      id="fullName"
+                      {...registerForm.register('fullName')}
+                      className={registerForm.formState.errors.fullName ? 'border-destructive' : ''}
+                    />
+                    {registerForm.formState.errors.fullName && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">
+                          {registerForm.formState.errors.fullName.message}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cpf">CPF (opcional)</Label>
+                    <Input
+                      id="cpf"
+                      placeholder="12345678901"
+                      maxLength={11}
+                      {...registerForm.register('cpf', {
+                        onChange: (e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          registerForm.setValue('cpf', value);
+                          registerForm.trigger('cpf');
+                        }
+                      })}
+                      className={registerForm.formState.errors.cpf ? 'border-destructive' : ''}
+                    />
+                    {registerForm.formState.errors.cpf && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">
+                          {registerForm.formState.errors.cpf.message}
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Apenas números (ex: 12345678901)
                     </p>
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label htmlFor="companyName">Nome da Empresa</Label>
+                    <Input
+                      id="companyName"
+                      {...registerForm.register('companyName')}
+                      className={registerForm.formState.errors.companyName ? 'border-destructive' : ''}
+                    />
+                    {registerForm.formState.errors.companyName && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">
+                          {registerForm.formState.errors.companyName.message}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cnpj">CNPJ (opcional)</Label>
+                    <Input
+                      id="cnpj"
+                      placeholder="12345678000199"
+                      maxLength={14}
+                      {...registerForm.register('cnpj', {
+                        onChange: (e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          registerForm.setValue('cnpj', value);
+                          registerForm.trigger('cnpj');
+                        }
+                      })}
+                      className={registerForm.formState.errors.cnpj ? 'border-destructive' : ''}
+                    />
+                    {registerForm.formState.errors.cnpj && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">
+                          {registerForm.formState.errors.cnpj.message}
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Apenas números (ex: 12345678000199)
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="responsibleName">Nome do Responsável</Label>
+                    <Input
+                      id="responsibleName"
+                      {...registerForm.register('responsibleName')}
+                      className={registerForm.formState.errors.responsibleName ? 'border-destructive' : ''}
+                    />
+                    {registerForm.formState.errors.responsibleName && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                        <p className="text-sm text-destructive">
+                          {registerForm.formState.errors.responsibleName.message}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div>
                 <Label htmlFor="phone">Telefone (WhatsApp)</Label>
@@ -210,29 +375,6 @@ export default function LoginPage() {
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Formato: DDD + número (ex: 51999887766)
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="companyDocument">CPF/CNPJ (opcional)</Label>
-                <Input
-                  id="companyDocument"
-                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  {...registerForm.register('companyDocument', {
-                    onChange: () => registerForm.trigger('companyDocument')
-                  })}
-                  className={registerForm.formState.errors.companyDocument ? 'border-destructive' : ''}
-                />
-                {registerForm.formState.errors.companyDocument && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                    <p className="text-sm text-destructive">
-                      {registerForm.formState.errors.companyDocument.message}
-                    </p>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  Pode enviar com ou sem formatação
                 </p>
               </div>
 
@@ -287,7 +429,10 @@ export default function LoginPage() {
                 type="button"
                 variant="link"
                 className="w-full"
-                onClick={() => setIsLogin(true)}
+                onClick={() => {
+                  setIsLogin(true);
+                  setUserType(null);
+                }}
               >
                 Já tem conta? Faça login
               </Button>

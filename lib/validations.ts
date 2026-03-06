@@ -6,26 +6,49 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
 
-export const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string()
-    .min(8, 'Senha deve ter no mínimo 8 caracteres')
-    .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
-    .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
-    .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
-  companyName: z.string().min(3, 'Nome da empresa deve ter no mínimo 3 caracteres'),
-  phone: z.string()
-    .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)'),
-  companyDocument: z.string()
-    .optional()
-    .refine((doc) => {
-      if (!doc) return true;
-      const clean = doc.replace(/\D/g, '');
-      if (clean.length === 11) return cpf.isValid(doc);
-      if (clean.length === 14) return cnpj.isValid(doc);
-      return false;
-    }, 'CPF ou CNPJ inválido'),
-});
+export const registerSchema = z.discriminatedUnion('userType', [
+  // Pessoa Física
+  z.object({
+    userType: z.literal('INDIVIDUAL'),
+    fullName: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+    cpf: z.string()
+      .optional()
+      .refine((doc) => {
+        if (!doc) return true;
+        const clean = doc.replace(/\D/g, '');
+        return clean.length === 11 && cpf.isValid(doc);
+      }, 'CPF inválido'),
+    phone: z.string()
+      .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)'),
+    email: z.string().email('Email inválido'),
+    password: z.string()
+      .min(8, 'Senha deve ter no mínimo 8 caracteres')
+      .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
+      .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
+      .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
+  }),
+  // Empresa
+  z.object({
+    userType: z.literal('COMPANY'),
+    companyName: z.string().min(3, 'Nome da empresa deve ter no mínimo 3 caracteres'),
+    cnpj: z.string()
+      .optional()
+      .refine((doc) => {
+        if (!doc) return true;
+        const clean = doc.replace(/\D/g, '');
+        return clean.length === 14 && cnpj.isValid(doc);
+      }, 'CNPJ inválido'),
+    responsibleName: z.string().min(3, 'Nome do responsável é obrigatório'),
+    phone: z.string()
+      .regex(/^\d{10,11}$/, 'Telefone inválido. Use formato: DDD + número (ex: 51999887766)'),
+    email: z.string().email('Email inválido'),
+    password: z.string()
+      .min(8, 'Senha deve ter no mínimo 8 caracteres')
+      .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
+      .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
+      .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
+  }),
+]);
 
 export const equipmentSchema = z.object({
   businessType: z.enum(['SALE', 'RENTAL', 'EXCHANGE', 'SERVICE'], { required_error: 'Tipo de negócio é obrigatório' }),
