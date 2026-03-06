@@ -19,7 +19,7 @@ import { ImageUpload } from '@/components/image-upload';
 import { analytics } from '@/lib/analytics';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
 import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
-import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
+import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS, CATEGORY_ICONS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
 
 export default function NewMachinePage() {
@@ -261,7 +261,11 @@ export default function NewMachinePage() {
                           : 'border-border hover:border-primary/50'
                       }`}
                     >
-                      <div className="text-3xl mb-2">🚜</div>
+                      <img 
+                        src={CATEGORY_ICONS[key as keyof typeof CATEGORY_ICONS]} 
+                        alt={label}
+                        className="w-12 h-12 mx-auto mb-2 object-contain"
+                      />
                       <div className="font-semibold text-sm">{label}</div>
                     </button>
                   ))}

@@ -43,6 +43,18 @@ export const CATEGORIES = {
   CONSTRUCTION: 'Construção (Linha Amarela)',
 } as const;
 
+// Mapeamento de ícones para categorias
+export const CATEGORY_ICONS = {
+  TRACTORS: '/icons/machines/trator3d.png',
+  HARVESTERS: '/icons/machines/colheitadeira3d.png',
+  PLANTING: '/icons/machines/plantadeira3d.png',
+  SPRAYING: '/icons/machines/pulverizador3d.png',
+  HAYMAKING: '/icons/machines/haymaker3d.png',
+  IMPLEMENTS: '/icons/machines/implemento3d.png',
+  LIVESTOCK: '/icons/machines/vaca3d.png',
+  CONSTRUCTION: '/icons/machines/escavadeira3d.png',
+} as const;
+
 // Tipos de negócio com labels (UPPERCASE)
 export const BUSINESS_TYPES = {
   SALE: 'Venda',
