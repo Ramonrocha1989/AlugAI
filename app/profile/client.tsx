@@ -96,7 +96,7 @@ export default function ProfileClient() {
           </div>
           <div>
             <Label>Empresa</Label>
-            <Input value={profile.company.name} disabled />
+            <Input value={profile.company?.name || ''} disabled />
           </div>
           <div>
             <Label>Status</Label>

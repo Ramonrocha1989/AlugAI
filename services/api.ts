@@ -43,6 +43,7 @@ const mockUsers: User[] = [
     id: '1', 
     name: 'Construtora Silva',
     email: 'empresa@exemplo.com', 
+    userType: 'COMPANY',
     role: 'USER',
     plan: 'FREE',
     maxAds: 3,
@@ -198,6 +199,7 @@ export const authService = {
         id: '1',
         name: 'Construtora Silva',
         email: credentials.email,
+        userType: 'COMPANY',
         role: 'USER',
         plan: 'FREE',
         maxAds: 3,
@@ -231,8 +233,9 @@ export const authService = {
       await delay(500);
       const user: User = {
         id: Date.now().toString(),
-        name: data.companyName,
+        name: data.userType === 'COMPANY' ? (data as any).companyName : (data as any).fullName,
         email: data.email,
+        userType: data.userType,
         role: 'USER',
         plan: 'FREE',
         maxAds: 3,
@@ -240,10 +243,10 @@ export const authService = {
         maxFeaturedAds: 0,
         isVerifiedSeller: false,
         emailVerified: false,
-        company: {
+        company: data.userType === 'COMPANY' ? {
           id: Date.now().toString(),
-          name: data.companyName,
-        },
+          name: (data as any).companyName,
+        } : undefined,
         usage: {
           activeAds: 0,
           premiumAds: 0,

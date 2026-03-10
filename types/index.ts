@@ -34,7 +34,7 @@ export interface User {
   maxFeaturedAds: number;
   isVerifiedSeller: boolean;
   emailVerified: boolean;
-  company: {
+  company?: {
     id: string;
     name: string;
   };

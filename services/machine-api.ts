@@ -247,6 +247,7 @@ export const authService = {
         id: '1',
         name: 'Agropecuária Exemplo',
         email: credentials.email,
+        userType: 'COMPANY',
         role: 'USER',
         plan: 'FREE',
         maxAds: 3,
