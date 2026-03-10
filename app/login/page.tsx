@@ -269,13 +269,13 @@ export default function LoginPage() {
                           registerForm.trigger('cpf');
                         }
                       })}
-                      className={registerForm.formState.errors.cpf ? 'border-destructive' : ''}
+                      className={(registerForm.formState.errors as any).cpf ? 'border-destructive' : ''}
                     />
-                    {registerForm.formState.errors.cpf && (
+                    {(registerForm.formState.errors as any).cpf && (
                       <div className="flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4 text-destructive" />
                         <p className="text-sm text-destructive">
-                          {registerForm.formState.errors.cpf.message}
+                          {(registerForm.formState.errors as any).cpf.message}
                         </p>
                       </div>
                     )}
@@ -291,13 +291,13 @@ export default function LoginPage() {
                     <Input
                       id="companyName"
                       {...registerForm.register('companyName')}
-                      className={registerForm.formState.errors.companyName ? 'border-destructive' : ''}
+                      className={(registerForm.formState.errors as any).companyName ? 'border-destructive' : ''}
                     />
-                    {registerForm.formState.errors.companyName && (
+                    {(registerForm.formState.errors as any).companyName && (
                       <div className="flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4 text-destructive" />
                         <p className="text-sm text-destructive">
-                          {registerForm.formState.errors.companyName.message}
+                          {(registerForm.formState.errors as any).companyName.message}
                         </p>
                       </div>
                     )}
@@ -316,13 +316,13 @@ export default function LoginPage() {
                           registerForm.trigger('cnpj');
                         }
                       })}
-                      className={registerForm.formState.errors.cnpj ? 'border-destructive' : ''}
+                      className={(registerForm.formState.errors as any).cnpj ? 'border-destructive' : ''}
                     />
-                    {registerForm.formState.errors.cnpj && (
+                    {(registerForm.formState.errors as any).cnpj && (
                       <div className="flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4 text-destructive" />
                         <p className="text-sm text-destructive">
-                          {registerForm.formState.errors.cnpj.message}
+                          {(registerForm.formState.errors as any).cnpj.message}
                         </p>
                       </div>
                     )}
@@ -336,13 +336,13 @@ export default function LoginPage() {
                     <Input
                       id="responsibleName"
                       {...registerForm.register('responsibleName')}
-                      className={registerForm.formState.errors.responsibleName ? 'border-destructive' : ''}
+                      className={(registerForm.formState.errors as any).responsibleName ? 'border-destructive' : ''}
                     />
-                    {registerForm.formState.errors.responsibleName && (
+                    {(registerForm.formState.errors as any).responsibleName && (
                       <div className="flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4 text-destructive" />
                         <p className="text-sm text-destructive">
-                          {registerForm.formState.errors.responsibleName.message}
+                          {(registerForm.formState.errors as any).responsibleName.message}
                         </p>
                       </div>
                     )}
