@@ -70,7 +70,8 @@ export default function LoginPage() {
       if (error.response?.status === 429) {
         showToast('⚠️ Muitas tentativas de cadastro! Por segurança, bloqueamos temporariamente. Tente novamente em 1 hora.', 'warning');
       } else if (error.response?.status === 409) {
-        showToast('❌ Este email já está cadastrado. Faça login ou use outro email.', 'error');
+        const errorMessage = error.data?.message || error.response?.data?.message || 'Dados já cadastrados';
+        showToast(`❌ ${errorMessage}`, 'error');
       } else {
         showToast('Erro ao fazer cadastro. Tente novamente.', 'error');
       }
