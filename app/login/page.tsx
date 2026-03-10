@@ -244,13 +244,13 @@ export default function LoginPage() {
                     <Input
                       id="fullName"
                       {...registerForm.register('fullName')}
-                      className={registerForm.formState.errors.fullName ? 'border-destructive' : ''}
+                      className={(registerForm.formState.errors as any).fullName ? 'border-destructive' : ''}
                     />
-                    {registerForm.formState.errors.fullName && (
+                    {(registerForm.formState.errors as any).fullName && (
                       <div className="flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4 text-destructive" />
                         <p className="text-sm text-destructive">
-                          {registerForm.formState.errors.fullName.message}
+                          {(registerForm.formState.errors as any).fullName.message}
                         </p>
                       </div>
                     )}
