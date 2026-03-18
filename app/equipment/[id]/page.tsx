@@ -2,12 +2,13 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEquipment } from '@/hooks/use-api';
 import { equipmentService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Building2, Calendar, Loader2, ArrowLeft, Eye, MessageCircle, Star, Award } from 'lucide-react';
+import { MapPin, Building2, Calendar, Loader2, ArrowLeft, Eye, MessageCircle, Star, Award, User } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 
 export default function EquipmentDetailPage() {
@@ -50,6 +51,12 @@ export default function EquipmentDetailPage() {
       </div>
     );
   }
+
+  // Debug - ver dados da máquina
+  console.log('=== EQUIPMENT DATA ===');
+  console.log('Equipment:', equipment);
+  console.log('Owner ID:', equipment.ownerId);
+  console.log('Owner Name:', equipment.ownerName);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -145,6 +152,32 @@ export default function EquipmentDetailPage() {
               <Button onClick={handleRentalRequest} className="w-full" size="lg">
                 Contatar via WhatsApp
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="font-semibold mb-4 flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                Anunciante
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-medium">{equipment.ownerName}</p>
+                  <p className="text-sm text-muted-foreground">{equipment.city}, {equipment.state}</p>
+                </div>
+                <Link 
+                  href={`/company/${equipment.ownerId}`}
+                  className="inline-flex items-center text-sm text-primary hover:underline"
+                  onClick={() => {
+                    console.log('=== LINK CLICKED ===');
+                    console.log('Going to:', `/company/${equipment.ownerId}`);
+                    console.log('Owner ID:', equipment.ownerId);
+                  }}
+                >
+                  Ver todas as máquinas desta empresa →
+                </Link>
+              </div>
             </CardContent>
           </Card>
 

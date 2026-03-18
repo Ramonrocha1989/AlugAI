@@ -1,6 +1,6 @@
 {
-  "name": "Mercado Máquina",
-  "short_name": "Mercado Máquina",
+  "name": "BaitaBriq",
+  "short_name": "BaitaBriq",
   "description": "Marketplace de máquinas agrícolas - Compre, venda, alugue ou troque",
   "start_url": "/",
   "display": "standalone",

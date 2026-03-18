@@ -16,7 +16,7 @@ export function ShareButtons({ title, description, url, price }: ShareButtonsPro
   const [copied, setCopied] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const shareText = `${title}\n${price}\n\nVeja no Mercado Máquina:`;
+  const shareText = `${title}\n${price}\n\nVeja no BaitaBriq:`;
 
   const handleCopyLink = async () => {
     try {

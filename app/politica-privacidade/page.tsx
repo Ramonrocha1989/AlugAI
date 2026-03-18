@@ -50,7 +50,7 @@ export default function PoliticaPrivacidadePage() {
             <li><strong>Revogar consentimento:</strong> Cancelar permissões a qualquer momento</li>
           </ul>
           <p className="text-muted-foreground mt-4">
-            Para exercer seus direitos, entre em contato: <strong>privacidade@mercadomaquina.com.br</strong>
+            Para exercer seus direitos, entre em contato: <strong>privacidade@baitabriq.com.br</strong>
           </p>
         </section>
 
@@ -99,7 +99,7 @@ export default function PoliticaPrivacidadePage() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">10. Contato - Encarregado de Dados (DPO)</h2>
           <p className="text-muted-foreground">
-            Email: <strong>privacidade@mercadomaquina.com.br</strong><br/>
+            Email: <strong>privacidade@baitabriq.com.br</strong><br/>
             Resposta em até 15 dias úteis.
           </p>
         </section>

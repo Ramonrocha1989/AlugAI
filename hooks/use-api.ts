@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService, machineService } from '@/services/machine-api';
+import { companyService } from '@/services/company-api';
 import { LoginCredentials, RegisterData, CreateMachineData, MachineFilters } from '@/types';
 
 // Hook para listar máquinas
@@ -78,5 +79,23 @@ export const useResetPassword = () => {
   return useMutation({
     mutationFn: ({ token, password }: { token: string; password: string }) => 
       authService.resetPassword(token, password),
+  });
+};
+
+// Hook para buscar dados da empresa
+export const useCompany = (id: string) => {
+  return useQuery({
+    queryKey: ['company', id],
+    queryFn: () => companyService.getCompany(id),
+    enabled: !!id,
+  });
+};
+
+// Hook para buscar máquinas da empresa
+export const useCompanyMachines = (companyId: string) => {
+  return useQuery({
+    queryKey: ['company-machines', companyId],
+    queryFn: () => companyService.getCompanyMachines(companyId),
+    enabled: !!companyId,
   });
 };

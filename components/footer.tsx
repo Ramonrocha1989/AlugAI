@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold mb-4">Mercado Máquina</h3>
+            <h3 className="font-semibold mb-4">BaitaBriq</h3>
             <p className="text-sm text-muted-foreground">
               Marketplace de máquinas agrícolas e de construção no Sul do Brasil.
             </p>
@@ -36,7 +36,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="break-words">contato@mercadomaquina.com.br</li>
+              <li className="break-words">contato@baitabriq.com.br</li>
               <li>(51) 99999-9999</li>
             </ul>
           </div>
@@ -52,7 +52,7 @@ export function Footer() {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Mercado Máquina. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} BaitaBriq. Todos os direitos reservados.</p>
           <p className="mt-2">CNPJ: XX.XXX.XXX/XXXX-XX</p>
         </div>
       </div>

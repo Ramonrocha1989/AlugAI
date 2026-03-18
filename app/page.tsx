@@ -174,9 +174,12 @@ export default function HomePage() {
   return (
     <div className="container mx-auto px-4 py-4 md:py-8 max-w-[1920px]">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold mb-2">Mercado Máquina</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-2">
+          <span style={{ color: '#B81212' }}>baita</span>
+          <span style={{ color: '#11813F' }}>briq</span>
+        </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Compre, venda, alugue ou troque máquinas agrícolas e de construção
+          Compre, venda ou troca máquinas agrícolas e de construção
         </p>
       </div>
 

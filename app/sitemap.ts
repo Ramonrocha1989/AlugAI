@@ -4,7 +4,7 @@ import { machineService } from '@/services/machine-api';
 export const revalidate = 3600; // Revalidar a cada 1 hora
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mercadomaquina.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br';
 
   const staticPages: MetadataRoute.Sitemap = [
     {

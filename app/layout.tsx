@@ -12,8 +12,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Mercado Máquina - Compra, Venda e Troca de Máquinas Agrícolas no Sul",
-    template: "%s | Mercado Máquina"
+    default: "BaitaBriq - Compra, Venda e Troca de Máquinas Agrícolas no Sul",
+    template: "%s | BaitaBriq"
   },
   description: "Marketplace de máquinas agrícolas e de construção no Sul do Brasil. Compre, venda, alugue ou troque tratores, colheitadeiras e implementos com segurança.",
   keywords: [
@@ -27,36 +27,36 @@ export const metadata: Metadata = {
     "máquinas SC",
     "máquinas PR",
   ],
-  authors: [{ name: 'Mercado Máquina' }],
-  creator: 'Mercado Máquina',
-  publisher: 'Mercado Máquina',
+  authors: [{ name: 'BaitaBriq' }],
+  creator: 'BaitaBriq',
+  publisher: 'BaitaBriq',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mercadomaquina.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br'),
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     url: '/',
-    siteName: 'Mercado Máquina',
-    title: 'Mercado Máquina - Compra, Venda e Troca de Máquinas Agrícolas',
+    siteName: 'BaitaBriq',
+    title: 'BaitaBriq - Compra, Venda e Troca de Máquinas Agrícolas',
     description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
     images: [
       {
-        url: '/logo.svg',
+        url: '/logo.jpeg',
         width: 1200,
         height: 630,
-        alt: 'Mercado Máquina',
+        alt: 'BaitaBriq',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mercado Máquina - Compra, Venda e Troca de Máquinas Agrícolas',
+    title: 'BaitaBriq - Compra, Venda e Troca de Máquinas Agrícolas',
     description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
-    images: ['/logo.svg'],
+    images: ['/logo.jpeg'],
   },
   robots: {
     index: true,
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Mercado Máquina',
+    title: 'BaitaBriq',
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,

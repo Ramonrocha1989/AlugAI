@@ -407,4 +407,35 @@ export const authService = {
     
     await api.post('/auth/verify-email', { token });
   },
+
+  getCompany: async (id: string): Promise<any> => {
+    if (USE_MOCK) {
+      await delay(300);
+      // Mock de dados da empresa
+      return {
+        id,
+        company_name: 'Construtora ABC',
+        description: 'Empresa especializada em locação de equipamentos de construção há mais de 10 anos.',
+        phone: '(51) 99999-9999',
+        location: 'Porto Alegre, RS',
+        rating: 4.8,
+        total_reviews: 25,
+        created_at: '2020-01-01T00:00:00Z',
+      };
+    }
+    
+    const { data } = await api.get(`/companies/${id}`);
+    return data;
+  },
+
+  getCompanyMachines: async (companyId: string): Promise<Machine[]> => {
+    if (USE_MOCK) {
+      await delay(300);
+      // Filtrar máquinas do mock por ownerId
+      return mockMachines.filter(machine => machine.ownerId === companyId);
+    }
+    
+    const { data } = await api.get(`/companies/${companyId}/machines`);
+    return data;
+  },
 };

@@ -5,7 +5,7 @@ export default function ComoFuncionaPage() {
       
       <div className="prose prose-slate max-w-none space-y-8">
         <section>
-          <h2 className="text-2xl font-semibold mb-4">🚜 O que é o Mercado Máquina?</h2>
+          <h2 className="text-2xl font-semibold mb-4">🚜 O que é o BaitaBriq?</h2>
           <p className="text-muted-foreground">
             Somos um marketplace especializado em máquinas agrícolas e de construção no Sul do Brasil. 
             Conectamos vendedores e compradores de forma rápida e segura.
@@ -127,7 +127,7 @@ export default function ComoFuncionaPage() {
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-1">O Mercado Máquina vende as máquinas?</h3>
+              <h3 className="font-semibold mb-1">O BaitaBriq vende as máquinas?</h3>
               <p className="text-sm text-muted-foreground">
                 Não. Somos apenas um intermediador. A negociação é direta entre comprador e vendedor.
               </p>
@@ -160,7 +160,7 @@ export default function ComoFuncionaPage() {
         <section className="bg-primary/10 p-6 rounded-lg">
           <h2 className="text-2xl font-semibold mb-4">📞 Precisa de Ajuda?</h2>
           <p className="text-muted-foreground mb-2">
-            Email: <strong>contato@mercadomaquina.com.br</strong>
+            Email: <strong>contato@baitabriq.com.br</strong>
           </p>
           <p className="text-muted-foreground">
             WhatsApp: <strong>(51) 99999-9999</strong>

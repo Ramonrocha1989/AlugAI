@@ -91,7 +91,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     
     const price = formatPrice(machine.price, machine.businessType);
     const message = encodeURIComponent(
-      `Olá! Vi seu anúncio no *Mercado Máquina* e tenho interesse:\n\n` +
+      `Olá! Vi seu anúncio no *BaitaBriq* e tenho interesse:\n\n` +
       `*${machine.name}*\n` +
       `Ano: ${machine.yearModel}\n` +
       `Preço: ${price}\n` +
@@ -293,7 +293,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <button 
-                    onClick={() => router.push(`/profile/${machine.ownerId}`)}
+                    onClick={() => router.push(`/company/${machine.ownerId}`)}
                     className="font-semibold text-lg hover:text-primary transition-colors"
                   >
                     {machine.ownerName}
@@ -304,11 +304,11 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               </div>
 
               <Button 
-                onClick={() => router.push(`/profile/${machine.ownerId}`)}
+                onClick={() => router.push(`/company/${machine.ownerId}`)}
                 variant="outline" 
                 className="w-full"
               >
-                Ver Perfil do Vendedor
+                Ver Perfil da Empresa
               </Button>
 
               <Button onClick={handleWhatsApp} variant="outline" className="w-full" size="lg">

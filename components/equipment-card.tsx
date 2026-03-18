@@ -1,16 +1,42 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Equipment } from '@/types';
+import { Machine } from '@/types/machine';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Award } from 'lucide-react';
 
 interface EquipmentCardProps {
-  equipment: Equipment;
+  equipment: Equipment | Machine;
 }
 
-export function EquipmentCard({ equipment }: EquipmentCardProps) {
+// Função para converter Machine para Equipment
+function machineToEquipment(machine: Machine): Equipment {
+  return {
+    id: machine.id,
+    name: machine.name,
+    description: machine.description,
+    dailyPrice: machine.price,
+    location: `${machine.city}, ${machine.state}`,
+    images: machine.images,
+    ownerId: machine.ownerId,
+    ownerName: machine.ownerName,
+    category: machine.category,
+    available: machine.available,
+    isPremium: machine.isPremium,
+    views: machine.views,
+    whatsappClicks: machine.whatsappClicks,
+    qualifiedLeads: machine.qualifiedLeads,
+    ownerPlan: machine.ownerPlan,
+  };
+}
+
+export function EquipmentCard({ equipment: rawEquipment }: EquipmentCardProps) {
+  // Converter Machine para Equipment se necessário
+  const equipment = 'businessType' in rawEquipment 
+    ? machineToEquipment(rawEquipment as Machine)
+    : rawEquipment as Equipment;
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative h-48 w-full">

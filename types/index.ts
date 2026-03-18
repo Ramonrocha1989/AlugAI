@@ -90,3 +90,16 @@ export interface CreateEquipmentData {
   category: string;
   images: string[];
 }
+
+// Tipos para perfil da empresa
+export interface Company {
+  id: string;
+  company_name: string | null;
+  description: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
+  rating: number;
+  total_reviews: number;
+  created_at: Date;
+}

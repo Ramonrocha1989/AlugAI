@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const priceDisplay = machine.businessType === 'RENTAL' ? `${price}/dia` : price;
     const title = `${machine.name} - ${machine.yearModel} | ${priceDisplay}`;
     const description = `${machine.description.slice(0, 155)}... | ${machine.city}, ${machine.state} | ${CATEGORIES[machine.category]}`;
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mercadomaquina.com'}/machine/${machine.id}`;
+    const url = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br'}/machine/${machine.id}`;
 
     return {
       title,
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title,
         description,
         url,
-        siteName: 'Mercado Máquina',
+        siteName: 'BaitaBriq',
         images: [
           {
             url: machine.images[0] || '/logo.svg',
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: 'Mercado Máquina',
+      title: 'BaitaBriq',
     };
   }
 }

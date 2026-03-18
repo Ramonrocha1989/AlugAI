@@ -5,9 +5,9 @@ export default function TermosDeUsoPage() {
       
       <div className="prose prose-slate max-w-none space-y-6">
         <section>
-          <h2 className="text-2xl font-semibold mb-4">1. Sobre o Mercado Máquina</h2>
+          <h2 className="text-2xl font-semibold mb-4">1. Sobre o BaitaBriq</h2>
           <p className="text-muted-foreground">
-            O Mercado Máquina é um marketplace que conecta compradores e vendedores de máquinas agrícolas e de construção. 
+            O BaitaBriq é um marketplace que conecta compradores e vendedores de máquinas agrícolas e de construção. 
             Atuamos como <strong>intermediador</strong>, facilitando o contato entre as partes.
           </p>
         </section>
@@ -34,7 +34,7 @@ export default function TermosDeUsoPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4">4. O que o Mercado Máquina NÃO faz</h2>
+          <h2 className="text-2xl font-semibold mb-4">4. O que o BaitaBriq NÃO faz</h2>
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
             <p className="font-semibold text-yellow-900 mb-2">⚠️ IMPORTANTE:</p>
             <ul className="list-disc pl-6 space-y-2 text-yellow-800">
@@ -83,7 +83,7 @@ export default function TermosDeUsoPage() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">8. Contato</h2>
           <p className="text-muted-foreground">
-            Dúvidas sobre estes termos: <strong>contato@mercadomaquina.com.br</strong>
+            Dúvidas sobre estes termos: <strong>contato@baitabriq.com.br</strong>
           </p>
         </section>
 
