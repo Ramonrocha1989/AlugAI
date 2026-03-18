@@ -75,36 +75,36 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
       {/* Header da Empresa */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="text-3xl">{company.company_name}</CardTitle>
+          <CardTitle className="text-3xl">{company?.company_name}</CardTitle>
         </CardHeader>
         <CardContent>
-          {company.description && (
+          {company?.description && (
             <p className="text-gray-600 mb-6">{company.description}</p>
           )}
           
           <div className="flex flex-wrap gap-6 text-sm">
-            {company.location && (
+            {company?.location && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-gray-500" />
                 <span>{company.location}</span>
               </div>
             )}
             
-            {company.phone && (
+            {company?.phone && (
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-gray-500" />
                 <span>{company.phone}</span>
               </div>
             )}
             
-            {company.rating && (
+            {company?.rating && (
               <div className="flex items-center gap-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-current" />
                 <span>{company.rating} ({company.total_reviews || 0} avaliações)</span>
               </div>
             )}
             
-            {company.created_at && (
+            {company?.created_at && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
                 <span>Desde {new Date(company.created_at).getFullYear()}</span>
@@ -112,7 +112,7 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
             )}
           </div>
           
-          {company.phone && (
+          {company?.phone && (
             <div className="mt-6">
               <Button onClick={handleWhatsApp}>
                 <MessageCircle className="h-4 w-4 mr-2" />
