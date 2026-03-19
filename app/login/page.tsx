@@ -47,17 +47,24 @@ export default function LoginPage() {
       // Usar window.location para garantir redirecionamento
       window.location.href = '/dashboard';
     } catch (error: any) {
-      // Não mostrar erro se for 403 (conta deletada - já tratado pelo apiRequest)
-      if (error.response?.status === 403 || error.message?.includes('marcada para exclusão')) {
-        return; // Toast amarelo já foi mostrado pelo lib/api.ts
-      }
+      // A mensagem do backend vem em error.message (interceptado pelo lib/api.ts)
+      const message = error.message || '';
       
-      if (error.response?.status === 429) {
+      if (message.includes('Email não verificado')) {
+        showToast(message, 'warning');
+      } else if (message.includes('HTTP 429') || message.includes('Too Many Requests') || message.toLowerCase().includes('throttler')) {
         showToast('⚠️ Muitas tentativas de login! Por segurança, bloqueamos temporariamente. Tente novamente em 15 minutos.', 'warning');
-      } else if (error.response?.status === 401) {
-        showToast('❌ Email ou senha incorretos.', 'error');
+      } else if (message.includes('marcada para exclusão')) {
+        // Já tratado pelo lib/api.ts, não fazer nada aqui
+        return;
+      } else if (message.includes('Invalid credentials') || message.includes('Unauthorized')) {
+        showToast('❌ Email ou senha incorretos. Verifique seus dados e tente novamente.', 'error');
       } else {
-        showToast('Erro ao fazer login. Tente novamente.', 'error');
+        // Outros erros - usar mensagem do backend se for amigável, senão usar genérica
+        const friendlyMessage = message.length > 5 && !message.includes('HTTP') && !message.includes('Error') 
+          ? message 
+          : 'Erro ao fazer login. Tente novamente.';
+        showToast(`❌ ${friendlyMessage}`, 'error');
       }
     }
   };
@@ -67,13 +74,12 @@ export default function LoginPage() {
       await register.mutateAsync(data);
       setShowVerificationMessage(true);
     } catch (error: any) {
-      if (error.response?.status === 429) {
+      const message = error.message || '';
+      
+      if (message.includes('HTTP 429') || message.includes('Too Many Requests') || message.toLowerCase().includes('throttler')) {
         showToast('⚠️ Muitas tentativas de cadastro! Por segurança, bloqueamos temporariamente. Tente novamente em 1 hora.', 'warning');
-      } else if (error.response?.status === 409) {
-        const errorMessage = error.data?.message || error.response?.data?.message || 'Dados já cadastrados';
-        showToast(`❌ ${errorMessage}`, 'error');
       } else {
-        showToast('Erro ao fazer cadastro. Tente novamente.', 'error');
+        showToast(`❌ ${message || 'Erro ao fazer cadastro. Tente novamente.'}`, 'error');
       }
     }
   };
