@@ -60,6 +60,8 @@ export interface Plan {
   name: string;
   price: number;
   maxAds: number;
+  maxPremiumAds: number;
+  maxFeaturedAds: number;
   features: string[];
 }
 
