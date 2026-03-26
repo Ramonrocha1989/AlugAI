@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { authService } from '@/services/api';
+import { authService } from '@/services/machine-api';
 
 function VerifyEmailContent() {
   const router = useRouter();

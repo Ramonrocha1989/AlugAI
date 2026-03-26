@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { authService } from '@/services/api';
+import { authService } from '@/services/machine-api';
 
 function ConfirmDeleteContent() {
   const router = useRouter();

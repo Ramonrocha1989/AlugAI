@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/types/machine';
-import { User, LoginCredentials, RegisterData } from '@/types';
+import { User, LoginCredentials, RegisterData, Plan, Equipment, CreateEquipmentData } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
+import { mockEquipments } from '@/lib/mock-data';
 import { apiRequest } from '@/lib/api';
 
 const api = axios.create({
@@ -33,13 +34,18 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('[AXIOS] Token adicionado ao header:', token.substring(0, 20) + '...');
+    } else {
+      console.log('[AXIOS] Nenhum token encontrado no localStorage');
     }
   }
+  console.log('[AXIOS] Fazendo requisição para:', config.url);
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
+    console.log('[AXIOS] Resposta recebida:', response.status, response.config.url);
     if (response.status >= 400) {
       const error: any = new Error(response.statusText);
       error.response = response;
@@ -48,7 +54,9 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.error('[AXIOS] Erro na requisição:', error.response?.status, error.response?.config?.url, error.message);
     if (error.response?.status === 401 && typeof window !== 'undefined') {
+      console.log('[AXIOS] Token expirado, removendo dados do localStorage');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
@@ -61,6 +69,11 @@ api.interceptors.response.use(
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Log para debug
+console.log('[CONFIG] USE_MOCK:', USE_MOCK);
+console.log('[CONFIG] NEXT_PUBLIC_USE_MOCK:', process.env.NEXT_PUBLIC_USE_MOCK);
+console.log('[CONFIG] API_URL:', process.env.NEXT_PUBLIC_API_URL);
 
 const getUserMachines = (userId: string): Machine[] => {
   if (typeof window === 'undefined') return [];
@@ -111,6 +124,146 @@ const applyFilters = (machines: Machine[], filters?: MachineFilters): Machine[] 
 
     return true;
   });
+};
+
+export const planService = {
+  getAll: async (): Promise<Plan[]> => {
+    if (USE_MOCK) {
+      await delay(300);
+      // Mock de planos
+      return [
+        {
+          id: 'free',
+          name: 'Gratuito',
+          price: 0,
+          maxAds: 3,
+          maxPremiumAds: 0,
+          maxFeaturedAds: 0,
+          features: ['3 anúncios gratuitos', 'Suporte básico']
+        },
+        {
+          id: 'lojista',
+          name: 'Lojista',
+          price: 29.90,
+          maxAds: 50,
+          maxPremiumAds: 10,
+          maxFeaturedAds: 5,
+          features: ['50 anúncios', '10 anúncios premium', '5 anúncios em destaque', 'Suporte prioritário']
+        }
+      ];
+    }
+    
+    const { data } = await api.get<Plan[]>('/plans');
+    return data;
+  },
+};
+
+const getUserEquipments = (userId: string): Equipment[] => {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(`equipments_${userId}`);
+  return stored ? JSON.parse(stored) : [];
+};
+
+const saveUserEquipments = (userId: string, equipments: Equipment[]) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(`equipments_${userId}`, JSON.stringify(equipments));
+};
+
+export const equipmentService = {
+  getAll: async (filters?: { search?: string; location?: string }): Promise<Equipment[]> => {
+    if (USE_MOCK) {
+      await delay(500);
+      let equipments = [...mockEquipments];
+      
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const user = JSON.parse(currentUser);
+        const userEquipments = getUserEquipments(user.id);
+        equipments = [...equipments, ...userEquipments];
+      }
+      
+      if (filters?.search) {
+        equipments = equipments.filter(eq => 
+          eq.name.toLowerCase().includes(filters.search!.toLowerCase())
+        );
+      }
+      
+      if (filters?.location) {
+        equipments = equipments.filter(eq => 
+          eq.location.toLowerCase().includes(filters.location!.toLowerCase())
+        );
+      }
+      
+      return equipments;
+    }
+    
+    const { data } = await api.get<Equipment[]>('/equipments', { params: filters });
+    return data;
+  },
+
+  getById: async (id: string): Promise<Equipment | null> => {
+    if (USE_MOCK) {
+      await delay(300);
+      const allEquipments = [...mockEquipments];
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const user = JSON.parse(currentUser);
+        const userEquipments = getUserEquipments(user.id);
+        allEquipments.push(...userEquipments);
+      }
+      return allEquipments.find(eq => eq.id === id) || null;
+    }
+    
+    const { data } = await api.get<Equipment>(`/equipments/${id}`);
+    return data;
+  },
+
+  create: async (data: CreateEquipmentData): Promise<Equipment> => {
+    if (USE_MOCK) {
+      await delay(500);
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) throw new Error('Usuário não autenticado');
+      
+      const user = JSON.parse(currentUser);
+      const userEquipments = getUserEquipments(user.id);
+      
+      const newEquipment: Equipment = {
+        id: Date.now().toString(),
+        ...data,
+        ownerId: user.id,
+        ownerName: user.company?.name || user.name,
+        available: true,
+      };
+      
+      userEquipments.push(newEquipment);
+      saveUserEquipments(user.id, userEquipments);
+      return newEquipment;
+    }
+    
+    const { data: newEquipment } = await api.post<Equipment>('/equipments', data);
+    return newEquipment;
+  },
+
+  getMyEquipments: async (): Promise<Equipment[]> => {
+    if (USE_MOCK) {
+      await delay(300);
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) return [];
+      const user = JSON.parse(currentUser);
+      return getUserEquipments(user.id);
+    }
+    
+    const { data } = await api.get<Equipment[]>('/equipments/my');
+    return data;
+  },
+
+  trackWhatsApp: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/track-whatsapp`);
+  },
+
+  markLead: async (id: string): Promise<void> => {
+    await api.post(`/machines/${id}/mark-lead`);
+  },
 };
 
 export const machineService = {
@@ -266,24 +419,39 @@ export const authService = {
         },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
+      console.log('[MOCK] Login realizado:', user);
       return user;
     }
     
-    const data = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    console.log('[API] Fazendo login para:', credentials.email);
     
-    // Salvar tokens e usuário
-    if (data.accessToken) {
-      localStorage.setItem('accessToken', data.accessToken);
+    try {
+      const data = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+      
+      console.log('[API] Resposta do login:', {
+        user: data.user,
+        hasAccessToken: !!data.accessToken,
+        hasRefreshToken: !!data.refreshToken,
+        emailVerified: data.user?.emailVerified
+      });
+      
+      // Salvar tokens e usuário
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      
+      return data.user;
+    } catch (error) {
+      console.error('[API] Erro no login:', error);
+      throw error;
     }
-    if (data.refreshToken) {
-      localStorage.setItem('refreshToken', data.refreshToken);
-    }
-    localStorage.setItem('currentUser', JSON.stringify(data.user));
-    
-    return data.user;
   },
 
   register: async (data: RegisterData): Promise<User> => {
@@ -312,6 +480,7 @@ export const authService = {
         },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
+      console.log('[MOCK] Usuário registrado:', user);
       return user;
     }
     
@@ -334,21 +503,36 @@ export const authService = {
       if (data.cnpj) payload.cnpj = data.cnpj;
     }
     
-    const response = await apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    console.log('[API] Registrando usuário:', { ...payload, password: '[HIDDEN]' });
     
-    // Salvar tokens corretos
-    if (response.accessToken) {
-      localStorage.setItem('accessToken', response.accessToken);
+    try {
+      const response = await apiRequest('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      
+      console.log('[API] Resposta do registro:', {
+        user: response.user,
+        hasAccessToken: !!response.accessToken,
+        hasRefreshToken: !!response.refreshToken,
+        message: response.message,
+        fullResponse: response
+      });
+      
+      // Salvar tokens corretos
+      if (response.accessToken) {
+        localStorage.setItem('accessToken', response.accessToken);
+      }
+      if (response.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
+      localStorage.setItem('currentUser', JSON.stringify(response.user));
+      
+      return response.user;
+    } catch (error) {
+      console.error('[API] Erro no registro:', error);
+      throw error;
     }
-    if (response.refreshToken) {
-      localStorage.setItem('refreshToken', response.refreshToken);
-    }
-    localStorage.setItem('currentUser', JSON.stringify(response.user));
-    
-    return response.user;
   },
 
   logout: async (): Promise<void> => {
@@ -381,31 +565,93 @@ export const authService = {
   forgotPassword: async (email: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Email de recuperação enviado para: ${email}`);
+      console.log(`[MOCK] Email de recuperação enviado para: ${email}`);
       return;
     }
     
-    await api.post('/auth/forgot-password', { email });
+    console.log(`[API] Enviando solicitação de recuperação de senha para: ${email}`);
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      console.log('[API] Resposta do forgot-password:', response.data);
+    } catch (error) {
+      console.error('[API] Erro no forgot-password:', error);
+      throw error;
+    }
   },
 
   resetPassword: async (token: string, password: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Senha resetada com token: ${token}`);
+      console.log(`[MOCK] Senha resetada com token: ${token}`);
       return;
     }
     
-    await api.post('/auth/reset-password', { token, password });
+    console.log(`[API] Resetando senha com token: ${token.substring(0, 10)}...`);
+    try {
+      const response = await api.post('/auth/reset-password', { token, password });
+      console.log('[API] Resposta do reset-password:', response.data);
+    } catch (error) {
+      console.error('[API] Erro no reset-password:', error);
+      throw error;
+    }
   },
 
   verifyEmail: async (token: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Email verificado com token: ${token}`);
+      console.log(`[MOCK] Email verificado com token: ${token}`);
       return;
     }
     
-    await api.post('/auth/verify-email', { token });
+    console.log(`[API] Verificando email com token: ${token.substring(0, 10)}...`);
+    try {
+      const response = await api.post('/auth/verify-email', { token });
+      console.log('[API] Resposta do verify-email:', response.data);
+    } catch (error) {
+      console.error('[API] Erro no verify-email:', error);
+      throw error;
+    }
+  },
+
+  requestDeleteAccount: async (password: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      console.log('[MOCK] Email de exclusão enviado');
+      return;
+    }
+    
+    console.log('[API] Solicitando exclusão de conta');
+    try {
+      const response = await api.post('/auth/request-delete', { password });
+      console.log('[API] Resposta do request-delete:', response.data);
+    } catch (error) {
+      console.error('[API] Erro no request-delete:', error);
+      throw error;
+    }
+  },
+
+  confirmDeleteAccount: async (token: string): Promise<void> => {
+    if (USE_MOCK) {
+      await delay(500);
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      console.log('[MOCK] Conta excluída');
+      return;
+    }
+    
+    console.log(`[API] Confirmando exclusão com token: ${token.substring(0, 10)}...`);
+    try {
+      const response = await api.post('/auth/confirm-delete', { token });
+      console.log('[API] Resposta do confirm-delete:', response.data);
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('token');
+    } catch (error) {
+      console.error('[API] Erro no confirm-delete:', error);
+      throw error;
+    }
   },
 
   getCompany: async (id: string): Promise<any> => {

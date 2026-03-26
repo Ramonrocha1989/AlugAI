@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { authService } from '@/services/api';
+import { authService } from '@/services/machine-api';
 import { deleteAccountSchema, DeleteAccountFormData } from '@/lib/validations';
 
 interface DeleteAccountModalProps {

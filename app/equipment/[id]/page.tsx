@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEquipment } from '@/hooks/use-api';
-import { equipmentService } from '@/services/api';
+import { equipmentService } from '@/services/machine-api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
