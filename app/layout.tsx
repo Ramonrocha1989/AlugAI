@@ -92,8 +92,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/logo-sem-fundo.png" />
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />
