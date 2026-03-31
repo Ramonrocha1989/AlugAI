@@ -210,7 +210,11 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
                 type="number"
                 step="1"
                 value={formData.price || ''}
-                onChange={(e) => updateFormData({ price: parseInt(e.target.value) || 0 })}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  const price = Number(value);
+                  updateFormData({ price });
+                }}
                 className="mt-2"
               />
             </div>
