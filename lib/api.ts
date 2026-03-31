@@ -48,9 +48,6 @@ function showToast(message: string, type: 'error' | 'success' | 'warning' = 'err
 export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   
-  console.log('[API_REQUEST] Fazendo requisição para:', endpoint);
-  console.log('[API_REQUEST] Token disponível:', !!token);
-  
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -63,11 +60,8 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
     credentials: 'include',
   });
 
-  console.log('[API_REQUEST] Resposta recebida:', response.status, response.statusText);
-
   if (response.status === 401 && typeof window !== 'undefined') {
     const data = await response.json().catch(() => ({}));
-    console.log('[API_REQUEST] Erro 401:', data);
     
     // Não redirecionar nem mostrar toast se estiver na página de login
     const isLoginPage = window.location.pathname === '/login';
@@ -95,7 +89,6 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
 
   if (response.status === 403 && typeof window !== 'undefined') {
     const data = await response.json().catch(() => ({}));
-    console.log('[API_REQUEST] Erro 403:', data);
     
     if (data.accountDeleted) {
       localStorage.removeItem('currentUser');
@@ -115,7 +108,6 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    console.log('[API_REQUEST] Erro HTTP:', response.status, errorData);
     const error: any = new Error(`HTTP ${response.status}`);
     error.response = response;
     error.data = errorData;
@@ -123,6 +115,5 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   }
 
   const responseData = await response.json();
-  console.log('[API_REQUEST] Dados da resposta:', responseData);
   return responseData;
 }

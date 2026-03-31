@@ -36,36 +36,49 @@ export default function LoginPage() {
     reValidateMode: 'onChange',
   });
 
+  // Função para detectar o tipo de toast baseado na mensagem
+  const getToastType = (message: string): 'success' | 'error' | 'warning' | 'info' => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Mensagens de sucesso
+    if (lowerMessage.includes('sucesso') || lowerMessage.includes('criado') || lowerMessage.includes('enviado')) {
+      return 'success';
+    }
+    
+    // Mensagens de aviso/warning (amarelo)
+    if (lowerMessage.includes('já cadastrado') || 
+        lowerMessage.includes('já existe') || 
+        lowerMessage.includes('already exists') ||
+        lowerMessage.includes('não verificado') ||
+        lowerMessage.includes('muitas tentativas') ||
+        lowerMessage.includes('muitas requisições') ||
+        lowerMessage.includes('bloqueado') ||
+        lowerMessage.includes('aguarde')) {
+      return 'warning';
+    }
+    
+    // Mensagens informativas (azul)
+    if (lowerMessage.includes('verifique') || 
+        lowerMessage.includes('confirme') ||
+        lowerMessage.includes('email enviado')) {
+      return 'info';
+    }
+    
+    // Por padrão, erros (vermelho)
+    return 'error';
+  };
+
   const onLogin = async (data: LoginFormData) => {
     try {
       await login.mutateAsync(data);
-      showToast('✅ Login realizado com sucesso!', 'success');
+      showToast('Login realizado com sucesso!', 'success');
       
-      // Aguardar para garantir que localStorage foi salvo
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Usar window.location para garantir redirecionamento
       window.location.href = '/dashboard';
     } catch (error: any) {
-      // A mensagem do backend vem em error.message (interceptado pelo lib/api.ts)
-      const message = error.message || '';
-      
-      if (message.includes('Email não verificado')) {
-        showToast(message, 'warning');
-      } else if (message.includes('HTTP 429') || message.includes('Too Many Requests') || message.toLowerCase().includes('throttler')) {
-        showToast('⚠️ Muitas tentativas de login! Por segurança, bloqueamos temporariamente. Tente novamente em 15 minutos.', 'warning');
-      } else if (message.includes('marcada para exclusão')) {
-        // Já tratado pelo lib/api.ts, não fazer nada aqui
-        return;
-      } else if (message.includes('Invalid credentials') || message.includes('Unauthorized')) {
-        showToast('❌ Email ou senha incorretos. Verifique seus dados e tente novamente.', 'error');
-      } else {
-        // Outros erros - usar mensagem do backend se for amigável, senão usar genérica
-        const friendlyMessage = message.length > 5 && !message.includes('HTTP') && !message.includes('Error') 
-          ? message 
-          : 'Erro ao fazer login. Tente novamente.';
-        showToast(`❌ ${friendlyMessage}`, 'error');
-      }
+      const message = error.data?.message || error.message || 'Erro ao fazer login';
+      const toastType = getToastType(message);
+      showToast(message, toastType);
     }
   };
 
@@ -74,13 +87,9 @@ export default function LoginPage() {
       await register.mutateAsync(data);
       setShowVerificationMessage(true);
     } catch (error: any) {
-      const message = error.message || '';
-      
-      if (message.includes('HTTP 429') || message.includes('Too Many Requests') || message.toLowerCase().includes('throttler')) {
-        showToast('⚠️ Muitas tentativas de cadastro! Por segurança, bloqueamos temporariamente. Tente novamente em 1 hora.', 'warning');
-      } else {
-        showToast(`❌ ${message || 'Erro ao fazer cadastro. Tente novamente.'}`, 'error');
-      }
+      const message = error.data?.message || error.message || 'Erro ao fazer cadastro';
+      const toastType = getToastType(message);
+      showToast(message, toastType);
     }
   };
 

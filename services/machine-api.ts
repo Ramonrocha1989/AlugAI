@@ -34,18 +34,13 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('[AXIOS] Token adicionado ao header:', token.substring(0, 20) + '...');
-    } else {
-      console.log('[AXIOS] Nenhum token encontrado no localStorage');
     }
   }
-  console.log('[AXIOS] Fazendo requisição para:', config.url);
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
-    console.log('[AXIOS] Resposta recebida:', response.status, response.config.url);
     if (response.status >= 400) {
       const error: any = new Error(response.statusText);
       error.response = response;
@@ -54,9 +49,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('[AXIOS] Erro na requisição:', error.response?.status, error.response?.config?.url, error.message);
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      console.log('[AXIOS] Token expirado, removendo dados do localStorage');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
@@ -69,11 +62,6 @@ api.interceptors.response.use(
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Log para debug
-console.log('[CONFIG] USE_MOCK:', USE_MOCK);
-console.log('[CONFIG] NEXT_PUBLIC_USE_MOCK:', process.env.NEXT_PUBLIC_USE_MOCK);
-console.log('[CONFIG] API_URL:', process.env.NEXT_PUBLIC_API_URL);
 
 const getUserMachines = (userId: string): Machine[] => {
   if (typeof window === 'undefined') return [];
@@ -130,7 +118,6 @@ export const planService = {
   getAll: async (): Promise<Plan[]> => {
     if (USE_MOCK) {
       await delay(300);
-      // Mock de planos
       return [
         {
           id: 'free',
@@ -419,11 +406,8 @@ export const authService = {
         },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
-      console.log('[MOCK] Login realizado:', user);
       return user;
     }
-    
-    console.log('[API] Fazendo login para:', credentials.email);
     
     try {
       const data = await apiRequest('/auth/login', {
@@ -431,14 +415,6 @@ export const authService = {
         body: JSON.stringify(credentials),
       });
       
-      console.log('[API] Resposta do login:', {
-        user: data.user,
-        hasAccessToken: !!data.accessToken,
-        hasRefreshToken: !!data.refreshToken,
-        emailVerified: data.user?.emailVerified
-      });
-      
-      // Salvar tokens e usuário
       if (data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
       }
@@ -449,7 +425,6 @@ export const authService = {
       
       return data.user;
     } catch (error) {
-      console.error('[API] Erro no login:', error);
       throw error;
     }
   },
@@ -480,11 +455,9 @@ export const authService = {
         },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));
-      console.log('[MOCK] Usuário registrado:', user);
       return user;
     }
     
-    // Criar payload específico para cada tipo de usuário
     let payload: any = {
       userType: data.userType,
       email: data.email,
@@ -493,17 +466,13 @@ export const authService = {
     };
     
     if (data.userType === 'INDIVIDUAL') {
-      // Pessoa Física - apenas campos específicos
       payload.fullName = data.fullName;
       if (data.cpf) payload.cpf = data.cpf;
     } else {
-      // Empresa - apenas campos específicos
       payload.companyName = data.companyName;
       payload.responsibleName = data.responsibleName;
       if (data.cnpj) payload.cnpj = data.cnpj;
     }
-    
-    console.log('[API] Registrando usuário:', { ...payload, password: '[HIDDEN]' });
     
     try {
       const response = await apiRequest('/auth/register', {
@@ -511,15 +480,6 @@ export const authService = {
         body: JSON.stringify(payload),
       });
       
-      console.log('[API] Resposta do registro:', {
-        user: response.user,
-        hasAccessToken: !!response.accessToken,
-        hasRefreshToken: !!response.refreshToken,
-        message: response.message,
-        fullResponse: response
-      });
-      
-      // Salvar tokens corretos
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
       }
@@ -529,8 +489,7 @@ export const authService = {
       localStorage.setItem('currentUser', JSON.stringify(response.user));
       
       return response.user;
-    } catch (error) {
-      console.error('[API] Erro no registro:', error);
+    } catch (error: any) {
       throw error;
     }
   },
@@ -565,16 +524,12 @@ export const authService = {
   forgotPassword: async (email: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`[MOCK] Email de recuperação enviado para: ${email}`);
       return;
     }
     
-    console.log(`[API] Enviando solicitação de recuperação de senha para: ${email}`);
     try {
       const response = await api.post('/auth/forgot-password', { email });
-      console.log('[API] Resposta do forgot-password:', response.data);
     } catch (error) {
-      console.error('[API] Erro no forgot-password:', error);
       throw error;
     }
   },
@@ -582,16 +537,12 @@ export const authService = {
   resetPassword: async (token: string, password: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`[MOCK] Senha resetada com token: ${token}`);
       return;
     }
     
-    console.log(`[API] Resetando senha com token: ${token.substring(0, 10)}...`);
     try {
       const response = await api.post('/auth/reset-password', { token, password });
-      console.log('[API] Resposta do reset-password:', response.data);
     } catch (error) {
-      console.error('[API] Erro no reset-password:', error);
       throw error;
     }
   },
@@ -599,16 +550,12 @@ export const authService = {
   verifyEmail: async (token: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`[MOCK] Email verificado com token: ${token}`);
       return;
     }
     
-    console.log(`[API] Verificando email com token: ${token.substring(0, 10)}...`);
     try {
       const response = await api.post('/auth/verify-email', { token });
-      console.log('[API] Resposta do verify-email:', response.data);
     } catch (error) {
-      console.error('[API] Erro no verify-email:', error);
       throw error;
     }
   },
@@ -616,16 +563,12 @@ export const authService = {
   requestDeleteAccount: async (password: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log('[MOCK] Email de exclusão enviado');
       return;
     }
     
-    console.log('[API] Solicitando exclusão de conta');
     try {
       const response = await api.post('/auth/request-delete', { password });
-      console.log('[API] Resposta do request-delete:', response.data);
     } catch (error) {
-      console.error('[API] Erro no request-delete:', error);
       throw error;
     }
   },
@@ -636,20 +579,16 @@ export const authService = {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      console.log('[MOCK] Conta excluída');
       return;
     }
     
-    console.log(`[API] Confirmando exclusão com token: ${token.substring(0, 10)}...`);
     try {
       const response = await api.post('/auth/confirm-delete', { token });
-      console.log('[API] Resposta do confirm-delete:', response.data);
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('token');
     } catch (error) {
-      console.error('[API] Erro no confirm-delete:', error);
       throw error;
     }
   },
@@ -657,7 +596,6 @@ export const authService = {
   getCompany: async (id: string): Promise<any> => {
     if (USE_MOCK) {
       await delay(300);
-      // Mock de dados da empresa
       return {
         id,
         company_name: 'Construtora ABC',
@@ -677,7 +615,6 @@ export const authService = {
   getCompanyMachines: async (companyId: string): Promise<Machine[]> => {
     if (USE_MOCK) {
       await delay(300);
-      // Filtrar máquinas do mock por ownerId
       return mockMachines.filter(machine => machine.ownerId === companyId);
     }
     
