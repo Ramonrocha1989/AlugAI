@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export interface CurrencyInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
-  value?: number;
+  value?: number | null;
   onChange?: (value: number) => void;
 }
 
@@ -31,9 +31,8 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
 
     // Atualizar display quando value prop muda
     React.useEffect(() => {
-      if (value !== undefined) {
-        setDisplayValue(value > 0 ? formatCurrency(value) : '');
-      }
+      const safeValue = value ?? 0;
+      setDisplayValue(safeValue > 0 ? formatCurrency(safeValue) : '');
     }, [value]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
