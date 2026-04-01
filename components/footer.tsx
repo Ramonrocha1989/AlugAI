@@ -37,7 +37,7 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="break-words">contato@baitabriq.com.br</li>
-              <li>(51) 99999-9999</li>
+              <li>(53) 98459-0461</li>
             </ul>
           </div>
 
@@ -53,7 +53,6 @@ export function Footer() {
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} BaitaBriq. Todos os direitos reservados.</p>
-          <p className="mt-2">CNPJ: XX.XXX.XXX/XXXX-XX</p>
         </div>
       </div>
     </footer>
