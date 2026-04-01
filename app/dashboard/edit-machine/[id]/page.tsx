@@ -6,6 +6,7 @@ import { useMachine, useUpdateMachine } from '@/hooks/use-machines';
 import { authService } from '@/services/machine-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,12 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
     
     const cleanData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        acc[key] = value;
+        // Garantir que price seja número
+        if (key === 'price') {
+          acc[key] = typeof value === 'string' ? parseInt(value) || 0 : value;
+        } else {
+          acc[key] = value;
+        }
       }
       return acc;
     }, {} as any);
@@ -206,15 +212,9 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
 
             <div>
               <Label>Preço (R$)</Label>
-              <Input
-                type="number"
-                step="1"
-                value={formData.price || ''}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  const price = Number(value);
-                  updateFormData({ price });
-                }}
+              <CurrencyInput
+                value={formData.price || 0}
+                onChange={(value) => updateFormData({ price: value })}
                 className="mt-2"
               />
             </div>

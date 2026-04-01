@@ -11,6 +11,7 @@ import { showBackendErrors } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ValidatedInput } from '@/components/ui/validated-input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -473,24 +474,15 @@ export default function NewMachinePage() {
             <div className="space-y-4">
               <div>
                 <Label>Preço (R$)</Label>
-                <Input
+                <CurrencyInput
                   id="price"
-                  type="number"
-                  value={formData.price || ''}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    const price = Number(value);
-                    updateFormData({ price });
-                    if (value) {
-                      validateField('price', value);
+                  value={formData.price || 0}
+                  onChange={(value) => {
+                    updateFormData({ price: value });
+                    if (value > 0) {
+                      validateField('price', value.toString());
                     }
                   }}
-                  onKeyPress={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
-                      e.preventDefault();
-                    }
-                  }}
-                  placeholder="285000"
                   className={`mt-2 ${validationErrors.price ? 'border-destructive' : ''}`}
                 />
                 {validationErrors.price && (
