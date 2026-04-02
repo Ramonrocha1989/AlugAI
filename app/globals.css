@@ -49,4 +49,65 @@
   .animate-shimmer {
     animation: shimmer 2s infinite linear;
   }
+
+  /* Truncar texto longo */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Estilos específicos para cards de máquinas */
+@layer components {
+  .machine-card-container {
+    display: grid;
+    gap: 1.5rem;
+    align-items: stretch; /* Volta para stretch para altura uniforme */
+  }
+
+  /* Grid responsivo */
+  @media (min-width: 640px) {
+    .machine-card-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .machine-card-container {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .machine-card-container {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .machine-card-container {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  /* Altura fixa para todos os cards */
+  .machine-card-container > * {
+    height: 560px;
+  }
 }

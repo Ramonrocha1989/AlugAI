@@ -33,8 +33,9 @@ export function MachineCard({ machine }: MachineCardProps) {
 
   return (
     <Link href={`/machine/${machine.id}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group">
-        <div className="relative h-48 w-full">
+      <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group h-[580px] flex flex-col">
+        {/* Imagem - Altura fixa */}
+        <div className="relative h-48 w-full flex-shrink-0">
           <Image
             src={machine.images[0] || '/placeholder.jpg'}
             alt={machine.name}
@@ -66,10 +67,11 @@ export function MachineCard({ machine }: MachineCardProps) {
           </div>
         </div>
 
-        <CardContent className="p-4 space-y-3">
-          {/* Title and Category */}
-          <div>
-            <h3 className="font-bold text-lg mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+        {/* Conteúdo - 332px restantes (580 - 248 da imagem) */}
+        <CardContent className="p-5 flex flex-col flex-grow h-[332px]">
+          {/* Title and Category - 80px */}
+          <div className="mb-4 h-[80px] flex flex-col justify-start">
+            <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors leading-tight">
               {machine.manufacturer || ''} {machine.model || ''} {machine.yearModel || ''}
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -77,75 +79,88 @@ export function MachineCard({ machine }: MachineCardProps) {
             </p>
           </div>
 
-          {/* Specs */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {machine.yearModel && <span>{machine.yearModel}</span>}
-            {machine.engineHours && (
-              <>
-                <span>•</span>
-                <span>{machine.engineHours.toLocaleString('pt-BR')}h</span>
-              </>
-            )}
-            {machine.power && (
-              <>
-                <span>•</span>
-                <span>{machine.power} cv</span>
-              </>
+          {/* Specs - 24px */}
+          <div className="mb-4 h-[24px] flex items-center">
+            {(machine.yearModel || machine.engineHours || machine.power) && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                {machine.yearModel && <span>{machine.yearModel}</span>}
+                {machine.engineHours && (
+                  <>
+                    <span>•</span>
+                    <span>{machine.engineHours.toLocaleString('pt-BR')}h</span>
+                  </>
+                )}
+                {machine.power && (
+                  <>
+                    <span>•</span>
+                    <span>{machine.power} cv</span>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Location */}
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-1" />
-            {machine.city || ''}, {machine.state || ''}
+          {/* Location - 24px */}
+          <div className="mb-4 h-[24px] flex items-center">
+            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="text-sm text-muted-foreground truncate">
+              {machine.city || ''}, {machine.state || ''}
+            </span>
           </div>
 
-          {/* Quick Tags */}
-          {machine.quickTags && machine.quickTags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {machine.quickTags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {QUICK_TAGS[tag]}
-                </Badge>
-              ))}
-              {machine.quickTags.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{machine.quickTags.length - 3}
-                </Badge>
-              )}
-            </div>
-          )}
+          {/* Quick Tags - 32px */}
+          <div className="mb-4 h-[32px] flex items-start">
+            {machine.quickTags && machine.quickTags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {machine.quickTags.slice(0, 2).map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs h-6">
+                    {QUICK_TAGS[tag]}
+                  </Badge>
+                ))}
+                {machine.quickTags.length > 2 && (
+                  <Badge variant="secondary" className="text-xs h-6">
+                    +{machine.quickTags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
 
-          {/* Negotiation Options */}
-          {(machine.acceptsTradeDown || machine.acceptsGrains || machine.acceptsFinancing) && (
-            <div className="flex flex-wrap gap-2 text-xs">
-              {machine.acceptsTradeDown && (
-                <div className="flex items-center gap-1 text-green-600">
-                  <CheckCircle2 className="h-3 w-3" />
-                  <span>Aceita troca</span>
-                </div>
-              )}
-              {machine.acceptsGrains && (
-                <div className="flex items-center gap-1 text-green-600">
-                  <CheckCircle2 className="h-3 w-3" />
-                  <span>Aceita grãos</span>
-                </div>
-              )}
-              {machine.acceptsFinancing && (
-                <div className="flex items-center gap-1 text-green-600">
-                  <CheckCircle2 className="h-3 w-3" />
-                  <span>Aceita financiamento</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Negotiation Options - 48px */}
+          <div className="mb-4 h-[48px] flex items-start">
+            {(machine.acceptsTradeDown || machine.acceptsGrains || machine.acceptsFinancing) && (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {machine.acceptsTradeDown && (
+                  <div className="flex items-center gap-1 text-green-600 whitespace-nowrap">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>Aceita troca</span>
+                  </div>
+                )}
+                {machine.acceptsGrains && (
+                  <div className="flex items-center gap-1 text-green-600 whitespace-nowrap">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>Aceita grãos</span>
+                  </div>
+                )}
+                {machine.acceptsFinancing && (
+                  <div className="flex items-center gap-1 text-green-600 whitespace-nowrap">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>Financiamento</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
-          {/* Price */}
-          <div className="pt-2 border-t">
-            <p className="text-2xl font-bold text-primary">
+          {/* Spacer flexível - Ocupa espaço restante */}
+          <div className="flex-grow"></div>
+
+          {/* Price - Sempre no final - 80px */}
+          <div className="pt-4 border-t mt-auto h-[80px] flex flex-col justify-center">
+            <p className="text-2xl font-bold text-primary leading-tight mb-2">
               {formatPrice(machine.price, machine.businessType)}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground truncate">
               {machine.ownerName || 'Vendedor'}
             </p>
           </div>

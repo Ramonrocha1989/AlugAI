@@ -12,20 +12,23 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "BaitaBriq - Compra, Venda e Troca de Máquinas Agrícolas no Sul",
-    template: "%s | BaitaBriq"
+    default: "BaitaBriq - Máquinas Agrícolas Usadas RS, SC, PR | Tratores e Colheitadeiras",
+    template: "%s | BaitaBriq - Máquinas Agrícolas"
   },
-  description: "Marketplace de máquinas agrícolas e de construção no Sul do Brasil. Compre, venda, alugue ou troque tratores, colheitadeiras e implementos com segurança.",
+  description: "Marketplace líder de máquinas agrícolas usadas no Sul do Brasil. Tratores John Deere, Case IH, colheitadeiras e implementos em RS, SC e PR. Compre, venda ou troque com segurança e financiamento disponível.",
   keywords: [
-    "máquinas agrícolas",
-    "tratores usados",
-    "colheitadeiras",
-    "implementos agrícolas",
-    "máquinas construção",
-    "compra venda tratores",
-    "máquinas RS",
-    "máquinas SC",
-    "máquinas PR",
+    "máquinas agrícolas usadas",
+    "tratores usados RS SC PR",
+    "colheitadeiras usadas sul",
+    "John Deere usado",
+    "Case IH usado",
+    "New Holland usado",
+    "implementos agrícolas usados",
+    "marketplace máquinas sul",
+    "tratores usados Pelotas",
+    "máquinas agrícolas Porto Alegre",
+    "colheitadeiras usadas Chapecó",
+    "implementos Cascavel",
   ],
   authors: [{ name: 'BaitaBriq' }],
   creator: 'BaitaBriq',

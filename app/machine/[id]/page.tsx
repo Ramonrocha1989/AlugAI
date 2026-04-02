@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import MachineDetailsClient from './client';
 import { machineService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES } from '@/lib/constants';
+import { MachineSchema } from '@/components/structured-data';
 
 type Props = {
   params: { id: string };
@@ -75,6 +76,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function MachineDetailsPage({ params }: Props) {
-  return <MachineDetailsClient params={params} />;
+export default async function MachineDetailsPage({ params }: Props) {
+  const machine = await machineService.getById(params.id);
+  
+  return (
+    <>
+      {machine && <MachineSchema machine={machine} />}
+      <MachineDetailsClient params={params} />
+    </>
+  );
 }

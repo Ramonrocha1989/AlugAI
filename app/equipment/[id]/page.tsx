@@ -1,206 +1,80 @@
-'use client';
+import { Metadata } from 'next';
+import { machineService } from '@/services/machine-api';
+import { CATEGORIES } from '@/lib/constants';
+import { MachineSchema } from '@/components/structured-data';
+import { redirect } from 'next/navigation';
 
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEquipment } from '@/hooks/use-api';
-import { equipmentService } from '@/services/machine-api';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Building2, Calendar, Loader2, ArrowLeft, Eye, MessageCircle, Star, Award, User } from 'lucide-react';
-import { authService } from '@/services/machine-api';
+type Props = {
+  params: { id: string };
+};
 
-export default function EquipmentDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const { data: equipment, isLoading } = useEquipment(params.id as string);
-
-  const handleRentalRequest = async () => {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      // router.push("/login");
-      return;
-    }
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const machine = await machineService.getById(params.id);
     
-    // Rastreia clique no WhatsApp
-    try {
-      await equipmentService.trackWhatsApp(params.id as string);
-    } catch (error) {
-      console.error('Erro ao rastrear clique:', error);
+    if (!machine) {
+      return {
+        title: 'Máquina não encontrada | BaitaBriq',
+      };
     }
-    
-    // Abre WhatsApp (substitua pelo número real)
-    const phone = equipment?.ownerPhone || '5511999999999';
-    const message = encodeURIComponent(`Olá! Tenho interesse na máquina: ${equipment?.name}`);
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-  };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    const price = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+    }).format(machine.price);
+
+    const title = `${machine.name} ${machine.yearModel} - ${price} | ${machine.city}-${machine.state} | BaitaBriq`;
+    const description = `${machine.name} ${machine.yearModel} em ${machine.city}-${machine.state}. ${machine.description.slice(0, 120)}... Veja fotos, detalhes técnicos e entre em contato com o vendedor.`;
+    const url = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br'}/equipment/${machine.id}`;
+
+    return {
+      title,
+      description,
+      keywords: [
+        `${machine.name} usado`,
+        `${machine.manufacturer} ${machine.yearModel}`,
+        `${machine.name} ${machine.city}`,
+        `máquinas ${machine.state}`,
+        CATEGORIES[machine.category],
+        machine.category.toLowerCase(),
+        'máquina agrícola usada',
+        `${machine.manufacturer} usado`
+      ],
+      openGraph: {
+        title,
+        description,
+        url,
+        siteName: 'BaitaBriq',
+        images: [
+          {
+            url: machine.images[0] || '/logo.jpeg',
+            width: 1200,
+            height: 630,
+            alt: `${machine.name} ${machine.yearModel}`,
+          },
+        ],
+        locale: 'pt_BR',
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: [machine.images[0] || '/logo.jpeg'],
+      },
+      alternates: {
+        canonical: url,
+      },
+    };
+  } catch (error) {
+    return {
+      title: 'Máquina não encontrada | BaitaBriq',
+    };
   }
+}
 
-  if (!equipment) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-center text-muted-foreground">Equipamento não encontrado</p>
-      </div>
-    );
-  }
-
-  // Debug - ver dados da máquina
-  console.log('=== EQUIPMENT DATA ===');
-  console.log('Equipment:', equipment);
-  console.log('Owner ID:', equipment.ownerId);
-  console.log('Owner Name:', equipment.ownerName);
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <Button
-        variant="ghost"
-        onClick={() => router.back()}
-        className="mb-6"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Voltar
-      </Button>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <div className="relative h-96 w-full rounded-lg overflow-hidden">
-            <Image
-              src={equipment.images[0]}
-              alt={equipment.name}
-              fill
-              className="object-cover"
-            />
-          </div>
-          {equipment.images.length > 1 && (
-            <div className="grid grid-cols-3 gap-4">
-              {equipment.images.slice(1).map((image, index) => (
-                <div key={index} className="relative h-24 rounded-lg overflow-hidden">
-                  <Image
-                    src={image}
-                    alt={`${equipment.name} ${index + 2}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              {equipment.isPremium && (
-                <Badge variant="premium" className="flex items-center gap-1">
-                  <Star className="h-3 w-3" />
-                  PREMIUM
-                </Badge>
-              )}
-              {equipment.ownerPlan === 'lojista' && (
-                <Badge variant="verified" className="flex items-center gap-1">
-                  <Award className="h-3 w-3" />
-                  VENDEDOR VERIFICADO
-                </Badge>
-              )}
-            </div>
-            <h1 className="text-3xl font-bold mb-2">{equipment.name}</h1>
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
-                {equipment.city}, {equipment.state}
-              </div>
-              <div className="flex items-center">
-                <Building2 className="h-4 w-4 mr-1" />
-                {equipment.ownerName}
-              </div>
-            </div>
-            {(equipment.views || equipment.whatsappClicks) && (
-              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                {equipment.views && (
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {equipment.views} visualizações
-                  </div>
-                )}
-                {equipment.whatsappClicks && (
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="h-4 w-4" />
-                    {equipment.whatsappClicks} contatos
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-primary mb-2">
-                R$ {equipment.price.toLocaleString('pt-BR')}
-                <span className="text-lg font-normal text-muted-foreground">/dia</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Categoria: {equipment.category}
-              </p>
-              <Button onClick={handleRentalRequest} className="w-full" size="lg">
-                Contatar via WhatsApp
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="font-semibold mb-4 flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Anunciante
-              </h2>
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium">{equipment.ownerName}</p>
-                  <p className="text-sm text-muted-foreground">{equipment.city}, {equipment.state}</p>
-                </div>
-                <Link 
-                  href={`/company/${equipment.ownerId}`}
-                  className="inline-flex items-center text-sm text-primary hover:underline"
-                  onClick={() => {
-                    console.log('=== LINK CLICKED ===');
-                    console.log('Going to:', `/company/${equipment.ownerId}`);
-                    console.log('Owner ID:', equipment.ownerId);
-                  }}
-                >
-                  Ver todas as máquinas desta empresa →
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="font-semibold mb-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-2" />
-                Disponibilidade
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {equipment.available ? 'Disponível para aluguel imediato' : 'Indisponível no momento'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <div>
-            <h2 className="font-semibold text-lg mb-3">Descrição</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              {equipment.description}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export default async function EquipmentPage({ params }: Props) {
+  // Redirect para a nova URL /machine/[id]
+  redirect(`/machine/${params.id}`);
 }
