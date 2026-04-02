@@ -43,34 +43,7 @@ export function LocalBusinessSchema() {
     "sameAs": [
       "https://www.instagram.com/baitabriq",
       "https://www.facebook.com/baitabriq"
-    ],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Máquinas Agrícolas",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "Tratores Usados"
-          }
-        },
-        {
-          "@type": "Offer", 
-          "itemOffered": {
-            "@type": "Product",
-            "name": "Colheitadeiras Usadas"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product", 
-            "name": "Implementos Agrícolas"
-          }
-        }
-      ]
-    }
+    ]
   };
 
   return (

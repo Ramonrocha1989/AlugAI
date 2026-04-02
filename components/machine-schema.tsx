@@ -10,17 +10,22 @@ export function MachineSchema({ machine }: MachineSchemaProps) {
     "@type": "Product",
     "name": machine.name,
     "description": machine.description,
-    "image": machine.images,
-    "brand": machine.manufacturer || "Não informado",
+    "image": machine.images.length > 0 ? machine.images : ["https://baitabriq.com.br/logo.jpeg"],
+    "brand": {
+      "@type": "Brand",
+      "name": machine.manufacturer || "Não informado"
+    },
     "model": machine.model || machine.name,
     "productionDate": machine.yearModel?.toString(),
     "category": machine.category,
+    "sku": machine.id,
     "offers": {
       "@type": "Offer",
-      "price": machine.price,
+      "price": machine.price.toString(),
       "priceCurrency": "BRL",
-      "availability": "https://schema.org/InStock",
-      "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias
+      "availability": machine.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      "url": `https://baitabriq.com.br/machine/${machine.id}`,
       "seller": {
         "@type": "Organization",
         "name": machine.ownerName || "BaitaBriq"
@@ -42,12 +47,7 @@ export function MachineSchema({ machine }: MachineSchemaProps) {
         "name": "Localização", 
         "value": `${machine.city}, ${machine.state}`
       }] : [])
-    ],
-    "aggregateRating": machine.isVerifiedSeller ? {
-      "@type": "AggregateRating",
-      "ratingValue": 4.5,
-      "ratingCount": 10
-    } : undefined
+    ]
   };
 
   return (
