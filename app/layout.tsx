@@ -7,6 +7,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { CsrfInitializer } from "@/components/csrf-initializer";
+import { LocalBusinessSchema } from "@/components/local-business-schema";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -102,6 +103,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <GoogleAnalytics />
         <CsrfInitializer />
+        <LocalBusinessSchema />
         <Providers>
           <ToastProvider>
             <Header />

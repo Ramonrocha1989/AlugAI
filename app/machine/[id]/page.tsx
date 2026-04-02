@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import MachineDetailsClient from './client';
 import { machineService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES } from '@/lib/constants';
-import { MachineSchema } from '@/components/structured-data';
+import { MachineSchema } from '@/components/machine-schema';
+import { Breadcrumbs } from '@/components/breadcrumbs';
 
 type Props = {
   params: { id: string };
@@ -79,9 +80,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MachineDetailsPage({ params }: Props) {
   const machine = await machineService.getById(params.id);
   
+  if (!machine) {
+    return <div>Máquina não encontrada</div>;
+  }
+
+  const breadcrumbItems = [
+    { name: 'Início', href: '/' },
+    { name: CATEGORIES[machine.category], href: `/?category=${machine.category}` },
+    { name: machine.name, href: `/machine/${machine.id}` }
+  ];
+  
   return (
     <>
-      {machine && <MachineSchema machine={machine} />}
+      <MachineSchema machine={machine} />
+      <div className="container mx-auto px-4 py-4">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       <MachineDetailsClient params={params} />
     </>
   );

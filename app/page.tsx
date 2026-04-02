@@ -12,6 +12,7 @@ import { analytics } from '@/lib/analytics';
 import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
 import { WebsiteSchema } from '@/components/structured-data';
+import { FAQSchema } from '@/components/faq-schema';
 
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
 
@@ -175,6 +176,7 @@ export default function HomePage() {
   return (
     <>
       <WebsiteSchema />
+      <FAQSchema />
       <div className="container mx-auto px-4 py-2 md:py-4 max-w-[1920px]">
         <div className="mb-4 md:mb-6">
           <h1 className="text-3xl md:text-5xl font-bold mb-2">
