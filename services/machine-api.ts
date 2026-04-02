@@ -389,10 +389,10 @@ export const authService = {
         email: credentials.email,
         userType: 'COMPANY',
         role: 'USER',
-        plan: 'FREE',
-        maxAds: 3,
-        maxPremiumAds: 0,
-        maxFeaturedAds: 0,
+        plan: 'lojista', // Mudando para lojista para testar
+        maxAds: 50,
+        maxPremiumAds: 10,
+        maxFeaturedAds: 5,
         isVerifiedSeller: false,
         emailVerified: true,
         company: {
@@ -400,9 +400,9 @@ export const authService = {
           name: 'Agropecuária Exemplo',
         },
         usage: {
-          activeAds: 0,
-          premiumAds: 0,
-          featuredAds: 0,
+          activeAds: 2,
+          premiumAds: 1,
+          featuredAds: 1,
         },
       };
       localStorage.setItem('currentUser', JSON.stringify(user));

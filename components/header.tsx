@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/tooltip';
 import { NotificationsDropdown } from '@/components/notifications-dropdown';
 import { authService } from '@/services/machine-api';
 import { useLogout } from '@/hooks/use-api';
+import { useUser } from '@/hooks/use-user';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
 import { LogOut, LayoutDashboard, Shield, Heart, FileText, CreditCard, Menu, X, ChevronDown, Tractor, Wheat, MapPin, BookOpen } from 'lucide-react';
@@ -17,6 +18,7 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
+  const { data: user, isLoading: userLoading } = useUser();
   const { data: favorites = [], isError: favoritesError } = useFavorites();
   const { data: receivedProposals = [], isError: receivedError } = useReceivedProposals();
   const { data: sentProposals = [], isError: sentError } = useSentProposals();
@@ -33,7 +35,6 @@ export function Header() {
   
   const totalNotifications = pendingReceived + updatedSent;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ name?: string; company?: { name: string }; role?: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
 
@@ -41,12 +42,6 @@ export function Header() {
     const checkAuth = () => {
       const currentUser = authService.getCurrentUser();
       setIsAuthenticated(!!currentUser);
-      
-      if (currentUser) {
-        // Extrair user se vier aninhado
-        const userData = (currentUser as any)?.user || currentUser;
-        setUser(userData);
-      }
     };
     checkAuth();
     window.addEventListener('storage', checkAuth);
@@ -142,7 +137,7 @@ export function Header() {
             )}
           </div>
           
-          {isAuthenticated ? (
+          {user && !userLoading ? (
             <>
               <NotificationsDropdown />
               
@@ -268,11 +263,18 @@ export function Header() {
                   </Button>
                 </Link>
               </div>
-              <Link href="/profile">
-                <Button variant="ghost" size="sm">
-                  Perfil
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                {user?.plan === 'lojista' && (
+                  <Badge variant="lojista" className="flex items-center gap-1">
+                    👑 Lojista Ativo
+                  </Badge>
+                )}
+                <Link href="/profile">
+                  <Button variant="ghost" size="sm">
+                    Perfil
+                  </Button>
+                </Link>
+              </div>
               {user?.role === 'ADMIN' && (
                 <Link href="/admin">
                   <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
@@ -304,7 +306,7 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden flex items-center gap-1 ml-auto">
-          {isAuthenticated && <NotificationsDropdown />}
+          {user && <NotificationsDropdown />}
           <Button
             variant="ghost"
             size="sm"
@@ -344,7 +346,7 @@ export function Header() {
               })}
             </div>
             
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <div className="border-t pt-2 mt-2">
                   <Link href="/dashboard/favorites" onClick={() => setMobileMenuOpen(false)}>
@@ -390,6 +392,11 @@ export function Header() {
                   <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start min-h-[48px]">
                       Perfil
+                      {user?.plan === 'lojista' && (
+                        <Badge variant="lojista" className="ml-2">
+                          👑 Lojista Ativo
+                        </Badge>
+                      )}
                     </Button>
                   </Link>
                   {user?.role === 'ADMIN' && (

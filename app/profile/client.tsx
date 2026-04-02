@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Trash2 } from 'lucide-react';
@@ -75,6 +76,37 @@ export default function ProfileClient() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Meu Perfil</h1>
+
+      {/* Seção do Plano */}
+      {profile.plan === 'lojista' && (
+        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              👑 Plano Lojista Ativo
+              <Badge variant="lojista">Premium</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{profile.usage?.activeAds || 0}/{profile.maxAds || '∞'}</div>
+                <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">{profile.usage?.premiumAds || 0}/{profile.maxPremiumAds || 3}</div>
+                <div className="text-sm text-muted-foreground">Premium Ativos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{profile.usage?.featuredAds || 0}/{profile.maxFeaturedAds || 5}</div>
+                <div className="text-sm text-muted-foreground">Destaques Ativos</div>
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-muted-foreground">
+              ✅ Anúncios ilimitados • ✅ 3 Premium simultâneos • ✅ 5 Destaques simultâneos • ✅ Suporte prioritário
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {!(profile as any).phone && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">

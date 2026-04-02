@@ -5,12 +5,7 @@ export function useUser() {
   return useQuery({
     queryKey: ['user'],
     queryFn: () => {
-      // Em modo mock, retornar usuário do localStorage
-      if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
-        const user = authService.getCurrentUser();
-        if (!user) throw new Error('Não autenticado');
-        return Promise.resolve(user);
-      }
+      // Sempre usar API real, não mock
       return authService.getMe();
     },
     staleTime: 1000 * 60 * 5, // 5 minutos

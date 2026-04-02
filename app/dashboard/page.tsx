@@ -11,6 +11,7 @@ import { DashboardAnalytics } from '@/components/dashboard-analytics';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Loader2, Edit, Trash2, Eye, MessageCircle, CheckCircle } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 import { Machine } from '@/types/machine';
@@ -136,6 +137,37 @@ export default function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Seção do Plano Lojista */}
+      {user?.plan === 'lojista' && (
+        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              👑 Plano Lojista Ativo
+              <Badge variant="lojista">Premium</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{user.usage?.activeAds || 0}/{user.maxAds}</div>
+                <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">{user.usage?.premiumAds || 0}/{user.maxPremiumAds}</div>
+                <div className="text-sm text-muted-foreground">Premium Ativos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{user.usage?.featuredAds || 0}/{user.maxFeaturedAds}</div>
+                <div className="text-sm text-muted-foreground">Destaques Ativos</div>
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-muted-foreground">
+              ✅ Anúncios ilimitados • ✅ 3 Premium simultâneos • ✅ 5 Destaques simultâneos • ✅ Suporte prioritário
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading || userLoading ? (
         <div className="flex justify-center items-center py-12">
