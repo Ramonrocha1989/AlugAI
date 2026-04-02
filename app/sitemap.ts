@@ -1,1 +1,71 @@
-import { MetadataRoute } from 'next';\nimport { machineService } from '@/services/machine-api';\n\nexport default async function sitemap(): Promise<MetadataRoute.Sitemap> {\n  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br';\n  \n  // Páginas estáticas\n  const staticPages = [\n    {\n      url: baseUrl,\n      lastModified: new Date(),\n      changeFrequency: 'daily' as const,\n      priority: 1,\n    },\n    {\n      url: `${baseUrl}/blog`,\n      lastModified: new Date(),\n      changeFrequency: 'weekly' as const,\n      priority: 0.8,\n    },\n    {\n      url: `${baseUrl}/como-funciona`,\n      lastModified: new Date(),\n      changeFrequency: 'monthly' as const,\n      priority: 0.6,\n    },\n    {\n      url: `${baseUrl}/termos-de-uso`,\n      lastModified: new Date(),\n      changeFrequency: 'yearly' as const,\n      priority: 0.3,\n    },\n    {\n      url: `${baseUrl}/politica-privacidade`,\n      lastModified: new Date(),\n      changeFrequency: 'yearly' as const,\n      priority: 0.3,\n    },\n  ];\n\n  // Posts do blog\n  const blogPosts = [\n    'como-escolher-trator-usado',\n    'manutencao-colheitadeira-safra', \n    'financiamento-maquinas-agricolas-2024',\n    'tecnologia-agricultura-precisao'\n  ].map(slug => ({\n    url: `${baseUrl}/blog/${slug}`,\n    lastModified: new Date(),\n    changeFrequency: 'monthly' as const,\n    priority: 0.7,\n  }));\n\n  // Páginas de categoria\n  const categoryPages = [\n    {\n      url: `${baseUrl}/categoria/tratores`,\n      lastModified: new Date(),\n      changeFrequency: 'daily' as const,\n      priority: 0.9,\n    },\n    {\n      url: `${baseUrl}/categoria/colheitadeiras`,\n      lastModified: new Date(),\n      changeFrequency: 'daily' as const,\n      priority: 0.9,\n    },\n  ];\n\n  // Páginas regionais\n  const regionalPages = [\n    {\n      url: `${baseUrl}/maquinas/rs`,\n      lastModified: new Date(),\n      changeFrequency: 'daily' as const,\n      priority: 0.8,\n    },\n  ];\n\n  let machinePages: MetadataRoute.Sitemap = [];\n  \n  try {\n    // Buscar máquinas para sitemap (limitado para performance)\n    const machines = await machineService.getAll({ limit: 1000 });\n    \n    machinePages = machines.data.map((machine) => ({\n      url: `${baseUrl}/machine/${machine.id}`,\n      lastModified: new Date(machine.updatedAt || machine.createdAt),\n      changeFrequency: 'weekly' as const,\n      priority: 0.6,\n    }));\n  } catch (error) {\n    console.error('Erro ao gerar sitemap das máquinas:', error);\n  }\n\n  return [\n    ...staticPages,\n    ...blogPosts,\n    ...categoryPages,\n    ...regionalPages,\n    ...machinePages,\n  ];\n}
+import { MetadataRoute } from 'next';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br';
+  
+  const staticPages = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/como-funciona`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/termos-de-uso`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/politica-privacidade`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+  ];
+
+  const blogPosts = [
+    'como-escolher-trator-usado',
+    'manutencao-colheitadeira-safra', 
+    'financiamento-maquinas-agricolas-2024',
+    'tecnologia-agricultura-precisao'
+  ].map(slug => ({
+    url: `${baseUrl}/blog/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  const categoryPages = [
+    {
+      url: `${baseUrl}/categoria/tratores`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/categoria/colheitadeiras`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+  ];
+
+  return [
+    ...staticPages,
+    ...blogPosts,
+    ...categoryPages,
+  ];
+}
