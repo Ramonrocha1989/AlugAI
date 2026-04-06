@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Machine } from '@/types/machine';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { FavoriteButton } from '@/components/favorite-button';
 import { MapPin, Star, Award, CheckCircle2 } from 'lucide-react';
 import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
 
@@ -64,6 +65,15 @@ export function MachineCard({ machine }: MachineCardProps) {
                 PREMIUM
               </Badge>
             )}
+          </div>
+
+          {/* Favorite Button */}
+          <div className="absolute bottom-2 right-2">
+            <FavoriteButton 
+              machineId={machine.id} 
+              machineName={`${machine.manufacturer} ${machine.model}`}
+              size="md"
+            />
           </div>
         </div>
 
