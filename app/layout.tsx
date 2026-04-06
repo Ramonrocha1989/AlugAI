@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import { ToastProvider } from "@/components/toast-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { BottomNav } from "@/components/bottom-nav";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { CsrfInitializer } from "@/components/csrf-initializer";
 import { LocalBusinessSchema } from "@/components/local-business-schema";
@@ -106,11 +107,14 @@ export default function RootLayout({
         <LocalBusinessSchema />
         <Providers>
           <ToastProvider>
-            <Header />
-            <main className="min-h-screen">
+            <div className="hidden md:block">
+              <Header />
+            </div>
+            <main className="min-h-screen pb-20 md:pb-0">
               {children}
             </main>
             <Footer />
+            <BottomNav />
           </ToastProvider>
         </Providers>
       </body>

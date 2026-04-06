@@ -33,6 +33,7 @@ export default function HomePage() {
   const [category, setCategory] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedCulture, setSelectedCulture] = useState('');
   
@@ -208,7 +209,21 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+        {/* Botão para expandir filtros no mobile */}
+        <div className="md:hidden mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        {/* Filtros - sempre visíveis no desktop, colapsáveis no mobile */}
+        <div className={`${showFilters ? 'block' : 'hidden'} md:block bg-card border rounded-lg p-4 md:p-6 mb-6 md:mb-8`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
