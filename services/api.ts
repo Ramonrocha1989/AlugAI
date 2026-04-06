@@ -3,7 +3,7 @@ import { Equipment, User, LoginCredentials, RegisterData, CreateEquipmentData, P
 import { mockEquipments } from '@/lib/mock-data';
 
 // Configuração do cliente Axios
-const api = axios.create({
+export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   timeout: 10000,
   headers: {
@@ -17,22 +17,19 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 // Interceptor: adiciona token JWT em todas as requisições
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      const userData = JSON.parse(user);
+      if (userData.token) {
+        config.headers.Authorization = `Bearer ${userData.token}`;
+      }
     }
   }
   return config;
 });
 
-// Interceptor: trata erros de autenticação
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Não redirecionar automaticamente - deixar componentes tratarem
-    return Promise.reject(error);
-  }
-);
+// Importar interceptor com mutex para refresh
+import './auth-interceptor';
 
 // Simulação de delay de rede
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
