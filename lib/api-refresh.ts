@@ -28,8 +28,9 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
         });
 
         if (refreshResponse.ok) {
-          const { accessToken: newAccessToken } = await refreshResponse.json();
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
           localStorage.setItem('accessToken', newAccessToken);
+          localStorage.setItem('refreshToken', newRefreshToken);
 
           // Repetir requisição original
           response = await fetch(`${API_URL}${endpoint}`, {

@@ -3,7 +3,7 @@ import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/
 import { User, LoginCredentials, RegisterData, Plan, Equipment, CreateEquipmentData } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
 import { mockEquipments } from '@/lib/mock-data';
-import { apiRequest } from '@/lib/api';
+import { apiRequest } from '@/lib/api-refresh';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
@@ -357,7 +357,7 @@ export const machineService = {
       return getUserMachines(user.id);
     }
     
-    const { data } = await api.get<Machine[]>('/machines/my');
+    const data = await apiRequest('/machines/my', { method: 'GET' });
     return data;
   },
 
