@@ -74,7 +74,7 @@ export default function LoginPage() {
       showToast('Login realizado com sucesso!', 'success');
       
       await new Promise(resolve => setTimeout(resolve, 300));
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (error: any) {
       const message = error.data?.message || error.message || 'Erro ao fazer login';
       const toastType = getToastType(message);
