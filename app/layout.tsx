@@ -97,9 +97,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
         <link rel="shortcut icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/logo-sem-fundo.png" />
+        <link rel="apple-touch-icon" href="/apple-icon-180x180.png" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />
