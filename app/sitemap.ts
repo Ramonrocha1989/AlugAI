@@ -20,7 +20,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/como-funciona`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
-      priority: 0.6,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/categoria/tratores`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/categoria/colheitadeiras`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/termos-de-uso`,
@@ -49,23 +61,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const categoryPages = [
-    {
-      url: `${baseUrl}/categoria/tratores`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/categoria/colheitadeiras`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    },
+    // Removido - já incluído em staticPages
   ];
 
   return [
     ...staticPages,
     ...blogPosts,
-    ...categoryPages,
   ];
 }

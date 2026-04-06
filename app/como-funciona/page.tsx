@@ -1,3 +1,30 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Como Funciona - BaitaBriq | Marketplace de Máquinas Agrícolas',
+  description: 'Saiba como comprar e vender máquinas agrícolas no BaitaBriq. Guia completo para vendedores e compradores. Planos gratuito e lojista disponíveis.',
+  keywords: [
+    'como funciona BaitaBriq',
+    'vender máquinas agrícolas',
+    'comprar tratores usados',
+    'marketplace máquinas sul brasil',
+    'plano lojista',
+    'vendedor verificado',
+    'segurança compra máquinas',
+    'como vender trator',
+    'como comprar colheitadeira'
+  ],
+  openGraph: {
+    title: 'Como Funciona o BaitaBriq - Marketplace de Máquinas Agrícolas',
+    description: 'Conectamos vendedores e compradores de máquinas agrícolas no Sul do Brasil',
+    type: 'website',
+    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+  },
+  alternates: {
+    canonical: '/como-funciona'
+  }
+};
+
 export default function ComoFuncionaPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">

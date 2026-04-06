@@ -6,6 +6,10 @@ import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { BlogListSchema } from '@/components/blog-schema';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 
+// Permitir renderização dinâmica para melhor indexação
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Blog - Dicas sobre Máquinas Agrícolas | BaitaBriq',
   description: 'Dicas, guias e novidades sobre máquinas agrícolas. Como escolher tratores, manutenção de colheitadeiras, financiamento rural e muito mais.',

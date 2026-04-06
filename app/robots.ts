@@ -22,19 +22,7 @@ export default function robots(): MetadataRoute.Robots {
           '/payment/',
         ],
       },
-      {
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: [
-          '/admin/',
-          '/dashboard/',
-          '/api/',
-          '/login',
-          '/payment/',
-        ],
-      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl,
   };
 }

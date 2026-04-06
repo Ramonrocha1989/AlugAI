@@ -4,6 +4,11 @@ import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { Machine } from '@/types/machine';
+
+// Permitir renderização dinâmica para melhor indexação
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Tratores Usados - RS, SC, PR | BaitaBriq',
@@ -30,10 +35,17 @@ export const metadata: Metadata = {
 };
 
 export default async function TratoresPage() {
-  const machines = await machineService.getAll({ 
-    category: 'TRACTORS',
-    limit: 50 
-  });
+  let machines: Machine[] = [];
+  
+  try {
+    machines = await machineService.getAll({ 
+      category: 'TRACTORS',
+      limit: 50 
+    });
+  } catch (error) {
+    console.error('Erro ao carregar tratores:', error);
+    // Página ainda renderiza, mas sem máquinas
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
