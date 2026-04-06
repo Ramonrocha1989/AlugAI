@@ -110,7 +110,7 @@ export default function RootLayout({
             <div className="hidden md:block">
               <Header />
             </div>
-            <main className="min-h-screen pb-20 md:pb-0">
+            <main className="min-h-screen pb-20 md:pb-0 md:pt-20">
               {children}
             </main>
             <Footer />

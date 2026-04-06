@@ -86,7 +86,7 @@ export function Header() {
   ];
 
   return (
-    <header className="border-b sticky top-0 bg-white z-50">
+    <header className="border-b fixed top-0 left-0 right-0 bg-white z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center flex-shrink-0 py-1">
           <img src="/logo-sem-fundo.png" alt="BaitaBriq" className="h-12 md:h-16 bg-transparent mix-blend-multiply transform scale-125" />
