@@ -94,15 +94,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{isLogin ? 'Login' : 'Cadastro'}</CardTitle>
-          <CardDescription>
-            {isLogin
-              ? 'Entre com suas credenciais'
-              : 'Crie sua conta para começar'}
-          </CardDescription>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center pb-2">
+          {/* Logo e Nome */}
+          <div className="flex flex-col items-center mb-4">
+            <img 
+              src="/logo-sem-fundo.png" 
+              alt="BaitaBriq" 
+              className="h-16 w-16 mb-3 bg-transparent mix-blend-multiply" 
+            />
+            <h1 className="text-2xl font-bold mb-1">
+              <span style={{ color: '#B81212' }}>baita</span>
+              <span style={{ color: '#11813F' }}>briq</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mb-4">
+              Compre, venda ou troque máquinas e equipamentos
+            </p>
+          </div>
+          
+          <CardTitle className="text-xl">{isLogin ? 'Entrar na sua conta' : 'Criar nova conta'}</CardTitle>
         </CardHeader>
         <CardContent>
           {showVerificationMessage ? (
