@@ -10,6 +10,7 @@ import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/image-upload';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
@@ -44,7 +45,7 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
         state: machine.state,
         city: machine.city,
         zipCode: machine.zipCode || undefined,
-        images: machine.images,
+        images: machine.images || [],
         videoUrl: machine.videoUrl || undefined,
         quickTags: machine.quickTags,
         acceptsTradeDown: machine.acceptsTradeDown,
@@ -249,6 +250,30 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
                 value={formData.description || ''}
                 onChange={(e) => updateFormData({ description: e.target.value })}
                 rows={6}
+                className="mt-2"
+              />
+            </div>
+
+            {/* Seção de Imagens */}
+            <div>
+              <Label>Fotos da Máquina</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                📸 Você pode adicionar novas fotos ou remover as existentes clicando no X que aparece ao passar o mouse sobre cada imagem
+              </p>
+              <ImageUpload
+                images={formData.images || []}
+                onChange={(images) => updateFormData({ images })}
+                maxImages={10}
+              />
+            </div>
+
+            {/* Vídeo */}
+            <div>
+              <Label>Vídeo (opcional)</Label>
+              <Input
+                value={formData.videoUrl || ''}
+                onChange={(e) => updateFormData({ videoUrl: e.target.value })}
+                placeholder="URL do vídeo (YouTube, Vimeo, etc.)"
                 className="mt-2"
               />
             </div>
