@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
-    const { planName, planPrice, planDescription, planType } = await request.json();
+    const body = await request.json();
+    const { planName, planDescription, planType } = body;
+    const planPrice = Number(body.planPrice);
 
     // Validar plano
     const validPlans = ['basico', 'profissional', 'premium'];
@@ -59,6 +61,7 @@ export async function POST(request: NextRequest) {
       sandbox_init_point: preference.sandbox_init_point,
     });
   } catch (error: any) {
+    console.error('[create-preference] ERRO:', error);
     return NextResponse.json(
       { error: 'Erro ao criar pagamento', details: error.message },
       { status: 500 }
