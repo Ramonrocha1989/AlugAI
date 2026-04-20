@@ -17,6 +17,10 @@ const badgeVariants = cva(
         premium: "border-transparent bg-yellow-500 text-white",
         verified: "border-transparent bg-blue-600 text-white",
         lojista: "border-transparent bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg",
+        basico: "border-transparent bg-blue-500 text-white",
+        profissional: "border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg",
+        planPremium: "border-transparent bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg",
+        founder: "border-transparent bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg",
       },
     },
     defaultVariants: {

@@ -17,7 +17,7 @@ export interface Equipment {
   views?: number;
   whatsappClicks?: number;
   qualifiedLeads?: number;
-  ownerPlan?: 'free' | 'lojista';
+  ownerPlan?: PlanId;
 }
 
 // Dados não sensíveis do usuário (armazenados em localStorage)
@@ -27,7 +27,7 @@ export interface User {
   email: string;
   userType: 'INDIVIDUAL' | 'COMPANY';
   role: string;
-  plan: string;
+  plan: PlanId;
   planExpiresAt?: string | null;
   maxAds: number;
   maxPremiumAds: number;
@@ -55,13 +55,24 @@ export interface UserProfile extends User {
   };
 }
 
+export type PlanId = 'free' | 'basico' | 'profissional' | 'premium';
+
 export interface Plan {
-  id: 'free' | 'lojista';
+  id: PlanId;
   name: string;
   price: number;
   maxAds: number;
+  maxPhotos: number;
+  maxVideos: number;
+  adDuration: number; // dias
   maxPremiumAds: number;
   maxFeaturedAds: number;
+  hasAnalytics: boolean;
+  analyticsLevel: 'none' | 'basic' | 'full' | 'premium';
+  hasPriority: boolean;
+  hasStorePage: boolean;
+  hasVerifiedBadge: boolean;
+  supportLevel: 'email_48h' | 'email_24h' | 'whatsapp_12h' | 'whatsapp_4h';
   features: string[];
 }
 
@@ -104,4 +115,6 @@ export interface Company {
   rating: number;
   total_reviews: number;
   created_at: Date;
+  plan?: PlanId;
+  is_verified?: boolean;
 }

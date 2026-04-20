@@ -54,7 +54,7 @@ export function EquipmentCard({ equipment: rawEquipment }: EquipmentCardProps) {
               PREMIUM
             </Badge>
           )}
-          {equipment.ownerPlan === 'lojista' && (
+          {(equipment.ownerPlan === 'profissional' || equipment.ownerPlan === 'premium') && (
             <Badge variant="verified" className="flex items-center gap-1">
               <Award className="h-3 w-3" />
               VERIFICADO

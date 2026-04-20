@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
-  output: 'standalone',
-  trailingSlash: true,
+  ...(isProd && { output: 'standalone', trailingSlash: true }),
   images: {
     remotePatterns: [
       {

@@ -1,3 +1,5 @@
+import { PlanId } from '@/types';
+
 // Tipos de negócio (UPPERCASE para match com backend)
 export type BusinessType = 'SALE' | 'RENTAL' | 'EXCHANGE' | 'SERVICE';
 
@@ -78,7 +80,7 @@ export interface Machine {
   isPremium?: boolean;
   whatsappClicks?: number;
   qualifiedLeads?: number;
-  ownerPlan?: 'free' | 'lojista';
+  ownerPlan?: PlanId;
   
   // Owner aninhado (retornado pelo backend)
   owner: {

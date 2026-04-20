@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Trash2 } from 'lucide-react';
 import { authService } from '@/services/machine-api';
+import { getPlanConfig } from '@/services/machine-api';
+import { PlanId } from '@/types';
 import { apiRequest } from '@/lib/api';
 import { DeleteAccountModal } from '@/components/delete-account-modal';
 
@@ -27,13 +29,11 @@ export default function ProfileClient() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      // Buscar do localStorage (dados básicos)
-      const user = authService.getCurrentUser();
-      if (!user) throw new Error('Não autenticado');
-      return user;
-    },
+    queryKey: ['user'],
+    queryFn: () => authService.getMe(),
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('currentUser'),
   });
 
   const updateProfile = useMutation({
@@ -78,35 +78,59 @@ export default function ProfileClient() {
       <h1 className="text-3xl font-bold mb-6">Meu Perfil</h1>
 
       {/* Seção do Plano */}
-      {profile.plan === 'lojista' && (
-        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              👑 Plano Lojista Ativo
-              <Badge variant="lojista">Premium</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{profile.usage?.activeAds || 0}/{profile.maxAds || '∞'}</div>
-                <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+      {profile.plan !== 'free' && (() => {
+        const planConfig = getPlanConfig(profile.plan as PlanId);
+        const planColors: Record<string, string> = {
+          basico: 'from-blue-50 to-sky-50 border-blue-200',
+          profissional: 'from-indigo-50 to-blue-50 border-indigo-200',
+          premium: 'from-amber-50 to-orange-50 border-amber-200',
+        };
+        const badgeVariant: Record<string, any> = {
+          basico: 'basico',
+          profissional: 'profissional',
+          premium: 'planPremium',
+        };
+        const planIcon: Record<string, string> = {
+          basico: '⚡',
+          profissional: '⭐',
+          premium: '👑',
+        };
+        return (
+          <Card className={`mb-6 bg-gradient-to-r ${planColors[profile.plan] || ''}`}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {planIcon[profile.plan]} Plano {planConfig.name} Ativo
+                <Badge variant={badgeVariant[profile.plan] || 'secondary'}>{planConfig.name}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{profile.usage?.activeAds || 0}/{profile.maxAds}</div>
+                  <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+                </div>
+                {planConfig.maxPremiumAds > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{profile.usage?.premiumAds || 0}/{profile.maxPremiumAds}</div>
+                    <div className="text-sm text-muted-foreground">Premium Ativos</div>
+                  </div>
+                )}
+                {planConfig.maxFeaturedAds > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{profile.usage?.featuredAds || 0}/{profile.maxFeaturedAds}</div>
+                    <div className="text-sm text-muted-foreground">Destaques Ativos</div>
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{profile.usage?.premiumAds || 0}/{profile.maxPremiumAds || 3}</div>
-                <div className="text-sm text-muted-foreground">Premium Ativos</div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                {planConfig.features.slice(0, 4).map((f, i) => (
+                  <span key={i}>✅ {f}{i < 3 ? ' • ' : ''}</span>
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{profile.usage?.featuredAds || 0}/{profile.maxFeaturedAds || 5}</div>
-                <div className="text-sm text-muted-foreground">Destaques Ativos</div>
-              </div>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              ✅ Anúncios ilimitados • ✅ 3 Premium simultâneos • ✅ 5 Destaques simultâneos • ✅ Suporte prioritário
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {!(profile as any).phone && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">

@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/tooltip';
 import { NotificationsDropdown } from '@/components/notifications-dropdown';
 import { authService } from '@/services/machine-api';
+import { getPlanConfig } from '@/services/machine-api';
 import { useLogout } from '@/hooks/use-api';
 import { useUser } from '@/hooks/use-user';
+import { PlanId } from '@/types';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
 import { LogOut, LayoutDashboard, Shield, Heart, FileText, CreditCard, Menu, X, ChevronDown, Tractor, Wheat, MapPin, BookOpen } from 'lucide-react';
@@ -264,11 +266,24 @@ export function Header() {
                 </Link>
               </div>
               <div className="flex items-center gap-2">
-                {user?.plan === 'lojista' && (
-                  <Badge variant="lojista" className="flex items-center gap-1">
-                    👑 Lojista Ativo
-                  </Badge>
-                )}
+                {user && user.plan !== 'free' && (() => {
+                  const planConfig = getPlanConfig(user.plan as PlanId);
+                  const badgeVariant: Record<string, any> = {
+                    basico: 'basico',
+                    profissional: 'profissional',
+                    premium: 'planPremium',
+                  };
+                  const planIcon: Record<string, string> = {
+                    basico: '⚡',
+                    profissional: '⭐',
+                    premium: '👑',
+                  };
+                  return (
+                    <Badge variant={badgeVariant[user.plan] || 'secondary'} className="flex items-center gap-1">
+                      {planIcon[user.plan]} {planConfig.name}
+                    </Badge>
+                  );
+                })()}
                 <Link href="/profile">
                   <Button variant="ghost" size="sm">
                     Perfil
@@ -392,11 +407,24 @@ export function Header() {
                   <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start min-h-[48px]">
                       Perfil
-                      {user?.plan === 'lojista' && (
-                        <Badge variant="lojista" className="ml-2">
-                          👑 Lojista Ativo
-                        </Badge>
-                      )}
+                      {user && user.plan !== 'free' && (() => {
+                        const planConfig = getPlanConfig(user.plan as PlanId);
+                        const badgeVariant: Record<string, any> = {
+                          basico: 'basico',
+                          profissional: 'profissional',
+                          premium: 'planPremium',
+                        };
+                        const planIcon: Record<string, string> = {
+                          basico: '⚡',
+                          profissional: '⭐',
+                          premium: '👑',
+                        };
+                        return (
+                          <Badge variant={badgeVariant[user.plan] || 'secondary'} className="ml-2">
+                            {planIcon[user.plan]} {planConfig.name}
+                          </Badge>
+                        );
+                      })()}
                     </Button>
                   </Link>
                   {user?.role === 'ADMIN' && (

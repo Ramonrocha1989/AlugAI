@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Check, CreditCard } from 'lucide-react';
 
+import { PlanId } from '@/types';
+
 interface CheckoutButtonProps {
   planName: string;
   planPrice: number;
   planDescription: string;
-  planType: 'lojista';
+  planType: PlanId;
 }
 
 export function CheckoutButton({ planName, planPrice, planDescription, planType }: CheckoutButtonProps) {

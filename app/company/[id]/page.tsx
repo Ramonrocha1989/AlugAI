@@ -3,8 +3,9 @@
 import { useCompany, useCompanyMachines } from '@/hooks/use-api';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, MapPin, Star, Calendar, MessageCircle } from 'lucide-react';
+import { Phone, MapPin, Star, Calendar, MessageCircle, Globe, Crown, Shield } from 'lucide-react';
 
 interface CompanyProfileProps {
   params: {
@@ -13,24 +14,15 @@ interface CompanyProfileProps {
 }
 
 export default function CompanyProfile({ params }: CompanyProfileProps) {
-  console.log('=== CompanyProfile component loaded ===');
-  console.log('Params:', params);
-  
   const { data: company, isLoading: companyLoading, error: companyError } = useCompany(params.id);
   const { data: machines, isLoading: machinesLoading } = useCompanyMachines(params.id);
 
   const handleWhatsApp = () => {
     if (!company?.phone) return;
-    
-    // Remove todos os caracteres não numéricos do telefone
     const cleanPhone = company.phone.replace(/\D/g, '');
-    
-    // Monta a mensagem
     const message = encodeURIComponent(
       `Olá! Vi o perfil da empresa *${company.company_name || 'sua empresa'}* no *BaitaBriq* e gostaria de mais informações sobre as máquinas disponíveis.`
     );
-    
-    // Abre o WhatsApp
     window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
   };
 
@@ -50,32 +42,39 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
     );
   }
 
-  if (companyError) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Erro ao carregar empresa</h1>
-        <p className="text-gray-600">Erro: {companyError.message}</p>
-        <p className="text-sm text-gray-500 mt-2">ID buscado: {params.id}</p>
-      </div>
-    );
-  }
-
-  if (!companyLoading && !company) {
+  if (companyError || (!companyLoading && !company)) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Empresa não encontrada</h1>
         <p className="text-gray-600">A empresa que você está procurando não existe.</p>
-        <p className="text-sm text-gray-500 mt-2">ID buscado: {params.id}</p>
       </div>
     );
   }
 
+  // Verificar se é Premium pelo campo do company (backend precisa retornar)
+  const isPremiumStore = company?.plan === 'premium';
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header da Empresa */}
-      <Card className="mb-8">
+      <Card className={`mb-8 ${isPremiumStore ? 'border-amber-300 shadow-lg' : ''}`}>
+        {isPremiumStore && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-3 border-b border-amber-200 flex items-center gap-2">
+            <Crown className="h-5 w-5 text-amber-600" />
+            <span className="font-semibold text-amber-800">Loja Premium</span>
+            <Badge variant="planPremium" className="ml-2">Verificada</Badge>
+          </div>
+        )}
         <CardHeader>
-          <CardTitle className="text-3xl">{company?.company_name}</CardTitle>
+          <CardTitle className="text-3xl flex items-center gap-3">
+            {company?.company_name}
+            {company?.is_verified && (
+              <Badge className="bg-green-500 text-white flex items-center gap-1">
+                <Shield className="h-3 w-3" />
+                Verificado
+              </Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {company?.description && (
@@ -96,6 +95,15 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
                 <span>{company.phone}</span>
               </div>
             )}
+
+            {company?.website && isPremiumStore && (
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-gray-500" />
+                <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  {company.website}
+                </a>
+              </div>
+            )}
             
             {company?.rating && (
               <div className="flex items-center gap-2">
@@ -111,6 +119,30 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
               </div>
             )}
           </div>
+
+          {/* Estatísticas da loja - só Premium */}
+          {isPremiumStore && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t">
+              <div className="text-center">
+                <div className="text-2xl font-bold">{machines?.length || 0}</div>
+                <div className="text-sm text-muted-foreground">Máquinas ativas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{company?.total_reviews || 0}</div>
+                <div className="text-sm text-muted-foreground">Avaliações</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{company?.rating || '-'}</div>
+                <div className="text-sm text-muted-foreground">Nota média</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {company?.created_at ? new Date().getFullYear() - new Date(company.created_at).getFullYear() : 0}+
+                </div>
+                <div className="text-sm text-muted-foreground">Anos na plataforma</div>
+              </div>
+            </div>
+          )}
           
           {company?.phone && (
             <div className="mt-6">
@@ -136,14 +168,14 @@ export default function CompanyProfile({ params }: CompanyProfileProps) {
             ))}
           </div>
         ) : machines && machines.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {machines.map((machine) => (
               <MachineCard key={machine.id} machine={machine} />
             ))}
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">Esta empresa ainda não possui máquinas cadastradas.</p>
+            <p className="text-gray-600">Esta empresa ainda não possui máquinas cadastradas.</p>
           </div>
         )}
       </div>

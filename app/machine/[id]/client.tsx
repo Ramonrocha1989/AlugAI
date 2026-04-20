@@ -73,15 +73,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     return businessType === 'RENTAL' ? `${formatted}/dia` : formatted;
   };
 
-  const handleWhatsApp = async () => {
-    try {
-      await machineService.trackWhatsApp(machine.id);
-    } catch (error) {
-      logger.error('Erro ao rastrear:', error);
-    }
-    
-    analytics.trackWhatsAppClick(machine.name, machine.price, machine.ownerName);
-    
+  const handleWhatsApp = () => {
     const phone = machine.ownerPhone?.replace(/\D/g, '') || '';
     
     if (!phone) {
@@ -98,7 +90,11 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
       `Localização: ${machine.city}, ${machine.state}\n\n` +
       `Gostaria de mais informações!`
     );
+    
     window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
+    
+    machineService.trackWhatsApp(machine.id).catch(() => {});
+    analytics.trackWhatsAppClick(machine.name, machine.price, machine.ownerName);
   };
 
   const handleReview = () => {

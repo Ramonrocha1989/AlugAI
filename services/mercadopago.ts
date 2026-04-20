@@ -11,8 +11,10 @@ export interface PaymentItem {
   description?: string;
 }
 
+export type PaidPlanType = 'basico' | 'profissional' | 'premium';
+
 export const mercadoPagoService = {
-  createPreference: async (items: PaymentItem[], userId: string, planType: 'lojista') => {
+  createPreference: async (items: PaymentItem[], userId: string, planType: PaidPlanType) => {
     const preference = new Preference(client);
     
     const externalReference = `${userId}-${planType}`;

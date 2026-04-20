@@ -14,7 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Loader2, Edit, Trash2, Eye, MessageCircle, CheckCircle } from 'lucide-react';
 import { authService } from '@/services/machine-api';
+import { getPlanConfig } from '@/services/machine-api';
 import { Machine } from '@/types/machine';
+import { PlanId } from '@/types';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -138,36 +140,55 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Seção do Plano Lojista */}
-      {user?.plan === 'lojista' && (
-        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              👑 Plano Lojista Ativo
-              <Badge variant="lojista">Premium</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{user.usage?.activeAds || 0}/{user.maxAds}</div>
-                <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+      {/* Seção do Plano */}
+      {user && user.plan !== 'free' && (() => {
+        const planConfig = getPlanConfig(user.plan as PlanId);
+        const planColors: Record<string, string> = {
+          basico: 'from-blue-50 to-sky-50 border-blue-200',
+          profissional: 'from-indigo-50 to-blue-50 border-indigo-200',
+          premium: 'from-amber-50 to-orange-50 border-amber-200',
+        };
+        const planBadge: Record<string, any> = {
+          basico: 'basico',
+          profissional: 'profissional',
+          premium: 'planPremium',
+        };
+        return (
+          <Card className={`mb-6 bg-gradient-to-r ${planColors[user.plan] || 'from-gray-50 to-gray-50 border-gray-200'}`}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {user.plan === 'premium' ? '👑' : user.plan === 'profissional' ? '⭐' : '⚡'} Plano {planConfig.name} Ativo
+                <Badge variant={planBadge[user.plan] || 'secondary'}>{planConfig.name}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{user.usage?.activeAds || 0}/{user.maxAds}</div>
+                  <div className="text-sm text-muted-foreground">Anúncios Ativos</div>
+                </div>
+                {planConfig.maxPremiumAds > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{user.usage?.premiumAds || 0}/{user.maxPremiumAds}</div>
+                    <div className="text-sm text-muted-foreground">Premium Ativos</div>
+                  </div>
+                )}
+                {planConfig.maxFeaturedAds > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{user.usage?.featuredAds || 0}/{user.maxFeaturedAds}</div>
+                    <div className="text-sm text-muted-foreground">Destaques Ativos</div>
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{user.usage?.premiumAds || 0}/{user.maxPremiumAds}</div>
-                <div className="text-sm text-muted-foreground">Premium Ativos</div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                {planConfig.features.slice(0, 4).map((f, i) => (
+                  <span key={i}>✅ {f}{i < 3 ? ' • ' : ''}</span>
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{user.usage?.featuredAds || 0}/{user.maxFeaturedAds}</div>
-                <div className="text-sm text-muted-foreground">Destaques Ativos</div>
-              </div>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              ✅ Anúncios ilimitados • ✅ 3 Premium simultâneos • ✅ 5 Destaques simultâneos • ✅ Suporte prioritário
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {isLoading || userLoading ? (
         <div className="flex justify-center items-center py-12">
@@ -176,7 +197,7 @@ export default function DashboardPage() {
       ) : machines && machines.length > 0 ? (
         <>
           {/* Analytics Dashboard */}
-          <DashboardAnalytics machines={machines} />
+          <DashboardAnalytics machines={machines} userPlan={(user?.plan || 'free') as PlanId} />
 
           {/* Lista de Máquinas */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-32">
@@ -240,8 +261,8 @@ export default function DashboardPage() {
                   Marcar Lead Qualificado
                 </Button>
 
-                {/* Botões Premium e Destaque (apenas para Lojista) */}
-                {user?.plan === 'lojista' && (
+                {/* Botões Premium e Destaque (planos que suportam) */}
+                {user && getPlanConfig(user.plan as PlanId).maxPremiumAds > 0 && (
                   <div className="space-y-2 mt-3 pt-3 border-t">
                     <Button
                       size="sm"

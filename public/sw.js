@@ -1,59 +1,49 @@
-const CACHE_NAME = 'baitabriq-v2';
-const urlsToCache = [
-  '/',
-  '/login',
-  '/manifest.json'
+const CACHE_NAME = 'baitabriq-v3';
+const STATIC_ASSETS = [
+  '/manifest.json',
+  '/logo-sem-fundo.png',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        // Cachear URLs individualmente para evitar falhas
-        return Promise.allSettled(
-          urlsToCache.map(url => 
-            cache.add(url).catch(err => console.log(`Failed to cache ${url}:`, err))
-          )
-        );
-      })
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(
+        STATIC_ASSETS.map((url) => cache.add(url).catch(() => {}))
+      )
+    )
   );
-  self.skipWaiting(); // Forçar ativação imediata
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((names) =>
+      Promise.all(
+        names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+      )
+    )
   );
-  self.clients.claim(); // Assumir controle imediatamente
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Só interceptar requests para o mesmo domínio
-  if (event.request.url.startsWith(self.location.origin)) {
+  const url = new URL(event.request.url);
+
+  // Nunca cachear: chunks JS, CSS, API, _next
+  if (
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/api/') ||
+    event.request.method !== 'GET'
+  ) {
+    return;
+  }
+
+  // Só cachear assets estáticos (imagens, ícones, manifest)
+  if (STATIC_ASSETS.some((asset) => url.pathname === asset)) {
     event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          if (response) {
-            return response;
-          }
-          
-          return fetch(event.request).catch((error) => {
-            console.log('Fetch failed:', error);
-            // Se fetch falhar e for navegação, retornar página inicial
-            if (event.request.mode === 'navigate') {
-              return caches.match('/') || new Response('Offline', { status: 503 });
-            }
-            throw error;
-          });
-        })
+      caches.match(event.request).then((cached) => cached || fetch(event.request))
     );
   }
 });

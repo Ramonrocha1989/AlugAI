@@ -20,6 +20,8 @@ import { ImageUpload } from '@/components/image-upload';
 import { analytics } from '@/lib/analytics';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
 import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
+import { getPlanConfig } from '@/services/machine-api';
+import { PlanId } from '@/types';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS, CATEGORY_ICONS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
 
@@ -44,6 +46,12 @@ export default function NewMachinePage() {
     acceptsFinancing: false,
   });
 
+  // Limites do plano do usuário
+  const currentUser = authService.getCurrentUser();
+  const planConfig = getPlanConfig((currentUser?.plan || 'free') as PlanId);
+  const maxPhotos = planConfig.maxPhotos;
+  const maxVideos = planConfig.maxVideos;
+
   useEffect(() => {
     const checkUserAndLimit = async () => {
       const user = authService.getCurrentUser();
@@ -54,11 +62,11 @@ export default function NewMachinePage() {
 
       try {
         const myMachines = await machineService.getMyMachines();
-        const userPlan = user.plan || 'free';
-        const maxAds = userPlan === 'free' ? 3 : 999;
+        const userPlan = (user.plan || 'free') as PlanId;
+        const planConfig = getPlanConfig(userPlan);
         
-        if (myMachines.length >= maxAds) {
-          setLimitError(`Limite de ${maxAds} anúncios atingido. Faça upgrade para o plano Lojista.`);
+        if (myMachines.length >= planConfig.maxAds) {
+          setLimitError(`Limite de ${planConfig.maxAds} anúncios atingido no plano ${planConfig.name}. Faça upgrade para anunciar mais.`);
           setShowUpgradeModal(true);
         }
       } catch (error: any) {
@@ -87,7 +95,7 @@ export default function NewMachinePage() {
   };
 
   const handleAddImage = () => {
-    if (imageUrl && formData.images && formData.images.length < 10) {
+    if (imageUrl && formData.images && formData.images.length < maxPhotos) {
       updateFormData({ images: [...formData.images, imageUrl] });
       setImageUrl('');
     }
@@ -179,7 +187,7 @@ export default function NewMachinePage() {
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <p className="text-sm text-destructive">{limitError}</p>
         </div>
-        <UpgradeLimitModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+        <UpgradeLimitModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} currentPlan={(authService.getCurrentUser()?.plan || 'free') as PlanId} />
       </div>
     );
   }
@@ -446,25 +454,36 @@ export default function NewMachinePage() {
           {step === 3 && (
             <div className="space-y-4">
               <div>
-                <Label>Fotos da Máquina (1 a 10)</Label>
+                <Label>Fotos da Máquina (1 a {maxPhotos})</Label>
                 <p className="text-sm text-muted-foreground mb-3">
                   📸 Sugestão: lateral completa, painel de horas, pneus/esteiras, motor, <strong>número de série</strong>
+                  {maxPhotos <= 3 && (
+                    <span className="block text-xs text-yellow-600 mt-1">
+                      ⚡ Faça upgrade para enviar mais fotos (até 25 no plano Premium)
+                    </span>
+                  )}
                 </p>
                 <ImageUpload
                   images={formData.images || []}
                   onChange={(images) => updateFormData({ images })}
-                  maxImages={10}
+                  maxImages={maxPhotos}
                 />
               </div>
 
               <div>
                 <Label>Vídeo (opcional)</Label>
-                <Input
-                  value={formData.videoUrl || ''}
-                  onChange={(e) => updateFormData({ videoUrl: e.target.value })}
-                  placeholder="URL do vídeo (até 30 segundos)"
-                  className="mt-2"
-                />
+                {maxVideos > 0 ? (
+                  <Input
+                    value={formData.videoUrl || ''}
+                    onChange={(e) => updateFormData({ videoUrl: e.target.value })}
+                    placeholder="URL do vídeo (até 60 segundos)"
+                    className="mt-2"
+                  />
+                ) : (
+                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                    🎥 Vídeo disponível a partir do plano Profissional (R$ 179/mês)
+                  </div>
+                )}
               </div>
             </div>
           )}

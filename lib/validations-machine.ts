@@ -46,7 +46,7 @@ export const createMachineSchema = z.object({
   city: z.string().min(2, 'Cidade é obrigatória'),
   zipCode: z.string().optional(),
   
-  images: z.array(z.string().url()).min(1, 'Adicione pelo menos uma imagem').max(10, 'Máximo de 10 imagens'),
+  images: z.array(z.string().url()).min(1, 'Adicione pelo menos uma imagem').max(25, 'Máximo de 25 imagens'),
   videoUrl: z.string().url().optional().or(z.literal('')),
   
   quickTags: z.array(z.enum([

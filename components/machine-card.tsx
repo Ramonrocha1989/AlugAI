@@ -51,7 +51,7 @@ export function MachineCard({ machine }: MachineCardProps) {
             </Badge>
           </div>
 
-          {/* Verification Badges */}
+          {/* Verification & Plan Badges */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">
             {machine.isVerifiedSeller && (
               <Badge className="bg-green-500 text-white flex items-center gap-1">
@@ -63,6 +63,16 @@ export function MachineCard({ machine }: MachineCardProps) {
               <Badge className="bg-yellow-500 text-white flex items-center gap-1">
                 <Star className="h-3 w-3" />
                 PREMIUM
+              </Badge>
+            )}
+            {machine.ownerPlan === 'premium' && (
+              <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs">
+                👑 Loja Premium
+              </Badge>
+            )}
+            {machine.ownerPlan === 'profissional' && !machine.isPremium && (
+              <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs">
+                ⭐ Profissional
               </Badge>
             )}
           </div>

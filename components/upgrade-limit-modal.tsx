@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { PlanId } from '@/types';
+import { getPlanConfig, PLANS_CONFIG } from '@/services/machine-api';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +12,23 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowUp } from 'lucide-react';
 
 interface UpgradeLimitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentPlan?: PlanId;
 }
 
-export function UpgradeLimitModal({ open, onOpenChange }: UpgradeLimitModalProps) {
+export function UpgradeLimitModal({ open, onOpenChange, currentPlan = 'free' }: UpgradeLimitModalProps) {
   const router = useRouter();
+  const current = getPlanConfig(currentPlan);
+
+  // Próximo plano disponível
+  const planOrder: PlanId[] = ['free', 'basico', 'profissional', 'premium'];
+  const currentIndex = planOrder.indexOf(currentPlan);
+  const nextPlanId = currentIndex < planOrder.length - 1 ? planOrder[currentIndex + 1] : null;
+  const nextPlan = nextPlanId ? getPlanConfig(nextPlanId) : null;
 
   const handleUpgrade = () => {
     onOpenChange(false);
@@ -34,16 +44,21 @@ export function UpgradeLimitModal({ open, onOpenChange }: UpgradeLimitModalProps
             <DialogTitle>Limite de Anúncios Atingido</DialogTitle>
           </div>
           <DialogDescription className="pt-4">
-            Você atingiu o limite de 3 anúncios do plano Gratuito.
-            <br />
-            <br />
-            Faça upgrade para o plano <strong>Lojista</strong> e tenha:
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Anúncios ilimitados</li>
-              <li>Selo Vendedor Verificado</li>
-              <li>Prioridade nas buscas</li>
-              <li>15 fotos por anúncio</li>
-            </ul>
+            Você atingiu o limite de <strong>{current.maxAds} anúncios</strong> do plano <strong>{current.name}</strong>.
+            {nextPlan && (
+              <>
+                <br /><br />
+                Faça upgrade para o plano <strong>{nextPlan.name}</strong> (R$ {nextPlan.price}/mês) e tenha:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>{nextPlan.maxAds} anúncios ativos</li>
+                  <li>{nextPlan.maxPhotos} fotos por anúncio</li>
+                  {nextPlan.maxVideos > 0 && <li>{nextPlan.maxVideos} vídeo(s) por anúncio</li>}
+                  {nextPlan.maxPremiumAds > 0 && <li>{nextPlan.maxPremiumAds} anúncios Premium</li>}
+                  {nextPlan.maxFeaturedAds > 0 && <li>{nextPlan.maxFeaturedAds} anúncios Destaque</li>}
+                  {nextPlan.hasAnalytics && <li>Analytics {nextPlan.analyticsLevel === 'basic' ? 'básico' : 'completo'}</li>}
+                </ul>
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -51,6 +66,7 @@ export function UpgradeLimitModal({ open, onOpenChange }: UpgradeLimitModalProps
             Cancelar
           </Button>
           <Button onClick={handleUpgrade}>
+            <ArrowUp className="h-4 w-4 mr-2" />
             Ver Planos
           </Button>
         </DialogFooter>

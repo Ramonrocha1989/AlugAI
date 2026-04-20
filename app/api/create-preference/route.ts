@@ -6,6 +6,15 @@ export async function POST(request: NextRequest) {
   try {
     const { planName, planPrice, planDescription, planType } = await request.json();
 
+    // Validar plano
+    const validPlans = ['basico', 'profissional', 'premium'];
+    if (!validPlans.includes(planType)) {
+      return NextResponse.json(
+        { error: 'Plano inválido' },
+        { status: 400 }
+      );
+    }
+
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
