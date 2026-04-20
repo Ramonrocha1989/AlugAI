@@ -17,7 +17,7 @@ export const mercadoPagoService = {
   createPreference: async (items: PaymentItem[], userId: string, planType: PaidPlanType) => {
     const preference = new Preference(client);
     
-    const externalReference = `${userId}-${planType}`;
+    const externalReference = `${userId}|${planType}|${items[0].unit_price}`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
     
     const result = await preference.create({

@@ -91,4 +91,16 @@ export const analytics = {
       });
     }
   },
+
+  // 9. Compra (e-commerce GA4)
+  trackPurchase: (transactionId: string, planName: string, value: number) => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'purchase', {
+        transaction_id: transactionId,
+        value: value,
+        currency: 'BRL',
+        items: [{ item_name: planName, price: value, quantity: 1 }],
+      });
+    }
+  },
 };
