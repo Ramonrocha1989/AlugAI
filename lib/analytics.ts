@@ -92,7 +92,40 @@ export const analytics = {
     }
   },
 
-  // 9. Compra (e-commerce GA4)
+  // 9. Visualização de produto (e-commerce GA4)
+  trackViewItem: (machineId: string, machineName: string, price: number, category: string) => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'view_item', {
+        currency: 'BRL',
+        value: price,
+        items: [{ item_id: machineId, item_name: machineName, price, item_category: category, quantity: 1 }],
+      });
+    }
+  },
+
+  // 10. Adicionar ao carrinho (e-commerce GA4)
+  trackAddToCart: (planName: string, price: number, planType: string) => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'add_to_cart', {
+        currency: 'BRL',
+        value: price,
+        items: [{ item_name: planName, item_category: planType, price, quantity: 1 }],
+      });
+    }
+  },
+
+  // 11. Iniciar checkout (e-commerce GA4)
+  trackBeginCheckout: (planName: string, price: number, planType: string) => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'begin_checkout', {
+        currency: 'BRL',
+        value: price,
+        items: [{ item_name: planName, item_category: planType, price, quantity: 1 }],
+      });
+    }
+  },
+
+  // 12. Compra (e-commerce GA4)
   trackPurchase: (transactionId: string, planName: string, value: number) => {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'purchase', {

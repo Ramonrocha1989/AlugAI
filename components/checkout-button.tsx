@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Check, CreditCard } from 'lucide-react';
+import { Loader2, CreditCard } from 'lucide-react';
+import { analytics } from '@/lib/analytics';
 
 import { PlanId } from '@/types';
 
@@ -19,6 +19,7 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
 
   const handleCheckout = async () => {
     setLoading(true);
+    analytics.trackAddToCart(planName, planPrice, planType);
 
     try {
       const token = localStorage.getItem('accessToken');
@@ -46,6 +47,7 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
       const data = await response.json();
 
       if (data.init_point) {
+        analytics.trackBeginCheckout(planName, planPrice, planType);
         window.location.href = data.init_point;
       } else {
         alert('Erro ao criar pagamento');

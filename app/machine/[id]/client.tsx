@@ -41,6 +41,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
     if (machine) {
       incrementViews.mutate(machine.id);
       analytics.trackMachineView(machine.id, machine.name, machine.category);
+      analytics.trackViewItem(machine.id, machine.name, machine.price, machine.category);
     }
   }, [machine?.id]);
 
