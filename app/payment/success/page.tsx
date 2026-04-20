@@ -17,8 +17,13 @@ function PaymentSuccessContent() {
     const externalRef = searchParams.get('external_reference') || '';
 
     if (status === 'approved' && paymentId) {
-      const [, planName, priceStr] = externalRef.split('|');
-      analytics.trackPurchase(paymentId, planName || 'plano', parseFloat(priceStr) || 0);
+      const PLAN_NAMES: Record<string, string> = {
+        basico: 'Básico',
+        profissional: 'Profissional',
+        premium: 'Premium',
+      };
+      const [, planType, priceStr] = externalRef.split('|');
+      analytics.trackPurchase(paymentId, PLAN_NAMES[planType] || planType || 'plano', parseFloat(priceStr) || 0);
     }
   }, [searchParams]);
 

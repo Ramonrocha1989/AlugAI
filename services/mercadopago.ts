@@ -30,6 +30,7 @@ export const mercadoPagoService = {
           currency_id: 'BRL',
         })),
         external_reference: externalReference,
+        auto_return: 'approved',
         back_urls: {
           success: `${siteUrl}/payment/success`,
           failure: `${siteUrl}/payment/failure`,
