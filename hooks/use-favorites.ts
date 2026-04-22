@@ -29,6 +29,8 @@ export function useAddFavorite() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['favorited-machines'] });
+      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-summary'] });
     },
   });
 }
@@ -42,6 +44,8 @@ export function useRemoveFavorite() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['favorited-machines'] });
+      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-summary'] });
     },
   });
 }
