@@ -266,14 +266,16 @@ export function Header() {
                 </Link>
               </div>
               <div className="flex items-center gap-2">
-                {user && user.plan !== 'free' && (() => {
+                {user && (() => {
                   const planConfig = getPlanConfig(user.plan as PlanId);
                   const badgeVariant: Record<string, any> = {
+                    free: 'secondary',
                     basico: 'basico',
                     profissional: 'profissional',
                     premium: 'planPremium',
                   };
                   const planIcon: Record<string, string> = {
+                    free: '📦',
                     basico: '⚡',
                     profissional: '⭐',
                     premium: '👑',
@@ -407,14 +409,16 @@ export function Header() {
                   <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start min-h-[48px]">
                       Perfil
-                      {user && user.plan !== 'free' && (() => {
+                      {user && (() => {
                         const planConfig = getPlanConfig(user.plan as PlanId);
                         const badgeVariant: Record<string, any> = {
+                          free: 'secondary',
                           basico: 'basico',
                           profissional: 'profissional',
                           premium: 'planPremium',
                         };
                         const planIcon: Record<string, string> = {
+                          free: '📦',
                           basico: '⚡',
                           profissional: '⭐',
                           premium: '👑',

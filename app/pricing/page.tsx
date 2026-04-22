@@ -110,7 +110,7 @@ export default function PricingPage() {
               )}
 
               {/* Badge plano ativo */}
-              {isCurrentPlan && !isFree && (
+              {isCurrentPlan && (
                 <div className="absolute -top-3 right-4 z-10">
                   <Badge variant={PLAN_BADGE_VARIANT[plan.id]} className="flex items-center gap-1">
                     <Shield className="h-3 w-3" />
