@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { CsrfInitializer } from "@/components/csrf-initializer";
 import { LocalBusinessSchema } from "@/components/local-business-schema";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -123,7 +124,9 @@ export default function RootLayout({
               <Header />
             </div>
             <main className="min-h-screen pb-20 md:pb-0 md:pt-20">
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </main>
             <Footer />
             <BottomNav />

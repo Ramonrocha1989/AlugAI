@@ -11,7 +11,8 @@ import {
   Bell,
   Star,
   MessageSquare,
-  ArrowLeft
+  ArrowLeft,
+  LayoutDashboard
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ const menuItems = [
   {
     title: 'Conta',
     items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, description: 'Suas máquinas e painel de controle' },
       { name: 'Meu Perfil', href: '/profile', icon: User, description: 'Visualizar e editar perfil' },
       { name: 'Notificações', href: '/dashboard/notifications', icon: Bell, description: 'Gerenciar notificações' },
     ]

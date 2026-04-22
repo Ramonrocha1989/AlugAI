@@ -8,6 +8,7 @@ import { DashboardAnalytics } from '@/components/dashboard-analytics';
 import { PlanCard } from '@/components/plan-card';
 import { MachineListItem } from '@/components/machine-list-item';
 import { DashboardSkeleton } from '@/components/dashboard-skeleton';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { PlanId } from '@/types';
@@ -53,15 +54,23 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {user && <PlanCard user={user} />}
+      {user && (
+        <ErrorBoundary>
+          <PlanCard user={user} />
+        </ErrorBoundary>
+      )}
 
       {machines && machines.length > 0 ? (
         <>
-          <DashboardAnalytics machines={machines} userPlan={(user?.plan || 'free') as PlanId} />
+          <ErrorBoundary>
+            <DashboardAnalytics machines={machines} userPlan={(user?.plan || 'free') as PlanId} />
+          </ErrorBoundary>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-32">
             {machines.map((machine) => (
-              <MachineListItem key={machine.id} machine={machine} user={user} />
+              <ErrorBoundary key={machine.id}>
+                <MachineListItem machine={machine} user={user} />
+              </ErrorBoundary>
             ))}
           </div>
         </>

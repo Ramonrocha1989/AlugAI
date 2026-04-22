@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import MachineDetailsClient from './client';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { machineService } from '@/services/machine-api';
 import { BUSINESS_TYPES, CATEGORIES } from '@/lib/constants';
 import { MachineSchema } from '@/components/machine-schema';
@@ -96,7 +97,9 @@ export default async function MachineDetailsPage({ params }: Props) {
       <div className="container mx-auto px-4 py-4">
         <Breadcrumbs items={breadcrumbItems} />
       </div>
-      <MachineDetailsClient params={params} />
+      <ErrorBoundary>
+        <MachineDetailsClient params={params} />
+      </ErrorBoundary>
     </>
   );
 }
