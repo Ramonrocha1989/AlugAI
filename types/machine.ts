@@ -76,17 +76,69 @@ export interface Machine {
   updatedAt: string;
   views: number;
   
-  // Monetização (NOVOS CAMPOS)
+  // Monetização
   isPremium?: boolean;
   whatsappClicks?: number;
   qualifiedLeads?: number;
   ownerPlan?: PlanId;
+  
+  // Analytics (retornado em /machines/my)
+  favoritesCount?: number;
+  proposalsCount?: {
+    pending: number;
+    accepted: number;
+    rejected: number;
+    countered: number;
+  };
   
   // Owner aninhado (retornado pelo backend)
   owner: {
     id: string;
     name: string;
     email: string;
+  };
+}
+
+// Analytics summary do usuário
+export interface AnalyticsSummary {
+  totals: {
+    views: number;
+    whatsappClicks: number;
+    qualifiedLeads: number;
+    favorites: number;
+    proposals: {
+      pending: number;
+      accepted: number;
+      rejected: number;
+      countered: number;
+    };
+  };
+  averages: {
+    daysToFirstContact: number;
+    viewsPerMachine: number;
+    clickRatePercent: number;
+  };
+}
+
+// Benchmarks por categoria
+export interface CategoryBenchmarks {
+  category: string;
+  platformAverage: {
+    views: number;
+    whatsappClicks: number;
+    clickRatePercent: number;
+    daysToSell: number;
+    averagePrice: number;
+  };
+  userAverage: {
+    views: number;
+    whatsappClicks: number;
+    clickRatePercent: number;
+    averagePrice: number;
+  };
+  comparison: {
+    viewsVsPlatform: number;
+    clickRateVsPlatform: number;
   };
 }
 

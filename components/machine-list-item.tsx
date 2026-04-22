@@ -8,23 +8,58 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/toast-provider';
 import { useDeleteMachine, useUpdateMachine } from '@/hooks/use-machines';
-import { useMarkLead } from '@/hooks/use-subscription';
 import { getPlanConfig } from '@/services/machine-api';
 import { Machine } from '@/types/machine';
 import { User, PlanId } from '@/types';
-import { Edit, Trash2, Eye, MessageCircle, CheckCircle, Loader2 } from 'lucide-react';
+import {
+  Edit, Trash2, Eye, MessageCircle, Loader2,
+  Heart, FileText, Clock, AlertTriangle,
+} from 'lucide-react';
 
 interface MachineListItemProps {
   machine: Machine;
   user: User | undefined;
 }
 
+function getDaysSince(dateStr: string): number {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getMachineAlerts(machine: Machine): string[] {
+  const alerts: string[] = [];
+  const days = getDaysSince(machine.createdAt);
+
+  if (machine.views > 20 && (machine.whatsappClicks || 0) === 0) {
+    alerts.push('Muitas views sem contato — melhore as fotos ou descrição');
+  }
+  if ((machine.whatsappClicks || 0) > 5 && (machine.proposalsCount?.pending || 0) === 0 && (machine.favoritesCount || 0) === 0) {
+    alerts.push('Contatos sem interesse visível — revise o preço ou condições');
+  }
+  if (days > 30 && machine.views < 10) {
+    alerts.push('Anúncio com poucas views — considere ativar Premium');
+  }
+  if (days > 60 && (machine.whatsappClicks || 0) === 0) {
+    alerts.push('60+ dias sem contato — considere baixar o preço');
+  }
+
+  return alerts;
+}
+
 export function MachineListItem({ machine, user }: MachineListItemProps) {
   const { showToast } = useToast();
   const deleteMachine = useDeleteMachine();
   const updateMachine = useUpdateMachine();
-  const markLead = useMarkLead();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const userPlan = (user?.plan || 'free') as PlanId;
+  const planConfig = user ? getPlanConfig(userPlan) : null;
+  const showAlerts = userPlan === 'profissional' || userPlan === 'premium';
+  const showExtras = userPlan === 'premium';
+  const daysSince = getDaysSince(machine.createdAt);
+  const alerts = showAlerts ? getMachineAlerts(machine) : [];
+  const totalProposals = machine.proposalsCount
+    ? machine.proposalsCount.pending + machine.proposalsCount.accepted + machine.proposalsCount.rejected + machine.proposalsCount.countered
+    : 0;
 
   const handleDelete = async () => {
     try {
@@ -41,14 +76,6 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
     }
   };
 
-  const handleMarkLead = async () => {
-    try {
-      await markLead.mutateAsync(machine.id);
-      showToast('Lead marcado como qualificado!', 'success');
-    } catch (error: any) {
-      showToast(error.response?.data?.message || 'Não foi possível marcar o lead', 'error');
-    }
-  };
 
   const togglePremium = async () => {
     try {
@@ -84,8 +111,6 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
     }
   };
 
-  const planConfig = user ? getPlanConfig(user.plan as PlanId) : null;
-
   return (
     <>
       <div className="relative">
@@ -109,6 +134,18 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
         </div>
 
         <div className="mt-3 p-3 bg-muted rounded-lg space-y-2">
+          {/* Dias desde publicação — Básico+ */}
+          {userPlan !== 'free' && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Clock className="h-4 w-4" /> Publicado há
+              </span>
+              <Badge variant={daysSince > 60 ? 'destructive' : daysSince > 30 ? 'outline' : 'secondary'}>
+                {daysSince} {daysSince === 1 ? 'dia' : 'dias'}
+              </Badge>
+            </div>
+          )}
+
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1 text-muted-foreground">
               <Eye className="h-4 w-4" /> Visualizações
@@ -117,30 +154,45 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1 text-muted-foreground">
-              <MessageCircle className="h-4 w-4" /> Cliques WhatsApp
+              <MessageCircle className="h-4 w-4" /> Contatos
             </span>
             <Badge variant="secondary">{machine.whatsappClicks || 0}</Badge>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <CheckCircle className="h-4 w-4" /> Leads Qualificados
-            </span>
-            <Badge variant="secondary">{machine.qualifiedLeads || 0}</Badge>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full mt-2"
-            onClick={handleMarkLead}
-            disabled={markLead.isPending}
-          >
-            {markLead.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-1" />
-            ) : (
-              <CheckCircle className="h-4 w-4 mr-1" />
-            )}
-            Marcar Lead Qualificado
-          </Button>
+
+          {/* Favoritos e Propostas — Premium */}
+          {showExtras && (
+            <>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Heart className="h-4 w-4" /> Favoritaram
+                </span>
+                <Badge variant="secondary">{machine.favoritesCount || 0}</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <FileText className="h-4 w-4" /> Propostas
+                </span>
+                <div className="flex items-center gap-1">
+                  {machine.proposalsCount?.pending ? (
+                    <Badge className="bg-yellow-100 text-yellow-800">{machine.proposalsCount.pending} pendente{machine.proposalsCount.pending > 1 ? 's' : ''}</Badge>
+                  ) : null}
+                  <Badge variant="secondary">{totalProposals} total</Badge>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Alertas por máquina — Profissional+ */}
+          {alerts.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {alerts.map((alert, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 p-2 rounded">
+                  <AlertTriangle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                  <span>{alert}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {planConfig && planConfig.maxPremiumAds > 0 && user && (
             <div className="space-y-2 mt-3 pt-3 border-t">
