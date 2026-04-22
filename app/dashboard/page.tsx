@@ -41,13 +41,13 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Minhas Máquinas</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-1">Minhas Máquinas</h1>
           <p className="text-muted-foreground">Gerencie seus anúncios de máquinas</p>
         </div>
-        <Link href="/dashboard/new-machine">
-          <Button size="lg">
+        <Link href="/dashboard/new-machine" className="sm:flex-shrink-0">
+          <Button size="lg" className="w-full sm:w-auto">
             <Plus className="h-5 w-5 mr-2" />
             Anunciar Máquina
           </Button>
