@@ -1,44 +1,37 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, PreApproval } from 'mercadopago';
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
 });
 
-export interface PaymentItem {
-  title: string;
-  quantity: number;
-  unit_price: number;
-  description?: string;
-}
-
 export type PaidPlanType = 'basico' | 'profissional' | 'premium';
 
+const PLAN_PRICES: Record<PaidPlanType, number> = {
+  basico: 89,
+  profissional: 179,
+  premium: 349,
+};
+
 export const mercadoPagoService = {
-  createPreference: async (items: PaymentItem[], userId: string, planType: PaidPlanType) => {
-    const preference = new Preference(client);
-    
-    const externalReference = `${userId}|${planType}|${items[0].unit_price}`;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-    
-    const result = await preference.create({
-      body: {
-        items: items.map((item, index) => ({
-          id: `item-${index}`,
-          title: item.title,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          currency_id: 'BRL',
-        })),
-        external_reference: externalReference,
-        ...(siteUrl.startsWith('https') && { auto_return: 'approved' }),
-        back_urls: {
-          success: `${siteUrl}/payment/success`,
-          failure: `${siteUrl}/payment/failure`,
-          pending: `${siteUrl}/payment/pending`,
-        },
-        notification_url: `${siteUrl}/api/webhook/mercadopago`,
+  createSubscription: async (planName: string, planType: PaidPlanType, userId: string, payerEmail: string) => {
+    const preapproval = new PreApproval(client);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br';
+    const price = PLAN_PRICES[planType];
+
+    const body = {
+      reason: `BaitaBriq - Plano ${planName}`,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: 'months' as const,
+        transaction_amount: Number(price),
+        currency_id: 'BRL' as const,
       },
-    });
+      external_reference: `${userId}|${planType}|${price}`,
+      back_url: `${siteUrl}/payment/success`,
+      payer_email: payerEmail,
+    };
+
+    const result = await preapproval.create({ body });
 
     return result;
   },

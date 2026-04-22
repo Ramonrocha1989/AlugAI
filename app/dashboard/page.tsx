@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const deleteMachine = useDeleteMachine();
   const updateMachine = useUpdateMachine();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [cancellingPlan, setCancellingPlan] = useState(false);
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -184,6 +185,39 @@ export default function DashboardPage() {
                 {planConfig.features.slice(0, 4).map((f, i) => (
                   <span key={i}>✅ {f}{i < 3 ? ' • ' : ''}</span>
                 ))}
+              </div>
+              <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {user.planExpiresAt
+                    ? `Renova em ${new Date(user.planExpiresAt).toLocaleDateString('pt-BR')}`
+                    : 'Assinatura ativa'}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  disabled={cancellingPlan}
+                  onClick={async () => {
+                    if (!confirm('Tem certeza que deseja cancelar sua assinatura? Seus anúncios ficarão ativos até o fim do período pago.')) return;
+                    setCancellingPlan(true);
+                    try {
+                      const token = localStorage.getItem('accessToken');
+                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/cancel`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (!res.ok) throw new Error();
+                      showToast('Assinatura cancelada. Seu plano fica ativo até o fim do período.', 'success');
+                      window.location.reload();
+                    } catch {
+                      showToast('Erro ao cancelar assinatura', 'error');
+                    } finally {
+                      setCancellingPlan(false);
+                    }
+                  }}
+                >
+                  {cancellingPlan ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancelar assinatura'}
+                </Button>
               </div>
             </CardContent>
           </Card>

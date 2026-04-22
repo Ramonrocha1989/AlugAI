@@ -4,11 +4,8 @@ import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { planName, planDescription, planType } = body;
-    const planPrice = Number(body.planPrice);
+    const { planName, planType, payerEmail } = await request.json();
 
-    // Validar plano
     const validPlans = ['basico', 'profissional', 'premium'];
     if (!validPlans.includes(planType)) {
       return NextResponse.json(
@@ -42,28 +39,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const preference = await mercadoPagoService.createPreference(
-      [
-        {
-          title: planName,
-          quantity: 1,
-          unit_price: planPrice,
-          description: planDescription,
-        },
-      ],
+    // Email: vem do body ou do token
+    const decoded = jwt.decode(token) as any;
+    const email = payerEmail || decoded?.email || '';
+
+    const subscription = await mercadoPagoService.createSubscription(
+      planName,
+      planType,
       userId,
-      planType
+      email
     );
 
     return NextResponse.json({
-      id: preference.id,
-      init_point: preference.init_point,
-      sandbox_init_point: preference.sandbox_init_point,
+      id: subscription.id,
+      init_point: subscription.init_point,
     });
   } catch (error: any) {
-    console.error('[create-preference] ERRO:', error);
     return NextResponse.json(
-      { error: 'Erro ao criar pagamento', details: error.message },
+      { error: 'Erro ao criar assinatura', details: error.message },
       { status: 500 }
     );
   }
