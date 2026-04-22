@@ -15,6 +15,7 @@ import { proposalsService } from '@/services/proposals-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { CounterProposalModal } from '@/components/counter-proposal-modal';
 import { Proposal } from '@/types/proposal';
 import { Loader2, Package, CheckCircle, XCircle, Clock, ArrowLeftRight, MessageCircle } from 'lucide-react';
@@ -34,6 +35,10 @@ export default function ProposalsClient() {
   
   const [counterProposal, setCounterProposal] = useState<Proposal | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'accept' | 'reject' | 'cancel';
+    id: string;
+  } | null>(null);
 
   const { data: received, isLoading: loadingReceived } = useReceivedProposals();
   const { data: sent, isLoading: loadingSent } = useSentProposals();
@@ -90,20 +95,29 @@ export default function ProposalsClient() {
   };
 
   const handleAccept = async (id: string) => {
-    if (confirm('Aceitar esta proposta?')) {
-      await acceptProposal.mutateAsync(id);
-    }
+    setConfirmAction({ type: 'accept', id });
   };
 
   const handleReject = async (id: string) => {
-    if (confirm('Recusar esta proposta?')) {
-      await rejectProposal.mutateAsync(id);
-    }
+    setConfirmAction({ type: 'reject', id });
   };
 
   const handleCancel = async (id: string) => {
-    if (confirm('Cancelar esta proposta?')) {
-      await cancelProposal.mutateAsync(id);
+    setConfirmAction({ type: 'cancel', id });
+  };
+
+  const executeConfirmAction = async () => {
+    if (!confirmAction) return;
+    try {
+      if (confirmAction.type === 'accept') {
+        await acceptProposal.mutateAsync(confirmAction.id);
+      } else if (confirmAction.type === 'reject') {
+        await rejectProposal.mutateAsync(confirmAction.id);
+      } else {
+        await cancelProposal.mutateAsync(confirmAction.id);
+      }
+    } finally {
+      setConfirmAction(null);
     }
   };
 
@@ -314,6 +328,29 @@ export default function ProposalsClient() {
           proposal={counterProposal}
         />
       )}
+
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        title={
+          confirmAction?.type === 'accept' ? 'Aceitar proposta' :
+          confirmAction?.type === 'reject' ? 'Recusar proposta' :
+          'Cancelar proposta'
+        }
+        description={
+          confirmAction?.type === 'accept' ? 'Tem certeza que deseja aceitar esta proposta?' :
+          confirmAction?.type === 'reject' ? 'Tem certeza que deseja recusar esta proposta?' :
+          'Tem certeza que deseja cancelar esta proposta?'
+        }
+        confirmLabel={
+          confirmAction?.type === 'accept' ? 'Aceitar' :
+          confirmAction?.type === 'reject' ? 'Recusar' :
+          'Cancelar proposta'
+        }
+        variant={confirmAction?.type === 'accept' ? 'default' : 'destructive'}
+        loading={acceptProposal.isPending || rejectProposal.isPending || cancelProposal.isPending}
+        onConfirm={executeConfirmAction}
+      />
     </div>
   );
 }

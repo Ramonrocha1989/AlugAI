@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMachine, useUpdateMachine } from '@/hooks/use-machines';
-import { authService } from '@/services/machine-api';
+import { useToast } from '@/components/toast-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { CurrencyInput } from '@/components/ui/currency-input';
@@ -17,16 +17,17 @@ import { CreateMachineData } from '@/types/machine';
 
 export default function EditMachinePage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const { data: machine, isLoading } = useMachine(params.id);
   const updateMachine = useUpdateMachine();
-  const [formData, setFormData] = useState<Partial<CreateMachineData>>({});
-
-  useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      // router.push("/login");
-    }
-  }, [router]);
+  const [formData, setFormData] = useState<Partial<CreateMachineData>>({
+    acceptsTradeDown: false,
+    acceptsTradeUp: false,
+    acceptsGrains: false,
+    acceptsFinancing: false,
+    images: [],
+    quickTags: [],
+  });
 
   useEffect(() => {
     if (machine) {
@@ -52,7 +53,7 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
         acceptsTradeUp: machine.acceptsTradeUp,
         acceptsGrains: machine.acceptsGrains,
         acceptsFinancing: machine.acceptsFinancing,
-        ownerPhone: machine.ownerPhone || undefined,
+        ownerPhone: machine.ownerPhone?.replace(/^55/, '') || undefined,
       });
     }
   }, [machine]);
@@ -75,9 +76,10 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
     
     const cleanData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        // Garantir que price seja número
         if (key === 'price') {
           acc[key] = typeof value === 'string' ? parseInt(value) || 0 : value;
+        } else if (key === 'ownerPhone' && typeof value === 'string') {
+          acc[key] = value.replace(/^55/, '');
         } else {
           acc[key] = value;
         }
@@ -87,14 +89,15 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
     
     try {
       await updateMachine.mutateAsync({ id: params.id, data: cleanData });
-      alert('Máquina atualizada com sucesso!');
+      showToast('Máquina atualizada com sucesso!', 'success');
       router.push('/dashboard');
     } catch (error: any) {
-      if (error.response?.status === 403) {
-        alert('Você não tem permissão para editar esta máquina');
-      } else {
-        alert('Erro ao atualizar máquina');
-      }
+      showToast(
+        error.response?.status === 403
+          ? 'Você não tem permissão para editar esta máquina'
+          : 'Erro ao atualizar máquina',
+        'error'
+      );
     }
   };
 

@@ -162,11 +162,11 @@ export function DashboardAnalytics({ machines, userPlan = 'free' }: DashboardAna
                 <CardTitle>Distribuição de Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                {totalViews > 0 ? (
+                {(totalViews + totalClicks + totalLeads) > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ value }) => value}>
-                        {pieData.map((entry, index) => (
+                      <Pie data={pieData.filter(d => d.value > 0)} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                        {pieData.filter(d => d.value > 0).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -174,8 +174,10 @@ export function DashboardAnalytics({ machines, userPlan = 'free' }: DashboardAna
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    Nenhum dado disponível
+                  <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground">
+                    <Eye className="h-8 w-8 mb-2 opacity-40" />
+                    <p className="text-sm">Ainda sem interações</p>
+                    <p className="text-xs mt-1">Compartilhe seus anúncios para começar a receber dados</p>
                   </div>
                 )}
               </CardContent>

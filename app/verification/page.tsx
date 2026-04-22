@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/machine-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,23 +14,17 @@ export default function VerificationPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   
-  const [formData, setFormData] = useState({
-    documentType: 'CPF',
-    documentNumber: '',
-    companyName: '',
-    phone: '',
-    email: '',
-    reason: '',
-  });
-
-  useEffect(() => {
+  const [formData, setFormData] = useState(() => {
     const user = authService.getCurrentUser();
-    if (!user) {
-      // router.push("/login");
-    } else {
-      setFormData(prev => ({ ...prev, email: user.email }));
-    }
-  }, [router]);
+    return {
+      documentType: 'CPF',
+      documentNumber: '',
+      companyName: '',
+      phone: '',
+      email: user?.email || '',
+      reason: '',
+    };
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

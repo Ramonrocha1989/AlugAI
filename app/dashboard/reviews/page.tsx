@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/machine-api';
 import { useUserReviews } from '@/hooks/use-reviews';
@@ -14,12 +13,6 @@ export default function ReviewsPage() {
   const router = useRouter();
   const user = authService.getCurrentUser();
   const { data, isLoading } = useUserReviews(user?.id || '');
-
-  useEffect(() => {
-    if (!user) {
-      // router.push("/login");
-    }
-  }, [router, user]);
 
   if (isLoading) {
     return (

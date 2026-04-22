@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useFavoritedMachines } from '@/hooks/use-favorites';
 import { MachineCard } from '@/components/machine-card';
+import { Button } from '@/components/ui/button';
 import { Loader2, Heart } from 'lucide-react';
 
 export default function FavoritesPage() {
@@ -40,12 +42,9 @@ export default function FavoritesPage() {
           <p className="text-muted-foreground mb-4">
             Clique no ícone de coração nas máquinas para adicioná-las aos favoritos
           </p>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            Explorar Máquinas
-          </a>
+          <Link href="/">
+            <Button>Explorar Máquinas</Button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

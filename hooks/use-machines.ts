@@ -55,6 +55,7 @@ export function useUpdateMachine() {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       queryClient.invalidateQueries({ queryKey: ['my-machines'] });
       queryClient.invalidateQueries({ queryKey: ['machine', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 }
