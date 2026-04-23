@@ -57,8 +57,9 @@ export const adminService = {
     return data;
   },
 
-  getUsers: async (params: { page?: number; limit?: number; search?: string }) => {
-    const { data } = await api.get('/admin/users', { params });
+  getUsers: async (params: { page?: number; limit?: number; search?: string; plan?: string; status?: string; userType?: string }) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined));
+    const { data } = await api.get('/admin/users', { params: cleanParams });
     return data;
   },
 
