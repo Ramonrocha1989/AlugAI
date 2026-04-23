@@ -3,10 +3,14 @@
 import { useAdminStats, useAdminMachines } from '@/hooks/use-admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Package, FileText, Star, Loader2, Clock } from 'lucide-react';
+import { Users, Package, FileText, Star, Loader2, Clock, DollarSign, AlertCircle, XCircle, RotateCcw, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AdminCharts } from '@/components/admin-charts';
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
+}
 
 export default function AdminDashboard() {
   const { data: stats, isLoading, error } = useAdminStats();
@@ -105,6 +109,75 @@ export default function AdminDashboard() {
       </div>
 
       <AdminCharts charts={stats?.charts} />
+
+      {/* Pagamentos */}
+      {stats?.payments && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Pagamentos</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <DollarSign className="h-5 w-5 text-green-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-green-600">{stats.payments.approved?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Aprovados</div>
+                <div className="text-sm font-medium text-green-600 mt-1">
+                  {formatCurrency(stats.payments.approved?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Timer className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-yellow-600">{stats.payments.pending?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Pendentes</div>
+                <div className="text-sm font-medium text-yellow-600 mt-1">
+                  {formatCurrency(stats.payments.pending?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <XCircle className="h-5 w-5 text-red-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-red-600">{stats.payments.rejected?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Recusados</div>
+                <div className="text-sm font-medium text-red-600 mt-1">
+                  {formatCurrency(stats.payments.rejected?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <AlertCircle className="h-5 w-5 text-orange-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-orange-600">{stats.payments.cancelled?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Cancelados</div>
+                <div className="text-sm font-medium text-orange-600 mt-1">
+                  {formatCurrency(stats.payments.cancelled?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <RotateCcw className="h-5 w-5 text-purple-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-purple-600">{stats.payments.refunded?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Estornados</div>
+                <div className="text-sm font-medium text-purple-600 mt-1">
+                  {formatCurrency(stats.payments.refunded?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Loader2 className="h-5 w-5 text-blue-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-blue-600">{stats.payments.in_process?.count || 0}</div>
+                <div className="text-xs text-muted-foreground">Em análise</div>
+                <div className="text-sm font-medium text-blue-600 mt-1">
+                  {formatCurrency(stats.payments.in_process?.total || 0)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <Link href="/admin/users">
