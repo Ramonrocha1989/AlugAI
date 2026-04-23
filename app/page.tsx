@@ -5,6 +5,7 @@ import { useInfiniteMachines } from '@/hooks/use-infinite-machines';
 import { MachineCard } from '@/components/machine-card';
 import { MachineSkeletonGrid } from '@/components/machine-skeleton';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MachineFilters } from '@/types/machine';
@@ -40,8 +41,8 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedCulture, setSelectedCulture] = useState('');
   
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(0);
   const [minYear, setMinYear] = useState('');
   const [maxYear, setMaxYear] = useState('');
   const [minEngineHours, setMinEngineHours] = useState('');
@@ -93,8 +94,8 @@ export default function HomePage() {
       state: state || undefined,
       category: category as any || undefined,
       businessType: businessType as any || undefined,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
       minYear: minYear ? Number(minYear) : undefined,
       maxYear: maxYear ? Number(maxYear) : undefined,
       minEngineHours: minEngineHours ? Number(minEngineHours) : undefined,
@@ -157,8 +158,8 @@ export default function HomePage() {
     setState('');
     setCategory('');
     setBusinessType('');
-    setMinPrice('');
-    setMaxPrice('');
+    setMinPrice(0);
+    setMaxPrice(0);
     setMinYear('');
     setMaxYear('');
     setMinEngineHours('');
@@ -303,19 +304,17 @@ export default function HomePage() {
             <div className="border-t pt-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Faixa de Preço (R$)</label>
+                  <label className="text-sm font-medium mb-2 block">Faixa de Preço</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      type="number"
+                    <CurrencyInput
                       placeholder="Mínimo"
                       value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
+                      onChange={(v) => setMinPrice(v)}
                     />
-                    <Input
-                      type="number"
+                    <CurrencyInput
                       placeholder="Máximo"
                       value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
+                      onChange={(v) => setMaxPrice(v)}
                     />
                   </div>
                 </div>
