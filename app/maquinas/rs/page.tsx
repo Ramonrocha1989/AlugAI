@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, MapPin } from 'lucide-react';
 
+import { Machine } from '@/types/machine';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Máquinas Agrícolas Usadas no Rio Grande do Sul - RS | BaitaBriq',
   description: 'Máquinas agrícolas usadas no RS. Tratores, colheitadeiras e implementos em Pelotas, Porto Alegre, Santa Maria, Passo Fundo. Financiamento disponível para produtores gaúchos.',
@@ -26,10 +31,16 @@ export const metadata: Metadata = {
 };
 
 export default async function MaquinasRSPage() {
-  const machines = await machineService.getAll({ 
-    state: 'RS',
-    limit: 50 
-  });
+  let machines: Machine[] = [];
+  
+  try {
+    machines = await machineService.getAll({ 
+      state: 'RS',
+      limit: 50 
+    });
+  } catch (error) {
+    console.error('Erro ao carregar máquinas RS:', error);
+  }
 
   const cities = [
     'Pelotas', 'Porto Alegre', 'Santa Maria', 'Passo Fundo', 
