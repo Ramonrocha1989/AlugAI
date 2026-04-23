@@ -64,6 +64,7 @@ export interface Machine {
   
   // Metadados
   available: boolean;
+  status?: string;
   createdAt: string;
   updatedAt: string;
   views: number;
