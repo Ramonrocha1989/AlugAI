@@ -124,4 +124,35 @@ export const adminService = {
   deleteBanner: async (id: string) => {
     await api.delete(`/admin/banners/${id}`);
   },
+
+  // Planos
+  getPlans: async () => {
+    const { data } = await api.get('/admin/plans');
+    return data;
+  },
+
+  updatePlan: async (id: string, planData: any) => {
+    const { data } = await api.put(`/admin/plans/${id}`, planData);
+    return data;
+  },
+
+  // Categorias
+  getCategories: async () => {
+    const { data } = await api.get('/admin/categories');
+    return data;
+  },
+
+  createCategory: async (category: any) => {
+    const { data } = await api.post('/admin/categories', category);
+    return data;
+  },
+
+  updateCategory: async (id: string, category: any) => {
+    const { data } = await api.put(`/admin/categories/${id}`, category);
+    return data;
+  },
+
+  deleteCategory: async (id: string) => {
+    await api.delete(`/admin/categories/${id}`);
+  },
 };

@@ -10,6 +10,7 @@ import { GoogleAnalytics } from "@/components/google-analytics";
 import { CsrfInitializer } from "@/components/csrf-initializer";
 import { LocalBusinessSchema } from "@/components/local-business-schema";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { MaintenanceGuard } from "@/components/maintenance-guard";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -120,16 +121,18 @@ export default function RootLayout({
         <LocalBusinessSchema />
         <Providers>
           <ToastProvider>
-            <div className="hidden md:block">
-              <Header />
-            </div>
-            <main className="min-h-screen pb-20 md:pb-0 md:pt-20">
-              <ErrorBoundary>
-                {children}
-              </ErrorBoundary>
-            </main>
-            <Footer />
-            <BottomNav />
+            <MaintenanceGuard>
+              <div className="hidden md:block">
+                <Header />
+              </div>
+              <main className="min-h-screen pb-20 md:pb-0 md:pt-20">
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
+              </main>
+              <Footer />
+              <BottomNav />
+            </MaintenanceGuard>
           </ToastProvider>
         </Providers>
       </body>

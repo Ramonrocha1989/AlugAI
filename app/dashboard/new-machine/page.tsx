@@ -22,13 +22,15 @@ import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } fro
 import { UpgradeLimitModal } from '@/components/upgrade-limit-modal';
 import { getPlanConfig } from '@/services/machine-api';
 import { PlanId } from '@/types';
-import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS, CATEGORY_ICONS } from '@/lib/constants';
+import { BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
+import { useCategories } from '@/hooks/use-categories';
 import { CreateMachineData } from '@/types/machine';
 
 export default function NewMachinePage() {
   const router = useRouter();
   const { showToast } = useToast();
   const createMachine = useCreateMachine();
+  const { categoriesMap, iconsMap } = useCategories();
   const { errors: validationErrors, validateField, setErrors } = useRealTimeValidation();
   const [step, setStep] = useState(1);
   const [imageUrl, setImageUrl] = useState('');
@@ -260,7 +262,7 @@ export default function NewMachinePage() {
               <div>
                 <Label className="mb-3 block">Categoria da Máquina</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {Object.entries(CATEGORIES).map(([key, label]) => (
+                  {Object.entries(categoriesMap).map(([key, label]) => (
                     <button
                       key={key}
                       onClick={() => updateFormData({ category: key as any })}
@@ -270,11 +272,13 @@ export default function NewMachinePage() {
                           : 'border-border hover:border-primary/50'
                       }`}
                     >
-                      <img 
-                        src={CATEGORY_ICONS[key as keyof typeof CATEGORY_ICONS]} 
-                        alt={label}
-                        className="w-12 h-12 mx-auto mb-2 object-contain"
-                      />
+                      {iconsMap[key] && (
+                        <img 
+                          src={iconsMap[key]} 
+                          alt={label}
+                          className="w-12 h-12 mx-auto mb-2 object-contain"
+                        />
+                      )}
                       <div className="font-semibold text-sm">{label}</div>
                     </button>
                   ))}
@@ -696,7 +700,7 @@ export default function NewMachinePage() {
                 <h3 className="font-semibold mb-4">Preview do Anúncio</h3>
                 <div className="space-y-2 text-sm">
                   <p><strong>Título:</strong> {formData.name}</p>
-                  <p><strong>Categoria:</strong> {formData.category && CATEGORIES[formData.category]}</p>
+                  <p><strong>Categoria:</strong> {formData.category && categoriesMap[formData.category]}</p>
                   <p><strong>Tipo:</strong> {formData.businessType && BUSINESS_TYPES[formData.businessType]}</p>
                   <p><strong>Fabricante:</strong> {formData.manufacturer} {formData.model}</p>
                   <p><strong>Ano:</strong> {formData.yearModel}</p>

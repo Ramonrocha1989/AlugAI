@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { MachineFilters } from '@/types/machine';
 import { analytics } from '@/lib/analytics';
 import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
-import { CATEGORIES, BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
+import { BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
+import { useCategories } from '@/hooks/use-categories';
 import { WebsiteSchema } from '@/components/structured-data';
 import { FAQSchema } from '@/components/faq-schema';
+import { BannerCarousel } from '@/components/banner-carousel';
 
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
 
@@ -28,6 +30,7 @@ const getSortByParam = (sort: SortOption): string => {
 };
 
 export default function HomePage() {
+  const { categoriesMap } = useCategories();
   const [search, setSearch] = useState('');
   const [state, setState] = useState('');
   const [category, setCategory] = useState('');
@@ -189,6 +192,8 @@ export default function HomePage() {
           </p>
         </div>
 
+        <BannerCarousel />
+
         <div className="mb-4 md:mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs md:text-sm font-medium">🌾 Filtro por Cultura:</span>
@@ -242,7 +247,7 @@ export default function HomePage() {
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">Todas as categorias</option>
-              {Object.entries(CATEGORIES).map(([key, label]) => (
+              {Object.entries(categoriesMap).map(([key, label]) => (
                 <option key={key} value={key}>{label}</option>
               ))}
             </select>
