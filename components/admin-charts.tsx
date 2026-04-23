@@ -72,7 +72,7 @@ export function AdminCharts({ charts }: AdminChartsProps) {
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number) => [`${value} usuário${value !== 1 ? 's' : ''}`, 'Novos']}
+                  formatter={(value: any) => [`${value} usuário${value !== 1 ? 's' : ''}`, 'Novos']}
                   labelFormatter={(label) => `Mês: ${label}`}
                 />
                 <Area type="monotone" dataKey="count" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} strokeWidth={2} />
@@ -87,7 +87,7 @@ export function AdminCharts({ charts }: AdminChartsProps) {
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number) => [`${value} máquina${value !== 1 ? 's' : ''}`, 'Novas']}
+                  formatter={(value: any) => [`${value} máquina${value !== 1 ? 's' : ''}`, 'Novas']}
                   labelFormatter={(label) => `Mês: ${label}`}
                 />
                 <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -102,7 +102,7 @@ export function AdminCharts({ charts }: AdminChartsProps) {
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${v}`} />
                 <Tooltip
-                  formatter={(value: number) => [formatCurrency(value), 'Receita']}
+                  formatter={(value: any) => [formatCurrency(value), 'Receita']}
                   labelFormatter={(label) => `Mês: ${label}`}
                 />
                 <Area type="monotone" dataKey="amount" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={2} />
