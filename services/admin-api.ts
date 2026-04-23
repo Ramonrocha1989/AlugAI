@@ -78,8 +78,9 @@ export const adminService = {
     return data;
   },
 
-  getMachines: async (params: { page?: number; limit?: number; status?: string }) => {
-    const { data } = await api.get('/admin/machines', { params });
+  getMachines: async (params: { page?: number; limit?: number; status?: string; search?: string }) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined));
+    const { data } = await api.get('/admin/machines', { params: cleanParams });
     return data;
   },
 

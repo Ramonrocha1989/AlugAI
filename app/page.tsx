@@ -123,20 +123,20 @@ export default function HomePage() {
     
     switch (culture) {
       case 'Arroz':
-        categoryFilter = 'TRACTORS';
+        categoryFilter = 'tratores';
         searchTerm = 'arroz';
         break;
       case 'Soja':
-        categoryFilter = 'TRACTORS';
+        categoryFilter = 'tratores';
         searchTerm = 'soja';
         break;
       case 'Milho':
-        categoryFilter = 'HARVESTERS';
+        categoryFilter = 'colheitadeiras';
         searchTerm = 'milho';
         break;
       case 'Pecuária Leiteira':
       case 'Pecuária de Corte':
-        categoryFilter = 'HAYMAKING';
+        categoryFilter = 'fenacao-e-silagem';
         break;
       default:
         break;

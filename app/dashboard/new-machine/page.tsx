@@ -120,14 +120,16 @@ export default function NewMachinePage() {
 
   const handleSubmit = async () => {
     try {
-      await createMachine.mutateAsync(formData as CreateMachineData);
+      const newMachine = await createMachine.mutateAsync(formData as CreateMachineData);
       
       analytics.trackMachineCreate(
         formData.category || 'unknown',
         formData.businessType || 'unknown'
       );
       
-      if (receiveWhatsApp && formData.ownerPhone) {
+      if (newMachine?.status === 'PENDING') {
+        showToast('📝 Anúncio enviado para análise! Será publicado após aprovação.', 'info');
+      } else if (receiveWhatsApp && formData.ownerPhone) {
         showToast(`✅ Anúncio publicado! Você receberá propostas no WhatsApp: ${formData.ownerPhone}`, 'success');
       } else {
         showToast('✅ Anúncio publicado com sucesso!', 'success');

@@ -13,7 +13,7 @@ import { Machine } from '@/types/machine';
 import { User, PlanId } from '@/types';
 import {
   Edit, Trash2, Eye, MessageCircle, Loader2,
-  Heart, FileText, Clock, AlertTriangle,
+  Heart, FileText, Clock, AlertTriangle, Hourglass, XCircle,
 } from 'lucide-react';
 
 interface MachineListItemProps {
@@ -116,6 +116,16 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
       <div className="relative">
         <MachineCard machine={machine} />
         <div className="absolute top-2 left-2 flex gap-2 z-10">
+          {machine.status === 'PENDING' && (
+            <Badge className="bg-yellow-500 text-white">
+              <Hourglass className="h-3 w-3 mr-1" /> Em análise
+            </Badge>
+          )}
+          {machine.status === 'REJECTED' && (
+            <Badge variant="destructive">
+              <XCircle className="h-3 w-3 mr-1" /> Reprovado
+            </Badge>
+          )}
           <Link href={`/dashboard/edit-machine/${machine.id}`}>
             <Button size="sm" variant="secondary" aria-label={`Editar ${machine.name}`}>
               <Edit className="h-4 w-4 mr-1" />

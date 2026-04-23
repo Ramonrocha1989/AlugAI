@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { CategoryBenchmarks } from '@/types/machine';
-import { CATEGORIES } from '@/lib/constants';
 
 interface CategoryBenchmarkCardProps {
   data: CategoryBenchmarks;
@@ -36,7 +35,7 @@ function ComparisonIndicator({ ratio }: { ratio: number }) {
 }
 
 export function CategoryBenchmarkCard({ data }: CategoryBenchmarkCardProps) {
-  const categoryName = CATEGORIES[data.category as keyof typeof CATEGORIES] || data.category;
+  const categoryName = data.category?.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || data.category;
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(price);

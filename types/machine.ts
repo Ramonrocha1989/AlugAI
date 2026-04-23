@@ -3,16 +3,8 @@ import { PlanId } from '@/types';
 // Tipos de negócio (UPPERCASE para match com backend)
 export type BusinessType = 'SALE' | 'RENTAL' | 'EXCHANGE' | 'SERVICE';
 
-// Categorias principais (UPPERCASE para match com backend)
-export type MachineCategory = 
-  | 'TRACTORS'
-  | 'HARVESTERS'
-  | 'PLANTING'
-  | 'SPRAYING'
-  | 'HAYMAKING'
-  | 'IMPLEMENTS'
-  | 'LIVESTOCK'
-  | 'CONSTRUCTION';
+// Categorias - agora dinâmicas do backend (slug)
+export type MachineCategory = string;
 
 // Tags rápidas (UPPERCASE para match com backend)
 export type QuickTag = 

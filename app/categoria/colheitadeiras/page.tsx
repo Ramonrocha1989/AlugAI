@@ -37,7 +37,7 @@ export default async function ColheitadeirasPage() {
   
   try {
     machines = await machineService.getAll({ 
-      category: 'HARVESTERS',
+      category: 'colheitadeiras',
       limit: 50 
     });
   } catch (error) {

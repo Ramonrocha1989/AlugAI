@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { machineService } from '@/services/machine-api';
-import { CATEGORIES } from '@/lib/constants';
 import { MachineSchema } from '@/components/structured-data';
 import { redirect } from 'next/navigation';
 
@@ -36,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         `${machine.manufacturer} ${machine.yearModel}`,
         `${machine.name} ${machine.city}`,
         `máquinas ${machine.state}`,
-        CATEGORIES[machine.category],
+        machine.category?.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
         machine.category.toLowerCase(),
         'máquina agrícola usada',
         `${machine.manufacturer} usado`

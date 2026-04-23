@@ -19,7 +19,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { ProposalModal } from '@/components/proposal-modal';
 import { authService } from '@/services/machine-api';
-import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
+import { BUSINESS_TYPES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
 import { 
   ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star, DollarSign
@@ -196,7 +196,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-3xl mb-2">{machine.name}</CardTitle>
-                  <p className="text-muted-foreground">{CATEGORIES[machine.category]}</p>
+                  <p className="text-muted-foreground">{machine.category?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-bold text-primary">

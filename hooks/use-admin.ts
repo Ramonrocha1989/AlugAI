@@ -60,9 +60,11 @@ export function useUpdateMachineStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminService.updateMachineStatus(id, status),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'machines'] });
-      queryClient.refetchQueries({ queryKey: ['admin', 'machines'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      queryClient.removeQueries({ queryKey: ['machines-infinite'] });
     },
   });
 }
@@ -93,10 +95,10 @@ export function useFeatureMachine() {
       });
       
       // Remover cache e forçar refetch
-      queryClient.removeQueries({ queryKey: ['infinite-machines'] });
+      queryClient.removeQueries({ queryKey: ['machines-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'machines'] });
       queryClient.invalidateQueries({ queryKey: ['machines'] });
-      await queryClient.refetchQueries({ queryKey: ['infinite-machines'] });
+      await queryClient.refetchQueries({ queryKey: ['machines-infinite'] });
     },
   });
 }

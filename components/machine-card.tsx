@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/favorite-button';
 import { MapPin, Star, Award, CheckCircle2 } from 'lucide-react';
-import { BUSINESS_TYPES, CATEGORIES, QUICK_TAGS } from '@/lib/constants';
+import { BUSINESS_TYPES, QUICK_TAGS } from '@/lib/constants';
 
 interface MachineCardProps {
   machine: Machine;
@@ -95,7 +95,7 @@ export function MachineCard({ machine }: MachineCardProps) {
               {machine.manufacturer || ''} {machine.model || ''} {machine.yearModel || ''}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {CATEGORIES[machine.category] || machine.category}
+              {machine.category?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Sem categoria'}
             </p>
           </div>
 

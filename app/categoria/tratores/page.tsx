@@ -39,7 +39,7 @@ export default async function TratoresPage() {
   
   try {
     machines = await machineService.getAll({ 
-      category: 'TRACTORS',
+      category: 'tratores',
       limit: 50 
     });
   } catch (error) {

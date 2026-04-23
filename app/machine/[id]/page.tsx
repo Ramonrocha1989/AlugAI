@@ -2,7 +2,11 @@ import { Metadata } from 'next';
 import MachineDetailsClient from './client';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { machineService } from '@/services/machine-api';
-import { BUSINESS_TYPES, CATEGORIES } from '@/lib/constants';
+import { BUSINESS_TYPES } from '@/lib/constants';
+
+function categoryLabel(slug: string): string {
+  return slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Categoria';
+}
 import { MachineSchema } from '@/components/machine-schema';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 
@@ -28,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const priceDisplay = machine.businessType === 'RENTAL' ? `${price}/dia` : price;
     const title = `${machine.name} - ${machine.yearModel} | ${priceDisplay}`;
-    const description = `${machine.description.slice(0, 155)}... | ${machine.city}, ${machine.state} | ${CATEGORIES[machine.category]}`;
+    const description = `${machine.description.slice(0, 155)}... | ${machine.city}, ${machine.state} | ${categoryLabel(machine.category)}`;
     const url = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br'}/machine/${machine.id}`;
 
     return {
@@ -38,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         machine.name,
         machine.manufacturer,
         machine.model,
-        CATEGORIES[machine.category],
+        categoryLabel(machine.category),
         machine.city,
         machine.state,
         'máquina agrícola',
@@ -87,7 +91,7 @@ export default async function MachineDetailsPage({ params }: Props) {
 
   const breadcrumbItems = [
     { name: 'Início', href: '/' },
-    { name: CATEGORIES[machine.category], href: `/?category=${machine.category}` },
+    { name: categoryLabel(machine.category), href: `/?category=${machine.category}` },
     { name: machine.name, href: `/machine/${machine.id}` }
   ];
   
