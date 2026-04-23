@@ -1,21 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAdminUsers, useBanUser, useVerifyUser } from '@/hooks/use-admin';
+import { useAdminUsers, useBanUser, useVerifyUser, useUpdateUserPlan } from '@/hooks/use-admin';
+import { PlanId } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Search, Ban, CheckCircle, Shield } from 'lucide-react';
+import { Loader2, Search, Ban, CheckCircle, Shield, Save } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Link from 'next/link';
+
+const PLAN_OPTIONS: { value: PlanId; label: string }[] = [
+  { value: 'free', label: 'Gratuito' },
+  { value: 'basico', label: 'Básico' },
+  { value: 'profissional', label: 'Profissional' },
+  { value: 'premium', label: 'Premium' },
+];
+
+const DURATION_OPTIONS = [
+  { value: '30', label: '30 dias' },
+  { value: '60', label: '60 dias' },
+  { value: '90', label: '90 dias' },
+  { value: '180', label: '6 meses' },
+  { value: '365', label: '1 ano' },
+  { value: 'null', label: 'Sem expiração' },
+];
+
+function calcExpiresAt(days: string): string | null {
+  if (days === 'null') return null;
+  const date = new Date();
+  date.setDate(date.getDate() + Number(days));
+  return date.toISOString();
+}
 
 export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [planEdits, setPlanEdits] = useState<Record<string, { plan: PlanId; duration: string }>>({}); 
+  const [confirmUserId, setConfirmUserId] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'ban' | 'verify' | 'plan'; userId: string; label: string } | null>(null);
   const { data, isLoading } = useAdminUsers({ page, limit: 20, search: debouncedSearch });
   const banUser = useBanUser();
   const verifyUser = useVerifyUser();
+  const updatePlan = useUpdateUserPlan();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -25,16 +54,20 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const handleBan = (id: string, isBanned: boolean) => {
-    if (confirm(`${isBanned ? 'Banir' : 'Desbanir'} este usuário?`)) {
-      banUser.mutate({ id, isBanned });
-    }
+  const handleBan = (id: string, name: string, isBanned: boolean) => {
+    setConfirmAction({
+      type: 'ban',
+      userId: id,
+      label: `${isBanned ? 'Banir' : 'Desbanir'} ${name}?`,
+    });
   };
 
-  const handleVerify = (id: string, isVerifiedSeller: boolean) => {
-    if (confirm(`${isVerifiedSeller ? 'Verificar' : 'Remover verificação de'} este vendedor?`)) {
-      verifyUser.mutate({ id, isVerifiedSeller });
-    }
+  const handleVerify = (id: string, name: string, isVerifiedSeller: boolean) => {
+    setConfirmAction({
+      type: 'verify',
+      userId: id,
+      label: `${isVerifiedSeller ? 'Verificar' : 'Remover verificação de'} ${name}?`,
+    });
   };
 
   return (
@@ -69,7 +102,7 @@ export default function AdminUsersPage() {
       ) : (
         <>
           <div className="space-y-4">
-            {(Array.isArray(data) ? data : data?.users || []).map((user: any) => (
+            {(Array.isArray(data) ? data : data?.data || []).map((user: any) => (
               <Card key={user.id}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -96,6 +129,82 @@ export default function AdminUsersPage() {
                       <p className="text-sm text-muted-foreground mb-2">
                         Empresa: {user.company?.name}
                       </p>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-sm text-muted-foreground">Plano:</span>
+                        <select
+                          className="text-sm border rounded px-2 py-1"
+                          value={planEdits[user.id]?.plan ?? user.plan ?? 'free'}
+                          onChange={(e) => setPlanEdits(prev => ({
+                            ...prev,
+                            [user.id]: { plan: e.target.value as PlanId, duration: prev[user.id]?.duration ?? '30' },
+                          }))}
+                          disabled={updatePlan.isPending}
+                        >
+                          {PLAN_OPTIONS.map((p) => (
+                            <option key={p.value} value={p.value}>{p.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          className="text-sm border rounded px-2 py-1"
+                          value={planEdits[user.id]?.duration ?? 'null'}
+                          onChange={(e) => setPlanEdits(prev => ({
+                            ...prev,
+                            [user.id]: { plan: prev[user.id]?.plan ?? user.plan ?? 'free', duration: e.target.value },
+                          }))}
+                          disabled={updatePlan.isPending}
+                        >
+                          {DURATION_OPTIONS.map((d) => (
+                            <option key={d.value} value={d.value}>{d.label}</option>
+                          ))}
+                        </select>
+                        {planEdits[user.id] && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              disabled={updatePlan.isPending}
+                              onClick={() => setConfirmUserId(user.id)}
+                            >
+                              {updatePlan.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Save className="h-3 w-3 mr-1" /> Aplicar</>}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={updatePlan.isPending}
+                              onClick={() => setPlanEdits(prev => { const n = { ...prev }; delete n[user.id]; return n; })}
+                            >
+                              Cancelar
+                            </Button>
+                          </>
+                        )}
+                        {confirmUserId === user.id && planEdits[user.id] && (
+                          <ConfirmDialog
+                            open={true}
+                            onOpenChange={(open) => { if (!open) setConfirmUserId(null); }}
+                            title="Alterar plano"
+                            description={`Alterar ${user.name || user.email} para ${PLAN_OPTIONS.find(p => p.value === planEdits[user.id].plan)?.label} (${DURATION_OPTIONS.find(d => d.value === planEdits[user.id].duration)?.label})?`}
+                            confirmLabel="Aplicar"
+                            loading={updatePlan.isPending}
+                            onConfirm={() => {
+                              const edit = planEdits[user.id];
+                              updatePlan.mutate(
+                                { id: user.id, plan: edit.plan, expiresAt: calcExpiresAt(edit.duration) },
+                                {
+                                  onSuccess: () => {
+                                    setConfirmUserId(null);
+                                    setPlanEdits(prev => { const n = { ...prev }; delete n[user.id]; return n; });
+                                  },
+                                }
+                              );
+                            }}
+                          />
+                        )}
+                        {user.planExpiresAt && (
+                          <span className="text-xs text-muted-foreground">
+                            Expira: {new Date(user.planExpiresAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex gap-4 text-sm">
                         <span>{user._count?.machines || 0} máquinas</span>
                         <span>{user._count?.proposals || 0} propostas</span>
@@ -108,7 +217,7 @@ export default function AdminUsersPage() {
                           <Button
                             size="sm"
                             variant={user.isVerifiedSeller ? 'outline' : 'default'}
-                            onClick={() => handleVerify(user.id, !user.isVerifiedSeller)}
+                            onClick={() => handleVerify(user.id, user.name || user.email, !user.isVerifiedSeller)}
                             disabled={verifyUser.isPending}
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
@@ -117,7 +226,7 @@ export default function AdminUsersPage() {
                           <Button
                             size="sm"
                             variant={user.isBanned ? 'outline' : 'destructive'}
-                            onClick={() => handleBan(user.id, !user.isBanned)}
+                            onClick={() => handleBan(user.id, user.name || user.email, !user.isBanned)}
                             disabled={banUser.isPending}
                           >
                             <Ban className="h-4 w-4 mr-2" />
@@ -154,6 +263,26 @@ export default function AdminUsersPage() {
             </div>
           )}
         </>
+      )}
+
+      {confirmAction && (
+        <ConfirmDialog
+          open={true}
+          onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
+          title={confirmAction.type === 'ban' ? 'Banir usuário' : 'Verificar vendedor'}
+          description={confirmAction.label}
+          confirmLabel="Confirmar"
+          variant={confirmAction.type === 'ban' ? 'destructive' : 'default'}
+          loading={banUser.isPending || verifyUser.isPending}
+          onConfirm={() => {
+            const user = (Array.isArray(data) ? data : data?.data || []).find((u: any) => u.id === confirmAction.userId);
+            if (confirmAction.type === 'ban') {
+              banUser.mutate({ id: confirmAction.userId, isBanned: !user?.isBanned }, { onSuccess: () => setConfirmAction(null) });
+            } else {
+              verifyUser.mutate({ id: confirmAction.userId, isVerifiedSeller: !user?.isVerifiedSeller }, { onSuccess: () => setConfirmAction(null) });
+            }
+          }}
+        />
       )}
     </div>
   );

@@ -37,6 +37,17 @@ export function useVerifyUser() {
   });
 }
 
+export function useUpdateUserPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, plan, expiresAt }: { id: string; plan: string; expiresAt: string | null }) =>
+      adminService.updateUserPlan(id, plan, expiresAt),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+}
+
 export function useAdminMachines(params: any) {
   return useQuery({
     queryKey: ['admin', 'machines', params],

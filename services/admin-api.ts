@@ -72,6 +72,11 @@ export const adminService = {
     return data;
   },
 
+  updateUserPlan: async (id: string, plan: string, expiresAt: string | null) => {
+    const { data } = await api.patch(`/admin/users/${id}/plan`, { plan, expiresAt });
+    return data;
+  },
+
   getMachines: async (params: { page?: number; limit?: number; status?: string }) => {
     const { data } = await api.get('/admin/machines', { params });
     return data;
