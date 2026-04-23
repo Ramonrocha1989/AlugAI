@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Package, FileText, Star, Loader2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { AdminCharts } from '@/components/admin-charts';
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useAdminStats();
+  const { data: stats, isLoading, error } = useAdminStats();
   const { data: pendingData } = useAdminMachines({ status: 'PENDING', limit: 1, page: 1 });
   const pendingCount = pendingData?.total ?? stats?.pendingMachines ?? 0;
 
@@ -16,6 +17,23 @@ export default function AdminDashboard() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Painel Administrativo</h1>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 mb-6">
+          Erro ao carregar estatísticas. O painel continua funcionando.
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Link href="/admin/users"><Button className="w-full" size="lg">Gerenciar Usuários</Button></Link>
+          <Link href="/admin/machines"><Button className="w-full" size="lg">Gerenciar Máquinas</Button></Link>
+          <Link href="/admin/reviews"><Button className="w-full" size="lg">Moderar Avaliações</Button></Link>
+          <Link href="/admin/settings"><Button className="w-full" size="lg">Configurações</Button></Link>
+        </div>
       </div>
     );
   }
@@ -85,6 +103,8 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <AdminCharts charts={stats?.charts} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <Link href="/admin/users">
