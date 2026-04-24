@@ -1,3 +1,11 @@
+export function optimizeCloudinaryUrl(url: string, options?: { width?: number; height?: number }): string {
+  if (!url || !url.includes('res.cloudinary.com')) return url;
+  const transforms = ['f_auto', 'q_auto'];
+  if (options?.width) transforms.push(`w_${options.width}`);
+  if (options?.height) transforms.push(`h_${options.height}`);
+  return url.replace('/image/upload/', `/image/upload/${transforms.join(',')}/`);
+}
+
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);

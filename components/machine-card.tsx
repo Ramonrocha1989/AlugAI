@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Machine } from '@/types/machine';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/favorite-button';
@@ -9,9 +10,10 @@ import { BUSINESS_TYPES, QUICK_TAGS } from '@/lib/constants';
 
 interface MachineCardProps {
   machine: Machine;
+  priority?: boolean;
 }
 
-export function MachineCard({ machine }: MachineCardProps) {
+export function MachineCard({ machine, priority = false }: MachineCardProps) {
   const formatPrice = (price: number | string, businessType: string) => {
     const numPrice = typeof price === 'string' ? parseInt(price) : price;
     const formatted = new Intl.NumberFormat('pt-BR', {
@@ -40,9 +42,10 @@ export function MachineCard({ machine }: MachineCardProps) {
         {/* Imagem */}
         <div className="relative h-48 w-full flex-shrink-0">
           <Image
-            src={machine.images[0] || '/placeholder.jpg'}
+            src={optimizeCloudinaryUrl(machine.images[0] || '/placeholder.jpg', { width: 400 })}
             alt={machine.name}
             fill
+            priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-200"
           />
           

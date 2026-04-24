@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
@@ -158,9 +159,10 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
                 onClick={() => openLightbox(0)}
               >
                 <Image
-                  src={machine.images[0] || '/placeholder.jpg'}
+                  src={optimizeCloudinaryUrl(machine.images[0] || '/placeholder.jpg', { width: 900 })}
                   alt={machine.name}
                   fill
+                  priority
                   className="object-cover rounded-t-lg"
                 />
                 {machine.isVerifiedSeller && (
@@ -183,7 +185,7 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
                       className="relative h-24 bg-muted rounded cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => openLightbox(idx + 1)}
                     >
-                      <Image src={img} alt={`Imagem ${idx + 2}`} fill className="object-cover rounded" />
+                      <Image src={optimizeCloudinaryUrl(img, { width: 200 })} alt={`Imagem ${idx + 2}`} fill className="object-cover rounded" />
                     </div>
                   ))}
                 </div>

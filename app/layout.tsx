@@ -100,6 +100,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
         <link rel="shortcut icon" href="/logo-sem-fundo.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" href="/apple-icon-180x180.png" />

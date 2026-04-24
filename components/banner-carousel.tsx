@@ -6,6 +6,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
@@ -55,7 +56,7 @@ export function BannerCarousel() {
   const content = (
     <div className="relative w-full h-[180px] sm:h-[250px] md:h-[320px] rounded-lg overflow-hidden group">
       <Image
-        src={banner.imageUrl}
+        src={optimizeCloudinaryUrl(banner.imageUrl, { width: 1200 })}
         alt="Banner promocional"
         fill
         className="object-cover"
