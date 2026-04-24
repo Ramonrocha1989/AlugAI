@@ -1,6 +1,30 @@
+'use client';
+
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { Instagram, Facebook, Linkedin, Youtube, Mail, Phone } from 'lucide-react';
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+});
+
+async function fetchPublicSettings() {
+  const { data } = await api.get('/settings/public');
+  return data;
+}
 
 export function Footer() {
+  const { data: settings } = useQuery({
+    queryKey: ['public-settings'],
+    queryFn: fetchPublicSettings,
+    staleTime: 1000 * 60 * 10,
+    retry: 1,
+  });
+
+  const social = settings?.socialLinks || {};
+  const hasSocial = social.instagram || social.facebook || social.linkedin || social.youtube;
+
   return (
     <footer className="border-t">
       <div className="container mx-auto px-4 py-8">
@@ -36,18 +60,57 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="break-words">contato@baitabriq.com.br</li>
-              <li>(53) 98459-0461</li>
+              <li>
+                <a href={`mailto:${settings?.emailSupport || 'contato@baitabriq.com.br'}`} className="flex items-center gap-2 hover:text-primary">
+                  <Mail className="h-4 w-4" />
+                  {settings?.emailSupport || 'contato@baitabriq.com.br'}
+                </a>
+              </li>
+              <li>
+                <a href={`https://wa.me/${settings?.whatsappSupport || '5553984590461'}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
+                  <Phone className="h-4 w-4" />
+                  {settings?.phoneSupport || '(53) 98459-0461'}
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Redes Sociais</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Instagram</li>
-              <li>Facebook</li>
-              <li>LinkedIn</li>
-            </ul>
+            {hasSocial ? (
+              <ul className="space-y-2 text-sm">
+                {social.instagram && (
+                  <li>
+                    <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                      <Instagram className="h-4 w-4" /> Instagram
+                    </a>
+                  </li>
+                )}
+                {social.facebook && (
+                  <li>
+                    <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                      <Facebook className="h-4 w-4" /> Facebook
+                    </a>
+                  </li>
+                )}
+                {social.youtube && (
+                  <li>
+                    <a href={social.youtube} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                      <Youtube className="h-4 w-4" /> YouTube
+                    </a>
+                  </li>
+                )}
+                {social.linkedin && (
+                  <li>
+                    <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+                      <Linkedin className="h-4 w-4" /> LinkedIn
+                    </a>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Em breve</p>
+            )}
           </div>
         </div>
 

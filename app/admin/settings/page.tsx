@@ -66,6 +66,7 @@ function GeralTab() {
     mutationFn: (data: any) => adminService.updateSettings(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
+      queryClient.invalidateQueries({ queryKey: ['public-settings'] });
       showToast('Configurações salvas!', 'success');
     },
     onError: () => showToast('Erro ao salvar configurações', 'error'),
@@ -694,6 +695,7 @@ function TermosTab() {
     mutationFn: (data: any) => adminService.updateSettings(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
+      queryClient.invalidateQueries({ queryKey: ['public-settings'] });
       showToast('Textos salvos!', 'success');
     },
     onError: () => showToast('Erro ao salvar', 'error'),
