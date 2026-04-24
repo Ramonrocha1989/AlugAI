@@ -30,9 +30,9 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold mb-4">BaitaBriq</h3>
+            <h3 className="font-semibold mb-4">{settings?.siteName || 'BaitaBriq'}</h3>
             <p className="text-sm text-muted-foreground">
-              Marketplace de máquinas agrícolas e de construção no Sul do Brasil.
+              {settings?.homeDescription || 'Marketplace de máquinas agrícolas e de construção no Sul do Brasil.'}
             </p>
           </div>
 
