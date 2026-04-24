@@ -156,4 +156,27 @@ export const adminService = {
   deleteCategory: async (id: string) => {
     await api.delete(`/admin/categories/${id}`);
   },
+
+  // Verificações
+  getVerificationRequests: async (params: { page?: number; limit?: number; status?: string }) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined));
+    const { data } = await api.get('/admin/verification-requests', { params: cleanParams });
+    return data;
+  },
+
+  approveVerification: async (id: string) => {
+    const { data } = await api.post(`/admin/verification-requests/${id}/approve`);
+    return data;
+  },
+
+  rejectVerification: async (id: string, reason?: string) => {
+    const { data } = await api.post(`/admin/verification-requests/${id}/reject`, { reason });
+    return data;
+  },
+
+  // Solicitar verificação (usuário)
+  requestVerification: async (body: any) => {
+    const { data } = await api.post('/verification/request', body);
+    return data;
+  },
 };

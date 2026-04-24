@@ -3,16 +3,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/machine-api';
+import { adminService } from '@/services/admin-api';
+import { useToast } from '@/components/toast-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Shield, Star, TrendingUp, ArrowLeft, Loader2 } from 'lucide-react';
+import { CheckCircle2, Shield, Star, TrendingUp, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { cpf, cnpj } from 'cpf-cnpj-validator';
 
 export default function VerificationPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [docError, setDocError] = useState('');
   
   const [formData, setFormData] = useState(() => {
     const user = authService.getCurrentUser();
@@ -26,15 +31,65 @@ export default function VerificationPage() {
     };
   });
 
+  const formatCPF = (value: string): string => {
+    const nums = value.replace(/\D/g, '').slice(0, 11);
+    return nums
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  };
+
+  const formatCNPJ = (value: string): string => {
+    const nums = value.replace(/\D/g, '').slice(0, 14);
+    return nums
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  };
+
+  const handleDocChange = (value: string) => {
+    const formatted = formData.documentType === 'CPF' ? formatCPF(value) : formatCNPJ(value);
+    setFormData({ ...formData, documentNumber: formatted });
+    setDocError('');
+  };
+
+  const validateDoc = (): boolean => {
+    const nums = formData.documentNumber.replace(/\D/g, '');
+    if (formData.documentType === 'CPF') {
+      if (!cpf.isValid(nums)) {
+        setDocError('CPF inv\u00e1lido');
+        return false;
+      }
+    } else {
+      if (!cnpj.isValid(nums)) {
+        setDocError('CNPJ inv\u00e1lido');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const formatPhone = (value: string): string => {
+    const nums = value.replace(/\D/g, '').slice(0, 11);
+    if (nums.length <= 2) return nums;
+    if (nums.length <= 7) return `(${nums.slice(0, 2)}) ${nums.slice(2)}`;
+    return `(${nums.slice(0, 2)}) ${nums.slice(2, 7)}-${nums.slice(7)}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateDoc()) return;
     setLoading(true);
 
-    // Simular envio (por enquanto só mostra sucesso)
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await adminService.requestVerification(formData);
       setSubmitted(true);
-    }, 1500);
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Erro ao enviar solicitação', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -155,7 +210,7 @@ export default function VerificationPage() {
                   <Label>Tipo de Documento</Label>
                   <select
                     value={formData.documentType}
-                    onChange={(e) => setFormData({ ...formData, documentType: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, documentType: e.target.value, documentNumber: '' })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-2"
                     required
                   >
@@ -165,14 +220,20 @@ export default function VerificationPage() {
                 </div>
 
                 <div>
-                  <Label>Número do Documento</Label>
+                  <Label>N\u00famero do Documento</Label>
                   <Input
                     value={formData.documentNumber}
-                    onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
+                    onChange={(e) => handleDocChange(e.target.value)}
                     placeholder={formData.documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
                     required
-                    className="mt-2"
+                    className={`mt-2 ${docError ? 'border-destructive' : ''}`}
                   />
+                  {docError && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">{docError}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -190,7 +251,7 @@ export default function VerificationPage() {
                   <Label>Telefone/WhatsApp</Label>
                   <Input
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
                     placeholder="(00) 00000-0000"
                     required
                     className="mt-2"

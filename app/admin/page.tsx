@@ -1,9 +1,9 @@
 'use client';
 
-import { useAdminStats, useAdminMachines } from '@/hooks/use-admin';
+import { useAdminStats, useAdminMachines, useAdminVerifications } from '@/hooks/use-admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Package, FileText, Star, Loader2, Clock, DollarSign, AlertCircle, XCircle, RotateCcw, Timer } from 'lucide-react';
+import { Users, Package, FileText, Star, Loader2, Clock, DollarSign, AlertCircle, XCircle, RotateCcw, Timer, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AdminCharts } from '@/components/admin-charts';
@@ -16,6 +16,8 @@ export default function AdminDashboard() {
   const { data: stats, isLoading, error } = useAdminStats();
   const { data: pendingData } = useAdminMachines({ status: 'PENDING', limit: 1, page: 1 });
   const pendingCount = pendingData?.total ?? stats?.pendingMachines ?? 0;
+  const { data: pendingVerifications } = useAdminVerifications({ status: 'PENDING', limit: 1, page: 1 });
+  const pendingVerifCount = pendingVerifications?.total ?? 0;
 
   if (isLoading) {
     return (
@@ -56,6 +58,20 @@ export default function AdminDashboard() {
               </span>
             </div>
             <Badge className="bg-yellow-500 text-white">{pendingCount}</Badge>
+          </div>
+        </Link>
+      )}
+
+      {pendingVerifCount > 0 && (
+        <Link href="/admin/verifications">
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between hover:bg-green-100 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-green-600" />
+              <span className="font-medium text-green-900">
+                {pendingVerifCount} solicitação{pendingVerifCount !== 1 ? 'ões' : ''} de verificação pendente{pendingVerifCount !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <Badge className="bg-green-500 text-white">{pendingVerifCount}</Badge>
           </div>
         </Link>
       )}
@@ -195,6 +211,16 @@ export default function AdminDashboard() {
         </Link>
         <Link href="/admin/reviews">
           <Button className="w-full" size="lg">Moderar Avaliações</Button>
+        </Link>
+        <Link href="/admin/verifications">
+          <Button className="w-full relative" size="lg">
+            Solicitações de Verificação
+            {pendingVerifCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-green-500 text-white h-6 w-6 flex items-center justify-center p-0 text-xs rounded-full">
+                {pendingVerifCount}
+              </Badge>
+            )}
+          </Button>
         </Link>
         <Link href="/admin/settings">
           <Button className="w-full" size="lg">Configurações</Button>

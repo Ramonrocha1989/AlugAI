@@ -33,6 +33,8 @@ export function useVerifyUser() {
       adminService.verifyUser(id, isVerifiedSeller),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      queryClient.removeQueries({ queryKey: ['machines-infinite'] });
     },
   });
 }
@@ -126,6 +128,39 @@ export function useDeleteReview() {
     mutationFn: (id: string) => adminService.deleteReview(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
+    },
+  });
+}
+
+export function useAdminVerifications(params: any) {
+  return useQuery({
+    queryKey: ['admin', 'verifications', params],
+    queryFn: () => adminService.getVerificationRequests(params),
+  });
+}
+
+export function useApproveVerification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminService.approveVerification(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      queryClient.removeQueries({ queryKey: ['machines-infinite'] });
+    },
+  });
+}
+
+export function useRejectVerification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => adminService.rejectVerification(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      queryClient.removeQueries({ queryKey: ['machines-infinite'] });
     },
   });
 }
