@@ -15,6 +15,7 @@ import { useFavorites } from '@/hooks/use-favorites';
 import { useReceivedProposals, useSentProposals } from '@/hooks/use-proposals';
 import { LogOut, LayoutDashboard, Shield, Heart, FileText, CreditCard, Menu, X, ChevronDown, Tractor, Wheat, MapPin, BookOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useMounted } from '@/hooks/use-mounted';
 
 export function Header() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export function Header() {
   ).length : 0;
   
   const totalNotifications = pendingReceived + updatedSent;
+  const mounted = useMounted();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);

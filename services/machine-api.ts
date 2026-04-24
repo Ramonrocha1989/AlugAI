@@ -723,4 +723,14 @@ export const authService = {
     const { data } = await api.get(`/companies/${companyId}/machines`);
     return data;
   },
+
+  getMyCompany: async (): Promise<any> => {
+    const { data } = await api.get('/companies/me');
+    return data;
+  },
+
+  updateCompanyProfile: async (profileData: any): Promise<any> => {
+    const { data } = await api.put('/companies/profile', profileData);
+    return data;
+  },
 };

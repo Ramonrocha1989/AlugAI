@@ -189,6 +189,9 @@ export default function ProfileClient() {
           <Card>
             <CardContent className="pt-5 pb-5">
               <nav className="space-y-1">
+                <Link href="/profile/store" className="flex items-center justify-between py-2 px-3 rounded-md text-sm hover:bg-muted transition-colors">
+                  Perfil da loja <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
                 <Link href="/dashboard" className="flex items-center justify-between py-2 px-3 rounded-md text-sm hover:bg-muted transition-colors">
                   Meus anúncios <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>

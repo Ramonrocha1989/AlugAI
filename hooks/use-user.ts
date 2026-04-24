@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/services/machine-api';
+import { useMounted } from './use-mounted';
 
 export function useUser() {
+  const mounted = useMounted();
   return useQuery({
     queryKey: ['user'],
-    queryFn: () => {
-      // Sempre usar API real, não mock
-      return authService.getMe();
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    retry: false, // Não tentar novamente em caso de erro
-    enabled: typeof window !== 'undefined' && !!localStorage.getItem('currentUser'), // Só executar se tiver usuário
+    queryFn: () => authService.getMe(),
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    enabled: mounted && !!localStorage.getItem('currentUser'),
   });
 }

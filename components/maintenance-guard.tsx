@@ -1,9 +1,11 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { usePathname } from 'next/navigation';
 import { Wrench } from 'lucide-react';
+import { useMounted } from '@/hooks/use-mounted';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
@@ -14,34 +16,34 @@ async function fetchPublicSettings() {
   return data;
 }
 
-function isAdmin(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const stored = localStorage.getItem('currentUser');
-    if (!stored) return false;
-    const user = JSON.parse(stored);
-    const parsed = user.user || user;
-    return parsed.role === 'ADMIN';
-  } catch {
-    return false;
-  }
-}
-
 export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const mounted = useMounted();
+  const [admin, setAdmin] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('currentUser');
+      if (stored) {
+        const user = JSON.parse(stored);
+        const parsed = user.user || user;
+        setAdmin(parsed.role === 'ADMIN');
+      }
+    } catch {}
+  }, []);
 
   const { data } = useQuery({
     queryKey: ['public-settings'],
     queryFn: fetchPublicSettings,
     staleTime: 1000 * 60 * 2,
     retry: 1,
+    enabled: mounted,
   });
 
-  // Permitir acesso ao login e admin mesmo em manutenção
   const allowedPaths = ['/login', '/admin'];
   const isAllowedPath = allowedPaths.some(p => pathname?.startsWith(p));
 
-  if (data?.maintenanceMode && !isAdmin() && !isAllowedPath) {
+  if (mounted && data?.maintenanceMode && !admin && !isAllowedPath) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="text-center max-w-md">

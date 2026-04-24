@@ -112,9 +112,14 @@ export interface Company {
   phone: string | null;
   location: string | null;
   website: string | null;
-  rating: number;
-  total_reviews: number;
+  rating?: number;
+  total_reviews?: number;
   created_at: Date;
   plan?: PlanId;
   is_verified?: boolean;
+  logo?: string | null;
+  banner?: string | null;
+  gallery?: string[];
+  businessHours?: string | null;
+  categoriesWorked?: string[];
 }

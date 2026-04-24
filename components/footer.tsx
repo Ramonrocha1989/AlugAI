@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { useMounted } from '@/hooks/use-mounted';
 import { Instagram, Facebook, Linkedin, Youtube, Mail, Phone } from 'lucide-react';
 
 const api = axios.create({
@@ -15,14 +16,17 @@ async function fetchPublicSettings() {
 }
 
 export function Footer() {
+  const mounted = useMounted();
+
   const { data: settings } = useQuery({
     queryKey: ['public-settings'],
     queryFn: fetchPublicSettings,
     staleTime: 1000 * 60 * 10,
     retry: 1,
+    enabled: mounted,
   });
 
-  const social = settings?.socialLinks || {};
+  const social = mounted ? (settings?.socialLinks || {}) : {};
   const hasSocial = social.instagram || social.facebook || social.linkedin || social.youtube;
 
   return (
@@ -30,9 +34,9 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold mb-4">{settings?.siteName || 'BaitaBriq'}</h3>
+            <h3 className="font-semibold mb-4">{(mounted && settings?.siteName) || 'BaitaBriq'}</h3>
             <p className="text-sm text-muted-foreground">
-              {settings?.homeDescription || 'Marketplace de máquinas agrícolas e de construção no Sul do Brasil.'}
+              {(mounted && settings?.homeDescription) || 'Marketplace de máquinas agrícolas e de construção no Sul do Brasil.'}
             </p>
           </div>
 
@@ -61,15 +65,15 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href={`mailto:${settings?.emailSupport || 'contato@baitabriq.com.br'}`} className="flex items-center gap-2 hover:text-primary">
+                <a href={`mailto:${(mounted && settings?.emailSupport) || 'contato@baitabriq.com.br'}`} className="flex items-center gap-2 hover:text-primary">
                   <Mail className="h-4 w-4" />
-                  {settings?.emailSupport || 'contato@baitabriq.com.br'}
+                  {(mounted && settings?.emailSupport) || 'contato@baitabriq.com.br'}
                 </a>
               </li>
               <li>
-                <a href={`https://wa.me/${settings?.whatsappSupport || '5553984590461'}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
+                <a href={`https://wa.me/${(mounted && settings?.whatsappSupport) || '5553984590461'}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
                   <Phone className="h-4 w-4" />
-                  {settings?.phoneSupport || '(53) 98459-0461'}
+                  {(mounted && settings?.phoneSupport) || '(53) 98459-0461'}
                 </a>
               </li>
             </ul>
@@ -77,7 +81,7 @@ export function Footer() {
 
           <div>
             <h3 className="font-semibold mb-4">Redes Sociais</h3>
-            {hasSocial ? (
+            {mounted && hasSocial ? (
               <ul className="space-y-2 text-sm">
                 {social.instagram && (
                   <li>
