@@ -59,6 +59,7 @@ export function BannerCarousel() {
         src={optimizeCloudinaryUrl(banner.imageUrl, { width: 1200 })}
         alt="Banner promocional"
         fill
+        sizes="100vw"
         className="object-cover"
         priority
       />

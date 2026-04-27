@@ -82,6 +82,7 @@ export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLi
             src={images[currentIndex]}
             alt={`Imagem ${currentIndex + 1}`}
             fill
+            sizes="100vw"
             className="object-contain"
             priority
           />
@@ -153,6 +154,7 @@ export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLi
                 src={img}
                 alt={`Thumbnail ${idx + 1}`}
                 fill
+                sizes="80px"
                 className="object-cover"
               />
             </button>
