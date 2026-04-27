@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMachine, useUpdateMachine } from '@/hooks/use-machines';
 import { useToast } from '@/components/toast-provider';
@@ -15,10 +15,11 @@ import { Loader2, ArrowLeft, Save } from 'lucide-react';
 import { CATEGORIES, BUSINESS_TYPES, ALL_MANUFACTURERS, STATES_SUL, QUICK_TAGS } from '@/lib/constants';
 import { CreateMachineData } from '@/types/machine';
 
-export default function EditMachinePage({ params }: { params: { id: string } }) {
+export default function EditMachinePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: machine, isLoading } = useMachine(params.id);
+  const { data: machine, isLoading } = useMachine(id);
   const updateMachine = useUpdateMachine();
   const [formData, setFormData] = useState<Partial<CreateMachineData>>({
     acceptsTradeDown: false,
@@ -88,7 +89,7 @@ export default function EditMachinePage({ params }: { params: { id: string } }) 
     }, {} as any);
     
     try {
-      await updateMachine.mutateAsync({ id: params.id, data: cleanData });
+      await updateMachine.mutateAsync({ id, data: cleanData });
       showToast('Máquina atualizada com sucesso!', 'success');
       router.push('/dashboard');
     } catch (error: any) {

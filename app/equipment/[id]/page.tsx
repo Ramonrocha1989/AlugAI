@@ -4,12 +4,13 @@ import { MachineSchema } from '@/components/structured-data';
 import { redirect } from 'next/navigation';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
   try {
-    const machine = await machineService.getById(params.id);
+    const machine = await machineService.getById(id);
     
     if (!machine) {
       return {
@@ -74,6 +75,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function EquipmentPage({ params }: Props) {
-  // Redirect para a nova URL /machine/[id]
-  redirect(`/machine/${params.id}`);
+  const { id } = await params;
+  redirect(`/machine/${id}`);
 }

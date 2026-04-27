@@ -1,6 +1,7 @@
 'use client';
 
 import { useCompany, useCompanyMachines } from '@/hooks/use-api';
+import { use } from 'react';
 import { MachineCard } from '@/components/machine-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +10,13 @@ import { Phone, MapPin, Star, Calendar, MessageCircle, Globe, Crown, Shield, Clo
 import Image from 'next/image';
 
 interface CompanyProfileProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function CompanyProfile({ params }: CompanyProfileProps) {
-  const { data: company, isLoading: companyLoading, error: companyError } = useCompany(params.id);
-  const { data: machines, isLoading: machinesLoading } = useCompanyMachines(params.id);
+  const resolvedParams = use(params);
+  const { data: company, isLoading: companyLoading, error: companyError } = useCompany(resolvedParams.id);
+  const { data: machines, isLoading: machinesLoading } = useCompanyMachines(resolvedParams.id);
 
   const handleWhatsApp = () => {
     if (!company?.phone) return;

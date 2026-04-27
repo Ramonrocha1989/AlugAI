@@ -11,12 +11,13 @@ import { MachineSchema } from '@/components/machine-schema';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
   try {
-    const machine = await machineService.getById(params.id);
+    const machine = await machineService.getById(id);
     
     if (!machine) {
       return {
@@ -83,7 +84,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function MachineDetailsPage({ params }: Props) {
-  const machine = await machineService.getById(params.id);
+  const { id } = await params;
+  const machine = await machineService.getById(id);
   
   if (!machine) {
     return <div>Máquina não encontrada</div>;
@@ -102,7 +104,7 @@ export default async function MachineDetailsPage({ params }: Props) {
         <Breadcrumbs items={breadcrumbItems} />
       </div>
       <ErrorBoundary>
-        <MachineDetailsClient params={params} />
+        <MachineDetailsClient params={{ id }} />
       </ErrorBoundary>
     </>
   );
