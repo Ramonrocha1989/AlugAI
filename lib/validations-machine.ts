@@ -2,9 +2,7 @@ import { z } from 'zod';
 
 // Schema para criação de máquina
 export const createMachineSchema = z.object({
-  businessType: z.enum(['SALE', 'RENTAL', 'EXCHANGE', 'SERVICE'], {
-    required_error: 'Tipo de negócio é obrigatório',
-  }),
+  businessType: z.enum(['SALE', 'RENTAL', 'EXCHANGE', 'SERVICE']),
   
   name: z.string().min(5, 'Nome deve ter no mínimo 5 caracteres'),
   description: z.string().min(100, 'Descrição deve ter no mínimo 100 caracteres'),
@@ -18,9 +16,7 @@ export const createMachineSchema = z.object({
     'IMPLEMENTS',
     'LIVESTOCK',
     'CONSTRUCTION',
-  ], {
-    required_error: 'Categoria é obrigatória',
-  }),
+  ]),
   
   manufacturer: z.string().min(2, 'Fabricante é obrigatório'),
   model: z.string().min(2, 'Modelo é obrigatório'),
