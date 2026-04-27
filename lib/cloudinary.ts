@@ -5,9 +5,10 @@ const UPLOAD_PRESET = 'baitabriq';
 
 export function optimizeCloudinaryUrl(url: string, options?: { width?: number; height?: number }): string {
   if (!url || !url.includes('res.cloudinary.com')) return url;
-  const transforms = ['f_auto', 'q_auto'];
+  const transforms = ['f_auto', 'q_auto:good'];
   if (options?.width) transforms.push(`w_${options.width}`);
   if (options?.height) transforms.push(`h_${options.height}`);
+  transforms.push('c_fill');
   return url.replace('/image/upload/', `/image/upload/${transforms.join(',')}/`);
 }
 

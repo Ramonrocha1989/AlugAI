@@ -7,10 +7,14 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cloudinary.com',
       },
     ],
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
   },
   async headers() {
     return [
