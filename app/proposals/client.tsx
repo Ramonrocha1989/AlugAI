@@ -15,8 +15,9 @@ import { proposalsService } from '@/services/proposals-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import dynamic from 'next/dynamic';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { CounterProposalModal } from '@/components/counter-proposal-modal';
+const CounterProposalModal = dynamic(() => import('@/components/counter-proposal-modal').then(m => ({ default: m.CounterProposalModal })), { ssr: false });
 import { Proposal } from '@/types/proposal';
 import { Loader2, Package, CheckCircle, XCircle, Clock, ArrowLeftRight, MessageCircle } from 'lucide-react';
 

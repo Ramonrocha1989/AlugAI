@@ -15,8 +15,9 @@ import { Loader2, Trash2, User, Shield, Pencil, X, Check, ChevronRight, Mail, Ph
 import { authService, getPlanConfig } from '@/services/machine-api';
 import { PlanId } from '@/types';
 import { apiRequest } from '@/lib/api';
-import { DeleteAccountModal } from '@/components/delete-account-modal';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/components/toast-provider';
+const DeleteAccountModal = dynamic(() => import('@/components/delete-account-modal').then(m => ({ default: m.DeleteAccountModal })), { ssr: false });
 import Link from 'next/link';
 
 const profileSchema = z.object({
