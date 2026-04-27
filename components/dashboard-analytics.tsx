@@ -5,7 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Machine, MachineCategory } from '@/types/machine';
 import { PlanId } from '@/types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import dynamic from 'next/dynamic';
+
+const BarChart = dynamic(() => import('recharts').then(m => ({ default: m.BarChart })), { ssr: false });
+const Bar = dynamic(() => import('recharts').then(m => ({ default: m.Bar })), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(m => ({ default: m.XAxis })), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(m => ({ default: m.YAxis })), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(m => ({ default: m.CartesianGrid })), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => ({ default: m.Tooltip })), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })), { ssr: false });
 import { useAnalyticsSummary, useCategoryBenchmarks } from '@/hooks/use-analytics';
 import { ConversionFunnel } from '@/components/conversion-funnel';
 import { CategoryBenchmarkCard } from '@/components/category-benchmark-card';
