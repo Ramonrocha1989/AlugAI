@@ -7,8 +7,7 @@ import { ArrowLeft, MapPin } from 'lucide-react';
 
 import { Machine } from '@/types/machine';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Máquinas Agrícolas Usadas no Rio Grande do Sul - RS | BaitaBriq',

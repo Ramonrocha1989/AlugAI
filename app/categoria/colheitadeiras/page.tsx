@@ -6,9 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Machine } from '@/types/machine';
 
-// Permitir renderização dinâmica para melhor indexação
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Colheitadeiras Usadas - RS, SC, PR | BaitaBriq',

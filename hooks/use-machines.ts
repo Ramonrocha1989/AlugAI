@@ -7,6 +7,7 @@ export function useMachines(filters?: MachineFilters) {
   return useQuery({
     queryKey: ['machines', filters],
     queryFn: () => machineService.getAll(filters),
+    staleTime: 1000 * 60,
   });
 }
 
@@ -16,6 +17,7 @@ export function useMachine(id: string) {
     queryKey: ['machine', id],
     queryFn: () => machineService.getById(id),
     enabled: !!id,
+    staleTime: 1000 * 60,
   });
 }
 

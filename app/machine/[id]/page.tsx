@@ -4,6 +4,8 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { machineService } from '@/services/machine-api';
 import { BUSINESS_TYPES } from '@/lib/constants';
 
+export const revalidate = 60;
+
 function categoryLabel(slug: string): string {
   return slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Categoria';
 }

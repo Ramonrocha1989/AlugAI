@@ -1,24 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { httpClient } from '@/lib/http-client';
 import { Machine, MachineFilters } from '@/types/machine';
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  timeout: 10000,
-});
-
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const { token } = JSON.parse(user);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-  }
-  return config;
-});
 
 interface MachinesPageResponse {
   data: Machine[];
@@ -34,7 +16,7 @@ export function useInfiniteMachines(filters?: MachineFilters) {
   return useInfiniteQuery({
     queryKey: ['machines-infinite', filters],
     queryFn: async ({ pageParam = 1 }) => {
-      const { data } = await api.get<MachinesPageResponse>('/machines', {
+      const { data } = await httpClient.get<MachinesPageResponse>('/machines', {
         params: {
           ...filters,
           page: pageParam,
@@ -48,5 +30,6 @@ export function useInfiniteMachines(filters?: MachineFilters) {
       return page < totalPages ? page + 1 : undefined;
     },
     initialPageParam: 1,
+    staleTime: 1000 * 60,
   });
 }
