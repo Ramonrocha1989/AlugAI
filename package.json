@@ -20,7 +20,7 @@
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.10.0",
     "clsx": "^2.1.0",
-    "cpf-cnpj-validator": "^1.0.3",
+    "cpf-cnpj-validator": "^2.1.0",
     "date-fns": "^4.1.0",
     "isomorphic-dompurify": "^2.30.0",
     "jsonwebtoken": "^9.0.3",
