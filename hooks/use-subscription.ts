@@ -1,17 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { machineService } from '@/services/machine-api';
+import { httpClient, validateEndpoint } from '@/lib/http-client';
 
 export function useCancelSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      const token = localStorage.getItem('accessToken');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/cancel`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Erro ao cancelar assinatura');
+      await httpClient.post(validateEndpoint('/subscriptions/cancel'));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });

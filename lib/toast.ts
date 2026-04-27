@@ -13,19 +13,13 @@
 // Este arquivo será usado como referência
 // O toast real deve ser chamado via useToast() hook
 
+import { logger } from './logger';
+
 export const toast = {
-  success: (message: string) => {
-    console.log('[Toast Success]:', message);
-  },
-  error: (message: string) => {
-    console.log('[Toast Error]:', message);
-  },
-  warning: (message: string) => {
-    console.log('[Toast Warning]:', message);
-  },
-  info: (message: string) => {
-    console.log('[Toast Info]:', message);
-  },
+  success: (message: string) => { logger.log('[Toast Success]:', message); },
+  error: (message: string) => { logger.log('[Toast Error]:', message); },
+  warning: (message: string) => { logger.log('[Toast Warning]:', message); },
+  info: (message: string) => { logger.log('[Toast Info]:', message); },
 };
 
 /**

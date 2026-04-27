@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { Button } from '@/components/ui/button';
 import { X, Upload, Loader2 } from 'lucide-react';
 
@@ -55,9 +55,14 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    onChange(newImages);
+  const removeImage = async (index: number) => {
+    const urlToDelete = images[index];
+    onChange(images.filter((_, i) => i !== index));
+    try {
+      await deleteFromCloudinary(urlToDelete);
+    } catch {
+      // falha silenciosa — imagem já removida da lista
+    }
   };
 
   return (

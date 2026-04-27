@@ -1,25 +1,6 @@
-import axios from 'axios';
+import { httpClient } from '@/lib/http-client';
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor para adicionar token
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const { token } = JSON.parse(user);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-  }
-  return config;
-});
+const api = httpClient;
 
 interface CreateCheckoutResponse {
   checkoutUrl: string;

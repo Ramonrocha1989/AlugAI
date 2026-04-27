@@ -31,9 +31,8 @@ export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
       setStep('success');
       reset();
     },
-    onError: (error: any) => {
-      // Erro já é tratado pelo apiRequest com toast
-      console.error('Erro ao solicitar exclusão:', error);
+    onError: () => {
+      // Erro tratado pelo apiRequest com toast
     },
   });
 

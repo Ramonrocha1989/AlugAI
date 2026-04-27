@@ -47,8 +47,8 @@ export function ReviewModal({
       onClose();
       setRating(5);
       setComment('');
-    } catch (error) {
-      console.error('Erro ao criar avaliação:', error);
+    } catch {
+      // Erro tratado pelo httpClient com toast
     }
   };
 

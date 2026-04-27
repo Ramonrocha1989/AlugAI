@@ -1,25 +1,8 @@
-import axios from 'axios';
 import { Company } from '@/types';
 import { Machine } from '@/types/machine';
+import { httpClient } from '@/lib/http-client';
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
+const api = httpClient;
 
 export const companyService = {
   getCompany: async (id: string): Promise<Company> => {

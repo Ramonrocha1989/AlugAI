@@ -1,37 +1,14 @@
-import axios from 'axios';
+import { httpClient } from '@/lib/http-client';
 import { Equipment, User, LoginCredentials, RegisterData, CreateEquipmentData, Plan } from '@/types';
 import { mockEquipments } from '@/lib/mock-data';
+import { logger } from '@/lib/logger';
 
-// Configuração do cliente Axios
-export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export const api = httpClient;
 
 // Modo mock (true = usa dados mockados, false = usa backend real)
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
-// Interceptor: adiciona token JWT em todas as requisições
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      const userData = JSON.parse(user);
-      if (userData.token) {
-        config.headers.Authorization = `Bearer ${userData.token}`;
-      }
-    }
-  }
-  return config;
-});
 
-// Importar interceptor com mutex para refresh
-import './auth-interceptor';
-
-// Simulação de delay de rede
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock de usuários (legado - não usado mais)
@@ -287,7 +264,7 @@ export const authService = {
   forgotPassword: async (email: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Email de recuperação enviado para: ${email}`);
+      logger.log('Email de recuperação enviado');
       return;
     }
     
@@ -298,7 +275,7 @@ export const authService = {
   resetPassword: async (token: string, password: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Senha resetada com token: ${token}`);
+      logger.log('Senha resetada com token');
       return;
     }
     
@@ -309,7 +286,7 @@ export const authService = {
   verifyEmail: async (token: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log(`Email verificado com token: ${token}`);
+      logger.log('Email verificado com token');
       return;
     }
     
@@ -320,7 +297,7 @@ export const authService = {
   requestDeleteAccount: async (password: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
-      console.log('Email de exclusão enviado');
+      logger.log('Email de exclusão enviado');
       return;
     }
     
@@ -332,7 +309,7 @@ export const authService = {
     if (USE_MOCK) {
       await delay(500);
       localStorage.removeItem('currentUser');
-      console.log('Conta excluída');
+      logger.log('Conta excluída');
       return;
     }
     

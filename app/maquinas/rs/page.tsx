@@ -39,7 +39,7 @@ export default async function MaquinasRSPage() {
       limit: 50 
     });
   } catch (error) {
-    console.error('Erro ao carregar máquinas RS:', error);
+    if (process.env.NODE_ENV !== 'production') console.error('Erro ao carregar máquinas RS');
   }
 
   const cities = [

@@ -43,8 +43,7 @@ export default async function TratoresPage() {
       limit: 50 
     });
   } catch (error) {
-    console.error('Erro ao carregar tratores:', error);
-    // Página ainda renderiza, mas sem máquinas
+    if (process.env.NODE_ENV !== 'production') console.error('Erro ao carregar tratores');
   }
 
   return (

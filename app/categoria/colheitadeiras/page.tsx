@@ -41,8 +41,7 @@ export default async function ColheitadeirasPage() {
       limit: 50 
     });
   } catch (error) {
-    console.error('Erro ao carregar colheitadeiras:', error);
-    // Página ainda renderiza, mas sem máquinas
+    if (process.env.NODE_ENV !== 'production') console.error('Erro ao carregar colheitadeiras');
   }
 
   return (

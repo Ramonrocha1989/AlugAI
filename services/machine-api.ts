@@ -1,64 +1,11 @@
-import axios from 'axios';
 import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/types/machine';
 import { User, LoginCredentials, RegisterData, Plan, PlanId, Equipment, CreateEquipmentData } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
 import { mockEquipments } from '@/lib/mock-data';
 import { apiRequest } from '@/lib/api-refresh';
+import { httpClient } from '@/lib/http-client';
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-  validateStatus: () => true,
-  transformRequest: [(data) => {
-    if (data && typeof data === 'object') {
-      const cleanData = { ...data };
-      if (cleanData.images) {
-        cleanData.images = Array.from(cleanData.images).filter(img => img);
-      }
-      if (cleanData.quickTags) {
-        cleanData.quickTags = Array.from(cleanData.quickTags).filter(tag => tag);
-      }
-      return JSON.stringify(cleanData);
-    }
-    return data;
-  }],
-});
-
-// Adicionar token do localStorage em todas as requisições axios
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => {
-    if (response.status >= 400) {
-      const error: any = new Error(response.statusText);
-      error.response = response;
-      return Promise.reject(error);
-    }
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+const api = httpClient;
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
-
+import { httpClient, validateEndpoint } from '@/lib/http-client';
 import { PlanId } from '@/types';
 
 interface CheckoutButtonProps {
@@ -22,33 +22,18 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
     analytics.trackAddToCart(planName, planPrice, planType);
 
     try {
-      const token = localStorage.getItem('accessToken');
-      
-      if (!token) {
-        alert('Você precisa estar logado para assinar um plano');
-        window.location.href = "/login";
-        return;
-      }
-
-      const response = await fetch('/api/create-preference', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          planName,
-          planPrice,
-          planDescription,
-          planType,
-        }),
+      const { data } = await httpClient.post(validateEndpoint('/api/create-preference'), {
+        planName,
+        planPrice,
+        planDescription,
+        planType,
       });
 
-      const data = await response.json();
-
       if (data.init_point) {
+        const url = new URL(data.init_point);
+        if (url.protocol !== 'https:') throw new Error('URL de pagamento inválida');
         analytics.trackBeginCheckout(planName, planPrice, planType);
-        window.location.href = data.init_point;
+        window.location.href = url.toString();
       } else {
         alert('Erro ao criar pagamento');
       }

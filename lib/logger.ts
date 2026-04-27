@@ -1,32 +1,27 @@
-/**
- * Logger que só funciona em desenvolvimento
- * Remove logs em produção para não expor informações sensíveis
- */
-
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+function sanitize(arg: unknown): unknown {
+  if (typeof arg === 'string') {
+    return arg.replace(/[\r\n\t]/g, ' ').replace(/[\x00-\x1F\x7F]/g, '');
+  }
+  return arg;
+}
+
+function sanitizeArgs(args: unknown[]): unknown[] {
+  return args.map(sanitize);
+}
+
 export const logger = {
-  log: (...args: any[]) => {
-    if (isDevelopment) {
-      console.log(...args);
-    }
+  log: (...args: unknown[]) => {
+    if (isDevelopment) console.log(...sanitizeArgs(args));
   },
-
-  error: (...args: any[]) => {
-    if (isDevelopment) {
-      console.error(...args);
-    }
+  error: (...args: unknown[]) => {
+    if (isDevelopment) console.error(...sanitizeArgs(args));
   },
-
-  warn: (...args: any[]) => {
-    if (isDevelopment) {
-      console.warn(...args);
-    }
+  warn: (...args: unknown[]) => {
+    if (isDevelopment) console.warn(...sanitizeArgs(args));
   },
-
-  info: (...args: any[]) => {
-    if (isDevelopment) {
-      console.info(...args);
-    }
+  info: (...args: unknown[]) => {
+    if (isDevelopment) console.info(...sanitizeArgs(args));
   },
 };

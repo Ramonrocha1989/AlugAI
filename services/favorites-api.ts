@@ -1,63 +1,8 @@
-import axios from 'axios';
 import { Machine } from '@/types/machine';
+import { httpClient } from '@/lib/http-client';
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  timeout: 10000,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
+const api = httpClient;
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
-
-// Adicionar token em todas as requisições
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
-// Interceptor para refresh automático
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          const { data } = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
-            { refreshToken }
-          );
-          
-          localStorage.setItem('accessToken', data.accessToken);
-          if (data.refreshToken) {
-            localStorage.setItem('refreshToken', data.refreshToken);
-          }
-          
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-          return api(originalRequest);
-        } catch (refreshError) {
-          localStorage.clear();
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

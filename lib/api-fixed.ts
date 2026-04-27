@@ -1,22 +1,16 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { httpClient, validateEndpoint } from './http-client';
 
 export async function apiRequest(endpoint: string, options: RequestInit = {}) {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const safeUrl = validateEndpoint(endpoint);
+  const method = (options.method || 'GET').toLowerCase() as 'get' | 'post' | 'put' | 'patch' | 'delete';
+  const body = options.body ? JSON.parse(options.body as string) : undefined;
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include',
+  const response = await httpClient.request({
+    url: safeUrl,
+    method,
+    data: body,
+    headers: options.headers as Record<string, string>,
   });
 
-  if (!response.ok) {
-    const error: any = new Error(`HTTP ${response.status}`);
-    error.response = response;
-    throw error;
-  }
-
-  return response.json();
+  return response.data;
 }
