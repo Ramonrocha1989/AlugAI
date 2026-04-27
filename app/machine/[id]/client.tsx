@@ -4,27 +4,26 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
+import dynamic from 'next/dynamic';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { useMachine, useIncrementViews } from '@/hooks/use-machines';
 import { machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
 import { sanitizeHTML } from '@/lib/sanitize';
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReviewsList } from '@/components/reviews-list';
-import { ReviewModal } from '@/components/review-modal';
 import { RatingBadge } from '@/components/rating-badge';
 import { ShareButtons } from '@/components/share-buttons';
-import { ImageLightbox } from '@/components/image-lightbox';
-import { ProposalModal } from '@/components/proposal-modal';
 import { authService } from '@/services/machine-api';
 import { BUSINESS_TYPES, QUICK_TAGS } from '@/lib/constants';
 import { analytics } from '@/lib/analytics';
-import { 
-  ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star, DollarSign
-} from 'lucide-react';
+import { ArrowLeft, MessageCircle, Eye, CheckCircle2, Loader2, Star, DollarSign } from 'lucide-react';
+
+const ImageLightbox = dynamic(() => import('@/components/image-lightbox').then(m => ({ default: m.ImageLightbox })), { ssr: false });
+const ReviewModal = dynamic(() => import('@/components/review-modal').then(m => ({ default: m.ReviewModal })), { ssr: false });
+const ProposalModal = dynamic(() => import('@/components/proposal-modal').then(m => ({ default: m.ProposalModal })), { ssr: false });
 
 export default function MachineDetailsClient({ params }: { params: { id: string } }) {
   const router = useRouter();
