@@ -3,7 +3,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
-  ...(isProd && { output: 'standalone', trailingSlash: true }),
+  ...(isProd && { trailingSlash: true }), // removido 'standalone' — incompatível com Netlify
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
@@ -13,6 +13,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
       { protocol: 'https', hostname: '*.railway.app' },
       { protocol: 'https', hostname: '*.ngrok-free.app' },
+      { protocol: 'https', hostname: 's7d2.scene7.com' },
+      { protocol: 'https', hostname: '*.scene7.com' },
     ],
   },
   async headers() {
