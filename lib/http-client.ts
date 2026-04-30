@@ -2,8 +2,20 @@ import axios from 'axios';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-// Usa cookies quando a URL aponta para o domínio de produção
-const useCookies = API_BASE.includes('api.baitabriq.com.br');
+// accessToken em memória — não exposto ao JS malicioso via localStorage
+let accessToken: string | null = null;
+
+export function setAccessToken(token: string) {
+  accessToken = token;
+}
+
+export function clearAccessToken() {
+  accessToken = null;
+}
+
+export function getAccessToken() {
+  return accessToken;
+}
 
 export function validateEndpoint(endpoint: string): string {
   if (!/^\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]*$/.test(endpoint)) {
@@ -16,29 +28,28 @@ export const httpClient = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: useCookies,
+  withCredentials: true, // necessário para enviar refreshToken cookie
 });
 
-// Em dev, injetar token do localStorage no header Authorization
-if (typeof window !== 'undefined' && !useCookies) {
-  httpClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-}
+// Injetar accessToken no header Authorization em toda requisição
+httpClient.interceptors.request.use((config) => {
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
 
-// Refresh automático com mutex
+// Refresh robusto sem race condition
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: () => void; reject: (err: unknown) => void }> = [];
+let pendingRequests: Array<() => void> = [];
 
-const processQueue = (error: unknown) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    error ? reject(error) : resolve();
-  });
-  failedQueue = [];
+const processPending = () => {
+  pendingRequests.forEach(cb => cb());
+  pendingRequests = [];
+};
+
+const clearPending = () => {
+  pendingRequests = [];
 };
 
 httpClient.interceptors.response.use(
@@ -50,44 +61,39 @@ httpClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Marcar para não tentar refresh infinito
+    originalRequest._retry = true;
+
     if (isRefreshing) {
+      // Enfileirar e aguardar o refresh em andamento terminar
       return new Promise((resolve, reject) => {
-        failedQueue.push({
-          resolve: () => resolve(httpClient(originalRequest)),
-          reject,
+        pendingRequests.push(() => {
+          if (accessToken) {
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          }
+          resolve(httpClient(originalRequest));
         });
       });
     }
 
-    originalRequest._retry = true;
     isRefreshing = true;
 
     try {
-      // Em produção: cookie enviado automaticamente via withCredentials
-      // Em dev: refreshToken no body
-      const refreshToken = !useCookies ? localStorage.getItem('refreshToken') : undefined;
-      const refreshRes = await httpClient.post(
-        validateEndpoint('/auth/refresh'),
-        !useCookies && refreshToken ? { refreshToken } : undefined,
-      );
+      // refreshToken é enviado automaticamente via cookie httpOnly
+      const refreshRes = await httpClient.post(validateEndpoint('/auth/refresh'));
 
-      if (!useCookies && refreshRes.data.accessToken) {
-        localStorage.setItem('accessToken', refreshRes.data.accessToken);
-        localStorage.setItem('refreshToken', refreshRes.data.refreshToken);
+      const newAccessToken = refreshRes.data.accessToken;
+      if (newAccessToken) {
+        setAccessToken(newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       }
 
-      processQueue(null);
-      // Remover Authorization header antigo para forçar uso do cookie novo
-      delete originalRequest.headers['Authorization'];
-      delete originalRequest.headers['authorization'];
-      // Pequeno delay para garantir que o browser processou o Set-Cookie
-      await new Promise(resolve => setTimeout(resolve, 100));
+      processPending();
       return httpClient(originalRequest);
     } catch (err) {
-      processQueue(err);
+      clearPending();
+      clearAccessToken();
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('currentUser');
         window.location.href = '/login';
       }

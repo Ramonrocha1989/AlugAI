@@ -3,7 +3,7 @@ import { User, LoginCredentials, RegisterData, Plan, PlanId, Equipment, CreateEq
 import { mockMachines } from '@/lib/mock-machines';
 import { mockEquipments } from '@/lib/mock-data';
 import { apiRequest } from '@/lib/api-refresh';
-import { httpClient } from '@/lib/http-client';
+import { httpClient, setAccessToken, clearAccessToken } from '@/lib/http-client';
 
 const api = httpClient;
 
@@ -464,7 +464,7 @@ export const authService = {
         body: JSON.stringify(credentials),
       });
 
-      if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
+      if (data.accessToken) setAccessToken(data.accessToken);
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
 
@@ -520,7 +520,7 @@ export const authService = {
     });
 
     localStorage.setItem('currentUser', JSON.stringify(response.user));
-    if (response.accessToken) localStorage.setItem('accessToken', response.accessToken);
+    if (response.accessToken) setAccessToken(response.accessToken);
     if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
 
     return response.user;
@@ -530,7 +530,7 @@ export const authService = {
     try {
       await apiRequest('/auth/logout', { method: 'POST' });
     } catch (_) {}
-    localStorage.removeItem('accessToken');
+    clearAccessToken();
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('currentUser');
     if (typeof window !== 'undefined') {
