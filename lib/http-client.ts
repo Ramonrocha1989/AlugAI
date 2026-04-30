@@ -47,7 +47,11 @@ export async function bootstrapAccessToken(): Promise<boolean> {
       const refreshRes = await httpClient.post(
         validateEndpoint('/auth/refresh'),
         {},
-        { headers: { 'x-skip-auth-refresh': 'true', 'x-skip-auth-redirect': 'true' } }
+        {
+          // Flags internas de controle (não viram headers HTTP)
+          skipAuthRefresh: true,
+          skipAuthRedirect: true,
+        } as any
       );
       const newAccessToken = refreshRes.data?.accessToken;
       if (newAccessToken) {
@@ -106,8 +110,8 @@ httpClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const requestUrl = typeof originalRequest?.url === 'string' ? originalRequest.url : '';
-    const skipAuthRefresh = originalRequest?.headers?.['x-skip-auth-refresh'] === 'true';
-    const skipAuthRedirect = originalRequest?.headers?.['x-skip-auth-redirect'] === 'true';
+    const skipAuthRefresh = Boolean((originalRequest as any)?.skipAuthRefresh);
+    const skipAuthRedirect = Boolean((originalRequest as any)?.skipAuthRedirect);
     const isRefreshEndpoint = requestUrl.includes('/auth/refresh');
 
     if (
