@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production';
 const isDev = process.env.NODE_ENV === 'development';
+const disableImageOptimization =
+  process.env.NEXT_DISABLE_IMAGE_OPTIMIZATION === 'true' ||
+  process.env.NETLIFY === 'true';
 
 const nextConfig = {
   ...(isProd && { trailingSlash: true }), // removido 'standalone' — incompatível com Netlify
   images: {
+    unoptimized: disableImageOptimization,
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.cloudinary.com' },
