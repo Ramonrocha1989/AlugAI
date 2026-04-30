@@ -465,7 +465,6 @@ export const authService = {
       });
 
       if (data.accessToken) setAccessToken(data.accessToken);
-      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
 
       return data.user;
@@ -521,7 +520,6 @@ export const authService = {
 
     localStorage.setItem('currentUser', JSON.stringify(response.user));
     if (response.accessToken) setAccessToken(response.accessToken);
-    if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
 
     return response.user;
   },
@@ -531,7 +529,6 @@ export const authService = {
       await apiRequest('/auth/logout', { method: 'POST' });
     } catch (_) {}
     clearAccessToken();
-    localStorage.removeItem('refreshToken');
     localStorage.removeItem('currentUser');
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
