@@ -77,6 +77,11 @@ httpClient.interceptors.response.use(
       }
 
       processQueue(null);
+      // Remover Authorization header antigo para forçar uso do cookie novo
+      delete originalRequest.headers['Authorization'];
+      delete originalRequest.headers['authorization'];
+      // Pequeno delay para garantir que o browser processou o Set-Cookie
+      await new Promise(resolve => setTimeout(resolve, 100));
       return httpClient(originalRequest);
     } catch (err) {
       processQueue(err);
