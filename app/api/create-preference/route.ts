@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mercadoPagoService } from '@/services/mercadopago';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,24 +24,22 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7);
     let userId: string;
-    
+    let decoded: JwtPayload;
+
     try {
-      const decoded = jwt.decode(token) as { userId?: string; sub?: string } | null;
-      userId = decoded?.userId || decoded?.sub || '';
-      
-      if (!userId) {
-        throw new Error('UserId não encontrado no token');
-      }
-    } catch (error) {
+      const secret = process.env.JWT_SECRET;
+      if (!secret) throw new Error('JWT_SECRET não configurado');
+      decoded = jwt.verify(token, secret) as JwtPayload;
+      userId = decoded.userId || decoded.sub || '';
+      if (!userId) throw new Error('UserId não encontrado no token');
+    } catch {
       return NextResponse.json(
         { error: 'Token inválido' },
         { status: 401 }
       );
     }
 
-    // Email: vem do body ou do token
-    const decoded = jwt.decode(token) as any;
-    const email = payerEmail || decoded?.email || '';
+    const email = payerEmail || decoded.email || '';
 
     const subscription = await mercadoPagoService.createSubscription(
       planName,

@@ -72,8 +72,7 @@ export default function LoginPage() {
     try {
       await login.mutateAsync(data);
       showToast('Login realizado com sucesso!', 'success');
-      
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
       window.location.href = '/';
     } catch (error: any) {
       const message = error.data?.message || error.message || 'Erro ao fazer login';

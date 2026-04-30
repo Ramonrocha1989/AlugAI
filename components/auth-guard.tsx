@@ -18,10 +18,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
       
       if (isProtectedRoute && !user) {
-        // router.push("/login");
-      } else {
-        setIsChecking(false);
+        router.push('/login');
+        return;
       }
+      setIsChecking(false);
     };
 
     checkAuth();

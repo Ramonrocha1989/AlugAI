@@ -1,50 +1,40 @@
 import axios from 'axios';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const isProd = process.env.NODE_ENV === 'production';
 
-// Valida que o endpoint é apenas um path relativo seguro e pertence ao domínio permitido
 export function validateEndpoint(endpoint: string): string {
   if (!/^\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]*$/.test(endpoint)) {
     throw new Error('Invalid endpoint');
   }
-  // Constrói URL completa usando o base como prefixo (não como origem)
-  const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
-  const fullUrl = new URL(base + endpoint);
-  const allowed = new URL(API_BASE);
-  if (fullUrl.origin !== allowed.origin) {
-    throw new Error('Endpoint fora do domínio permitido');
-  }
-  // Retorna apenas o path relativo ao baseURL para o axios não duplicar
-  const basePath = new URL(API_BASE).pathname.replace(/\/$/, '');
-  const relativePath = fullUrl.pathname.replace(basePath, '') + fullUrl.search;
-  return relativePath || '/';
+  return endpoint;
 }
 
 export const httpClient = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true,
+  withCredentials: isProd, // cookies só em produção
 });
 
-// Adiciona token em todas as requisições
-httpClient.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
+// Em dev, injetar token do localStorage no header Authorization
+if (typeof window !== 'undefined' && !isProd) {
+  httpClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-  }
-  return config;
-});
+    return config;
+  });
+}
 
 // Refresh automático com mutex
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+let failedQueue: Array<{ resolve: () => void; reject: (err: unknown) => void }> = [];
 
-const processQueue = (error: unknown, token: string | null) => {
+const processQueue = (error: unknown) => {
   failedQueue.forEach(({ resolve, reject }) => {
-    error ? reject(error) : resolve(token!);
+    error ? reject(error) : resolve();
   });
   failedQueue = [];
 };
@@ -61,10 +51,7 @@ httpClient.interceptors.response.use(
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
-          resolve: (token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(httpClient(originalRequest));
-          },
+          resolve: () => resolve(httpClient(originalRequest)),
           reject,
         });
       });
@@ -74,19 +61,21 @@ httpClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
-      if (!refreshToken) throw new Error('No refresh token');
+      const refreshToken = !isProd ? localStorage.getItem('refreshToken') : undefined;
+      const refreshRes = await httpClient.post(
+        validateEndpoint('/auth/refresh'),
+        !isProd && refreshToken ? { refreshToken } : undefined,
+      );
 
-      const { data } = await httpClient.post(validateEndpoint('/auth/refresh'), { refreshToken });
+      if (!isProd && refreshRes.data.accessToken) {
+        localStorage.setItem('accessToken', refreshRes.data.accessToken);
+        localStorage.setItem('refreshToken', refreshRes.data.refreshToken);
+      }
 
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-
-      originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-      processQueue(null, data.accessToken);
+      processQueue(null);
       return httpClient(originalRequest);
     } catch (err) {
-      processQueue(err, null);
+      processQueue(err);
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');

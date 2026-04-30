@@ -111,10 +111,10 @@ export interface Company {
   description: string | null;
   phone: string | null;
   location: string | null;
-  website: string | null;
+  website?: string | null;
   rating?: number;
   total_reviews?: number;
-  created_at: Date;
+  created_at: Date | string;
   plan?: PlanId;
   is_verified?: boolean;
   logo?: string | null;

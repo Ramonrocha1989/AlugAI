@@ -1,5 +1,5 @@
 import { Machine, CreateMachineData, MachineFilters, MachinesResponse } from '@/types/machine';
-import { User, LoginCredentials, RegisterData, Plan, PlanId, Equipment, CreateEquipmentData } from '@/types';
+import { User, LoginCredentials, RegisterData, Plan, PlanId, Equipment, CreateEquipmentData, UserProfile, Company } from '@/types';
 import { mockMachines } from '@/lib/mock-machines';
 import { mockEquipments } from '@/lib/mock-data';
 import { apiRequest } from '@/lib/api-refresh';
@@ -463,15 +463,11 @@ export const authService = {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
-      
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-      }
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
+
+      if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
+      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
-      
+
       return data.user;
     } catch (error) {
       throw error;
@@ -506,48 +502,37 @@ export const authService = {
       localStorage.setItem('currentUser', JSON.stringify(user));
       return user;
     }
-    
-    let payload: any = {
+
+    const payload: RegisterData & { responsibleName?: string } = {
       userType: data.userType,
       email: data.email,
       password: data.password,
       phone: data.phone,
+      ...(data.userType === 'INDIVIDUAL'
+        ? { fullName: data.fullName, ...(data.cpf && { cpf: data.cpf }) }
+        : { companyName: data.companyName, responsibleName: data.responsibleName, ...(data.cnpj && { cnpj: data.cnpj }) }
+      ),
     };
-    
-    if (data.userType === 'INDIVIDUAL') {
-      payload.fullName = data.fullName;
-      if (data.cpf) payload.cpf = data.cpf;
-    } else {
-      payload.companyName = data.companyName;
-      payload.responsibleName = data.responsibleName;
-      if (data.cnpj) payload.cnpj = data.cnpj;
-    }
-    
-    try {
-      const response = await apiRequest('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-      
-      if (response.accessToken) {
-        localStorage.setItem('accessToken', response.accessToken);
-      }
-      if (response.refreshToken) {
-        localStorage.setItem('refreshToken', response.refreshToken);
-      }
-      localStorage.setItem('currentUser', JSON.stringify(response.user));
-      
-      return response.user;
-    } catch (error: any) {
-      throw error;
-    }
+
+    const response = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    localStorage.setItem('currentUser', JSON.stringify(response.user));
+    if (response.accessToken) localStorage.setItem('accessToken', response.accessToken);
+    if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
+
+    return response.user;
   },
 
   logout: async (): Promise<void> => {
-    localStorage.removeItem('currentUser');
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch (_) {}
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
@@ -566,7 +551,7 @@ export const authService = {
     return data;
   },
 
-  getProfile: async (): Promise<any> => {
+  getProfile: async (): Promise<UserProfile> => {
     return await apiRequest('/auth/profile', { method: 'GET' });
   },
 
@@ -575,12 +560,7 @@ export const authService = {
       await delay(500);
       return;
     }
-    
-    try {
-      const response = await api.post('/auth/forgot-password', { email });
-    } catch (error) {
-      throw error;
-    }
+    await api.post('/auth/forgot-password', { email });
   },
 
   resetPassword: async (token: string, password: string): Promise<void> => {
@@ -588,12 +568,7 @@ export const authService = {
       await delay(500);
       return;
     }
-    
-    try {
-      const response = await api.post('/auth/reset-password', { token, password });
-    } catch (error) {
-      throw error;
-    }
+    await api.post('/auth/reset-password', { token, password });
   },
 
   verifyEmail: async (token: string): Promise<void> => {
@@ -601,12 +576,7 @@ export const authService = {
       await delay(500);
       return;
     }
-    
-    try {
-      const response = await api.post('/auth/verify-email', { token });
-    } catch (error) {
-      throw error;
-    }
+    await api.post('/auth/verify-email', { token });
   },
 
   requestDeleteAccount: async (password: string): Promise<void> => {
@@ -614,35 +584,20 @@ export const authService = {
       await delay(500);
       return;
     }
-    
-    try {
-      const response = await api.post('/auth/request-delete', { password });
-    } catch (error) {
-      throw error;
-    }
+    await api.post('/auth/request-delete', { password });
   },
 
   confirmDeleteAccount: async (token: string): Promise<void> => {
     if (USE_MOCK) {
       await delay(500);
       localStorage.removeItem('currentUser');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       return;
     }
-    
-    try {
-      const response = await api.post('/auth/confirm-delete', { token });
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('token');
-    } catch (error) {
-      throw error;
-    }
+    await api.post('/auth/confirm-delete', { token });
+    localStorage.removeItem('currentUser');
   },
 
-  getCompany: async (id: string): Promise<any> => {
+  getCompany: async (id: string): Promise<Company> => {
     if (USE_MOCK) {
       await delay(300);
       return {
@@ -671,12 +626,12 @@ export const authService = {
     return data;
   },
 
-  getMyCompany: async (): Promise<any> => {
+  getMyCompany: async (): Promise<Company> => {
     const { data } = await api.get('/companies/me');
     return data;
   },
 
-  updateCompanyProfile: async (profileData: any): Promise<any> => {
+  updateCompanyProfile: async (profileData: Partial<Company>): Promise<Company> => {
     const { data } = await api.put('/companies/profile', profileData);
     return data;
   },
