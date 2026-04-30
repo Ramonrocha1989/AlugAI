@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService, machineService } from '@/services/machine-api';
 import { companyService } from '@/services/company-api';
 import { LoginCredentials, RegisterData, CreateMachineData, MachineFilters } from '@/types';
+import { useAuthReady } from './use-auth-ready';
 
 // Hook para listar máquinas
 export const useEquipments = (filters?: MachineFilters) => {
@@ -22,9 +23,13 @@ export const useEquipment = (id: string) => {
 
 // Hook para listar máquinas do usuário
 export const useMyEquipments = () => {
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['my-machines'],
     queryFn: () => machineService.getMyMachines(),
+    enabled: isAuthenticated && !isBootstrapping,
+    retry: false,
   });
 };
 

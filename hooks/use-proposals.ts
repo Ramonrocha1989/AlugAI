@@ -1,15 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { proposalsService } from '@/services/proposals-api';
 import { CreateProposalData, CounterProposalData } from '@/types/proposal';
+import { useAuthReady } from './use-auth-ready';
 
 // Hook para listar propostas recebidas
 export function useReceivedProposals() {
-  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
-  
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['proposals', 'received'],
     queryFn: () => proposalsService.getAll('received'),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isBootstrapping,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -17,12 +18,12 @@ export function useReceivedProposals() {
 
 // Hook para listar propostas enviadas
 export function useSentProposals() {
-  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
-  
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['proposals', 'sent'],
     queryFn: () => proposalsService.getAll('sent'),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isBootstrapping,
     retry: false,
     refetchOnWindowFocus: false,
   });

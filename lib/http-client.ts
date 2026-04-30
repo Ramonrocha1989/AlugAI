@@ -4,17 +4,65 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // accessToken em memória — não exposto ao JS malicioso via localStorage
 let accessToken: string | null = null;
+let bootstrapPromise: Promise<boolean> | null = null;
+
+function dispatchAuthTokenChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('auth-token-changed'));
+  }
+}
+
+function isPublicAuthEndpoint(url?: string) {
+  if (!url) return false;
+
+  return [
+    '/auth/login',
+    '/auth/register',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/auth/verify-email',
+  ].some((endpoint) => url.includes(endpoint));
+}
 
 export function setAccessToken(token: string) {
   accessToken = token;
+  dispatchAuthTokenChanged();
 }
 
 export function clearAccessToken() {
   accessToken = null;
+  dispatchAuthTokenChanged();
 }
 
 export function getAccessToken() {
   return accessToken;
+}
+
+export async function bootstrapAccessToken(): Promise<boolean> {
+  if (accessToken) return true;
+  if (bootstrapPromise) return bootstrapPromise;
+
+  bootstrapPromise = (async () => {
+    try {
+      const refreshRes = await httpClient.post(
+        validateEndpoint('/auth/refresh'),
+        {},
+        { headers: { 'x-skip-auth-refresh': 'true', 'x-skip-auth-redirect': 'true' } }
+      );
+      const newAccessToken = refreshRes.data?.accessToken;
+      if (newAccessToken) {
+        setAccessToken(newAccessToken);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      bootstrapPromise = null;
+    }
+  })();
+
+  return bootstrapPromise;
 }
 
 export function validateEndpoint(endpoint: string): string {
@@ -33,7 +81,8 @@ export const httpClient = axios.create({
 
 // Injetar accessToken no header Authorization em toda requisição
 httpClient.interceptors.request.use((config) => {
-  if (accessToken) {
+  const requestUrl = typeof config.url === 'string' ? config.url : '';
+  if (accessToken && !isPublicAuthEndpoint(requestUrl)) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
@@ -56,8 +105,18 @@ httpClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = typeof originalRequest?.url === 'string' ? originalRequest.url : '';
+    const skipAuthRefresh = originalRequest?.headers?.['x-skip-auth-refresh'] === 'true';
+    const skipAuthRedirect = originalRequest?.headers?.['x-skip-auth-redirect'] === 'true';
+    const isRefreshEndpoint = requestUrl.includes('/auth/refresh');
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      skipAuthRefresh ||
+      isRefreshEndpoint ||
+      isPublicAuthEndpoint(requestUrl)
+    ) {
       return Promise.reject(error);
     }
 
@@ -93,7 +152,7 @@ httpClient.interceptors.response.use(
     } catch (err) {
       clearPending();
       clearAccessToken();
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !skipAuthRedirect) {
         localStorage.removeItem('currentUser');
         window.location.href = '/login';
       }

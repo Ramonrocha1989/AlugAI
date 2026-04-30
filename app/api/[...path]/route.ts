@@ -2,6 +2,14 @@ import { NextRequest } from 'next/server';
 
 const BACKEND = process.env.BACKEND_URL || 'http://localhost:3000';
 
+function getSetCookieHeaders(res: Response): string[] {
+  const setCookies = res.headers.getSetCookie?.() ?? [];
+  if (setCookies.length > 0) return setCookies;
+
+  const singleHeader = res.headers.get('set-cookie');
+  return singleHeader ? [singleHeader] : [];
+}
+
 async function handler(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const backendUrl = `${BACKEND}${pathname}${search}`;
@@ -30,22 +38,20 @@ async function handler(req: NextRequest) {
     }
   });
 
-  // Montar resposta com Set-Cookie explícito
-  const setCookies = res.headers.getSetCookie?.() ?? [];
+  // Repassar Set-Cookie exatamente como veio do backend
+  const setCookies = getSetCookieHeaders(res);
   const body = await res.arrayBuffer();
 
-  return new Response(body, {
+  const response = new Response(body, {
     status: res.status,
-    headers: {
-      ...resHeaders,
-      // Cada Set-Cookie como header separado
-      ...(setCookies.length > 0 && {
-        'set-cookie': setCookies
-          .map(c => c.replace(/;\s*secure/gi, '').replace(/;\s*domain=[^;]*/gi, ''))
-          .join(', '),
-      }),
-    },
+    headers: resHeaders,
   });
+
+  for (const cookie of setCookies) {
+    response.headers.append('set-cookie', cookie);
+  }
+
+  return response;
 }
 
 export const GET = handler;

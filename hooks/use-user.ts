@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/services/machine-api';
-import { useMounted } from './use-mounted';
+import { useAuthReady } from './use-auth-ready';
 
 export function useUser() {
-  const mounted = useMounted();
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['user'],
     queryFn: () => authService.getMe(),
     staleTime: 1000 * 60 * 5,
     retry: false,
-    enabled: mounted && !!localStorage.getItem('currentUser'),
+    enabled: isAuthenticated && !isBootstrapping,
   });
 }

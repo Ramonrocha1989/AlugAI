@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesService } from '@/services/favorites-api';
+import { useAuthReady } from './use-auth-ready';
 
 // Hook para listar favoritos
 export function useFavorites() {
-  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
-  
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['favorites'],
     queryFn: () => favoritesService.list(),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isBootstrapping,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -70,9 +71,12 @@ export function useToggleFavorite() {
 
 // Hook para listar máquinas favoritadas (com dados completos do backend)
 export function useFavoritedMachines() {
+  const { isAuthenticated, isBootstrapping } = useAuthReady();
+
   return useQuery({
     queryKey: ['favorited-machines'],
     queryFn: () => favoritesService.listWithMachines(),
+    enabled: isAuthenticated && !isBootstrapping,
     retry: false,
     refetchOnWindowFocus: false,
     select: (data) => ({

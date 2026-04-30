@@ -94,7 +94,14 @@ export function Header() {
     <header className="border-b fixed top-0 left-0 right-0 bg-white z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center flex-shrink-0 py-1">
-          <Image src="/logo-sem-fundo.png" alt="BaitaBriq" width={0} height={0} sizes="100vw" priority className="h-12 md:h-16 w-auto bg-transparent mix-blend-multiply transform scale-125" />
+          <Image
+            src="/logo-sem-fundo.png"
+            alt="BaitaBriq"
+            width={220}
+            height={96}
+            priority
+            className="h-12 md:h-16 w-auto bg-transparent mix-blend-multiply"
+          />
         </Link>
 
         {/* Desktop Navigation */}

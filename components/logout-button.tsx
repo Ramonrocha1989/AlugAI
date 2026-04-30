@@ -1,26 +1,20 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useLogout } from '@/hooks/use-api';
 import { LogOut } from 'lucide-react';
 
 export function LogoutButton() {
-  const router = useRouter();
+  const logout = useLogout();
 
-  const handleLogout = () => {
-    // Limpar dados do localStorage
-    localStorage.removeItem('currentUser');
-    
-    // Disparar evento para atualizar outros componentes
-    window.dispatchEvent(new Event('storage'));
-    
-    // Redirecionar para login
-    router.push('/login');
+  const handleLogout = async () => {
+    await logout.mutateAsync();
   };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <button 
         onClick={handleLogout}
+        disabled={logout.isPending}
         className="flex items-center w-full p-4 hover:bg-red-50 transition-colors text-red-600"
       >
         <div className="bg-red-100 p-2 rounded-lg mr-4">
