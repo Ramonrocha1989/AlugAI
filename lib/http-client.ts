@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-const isProd = process.env.NODE_ENV === 'production';
+
+// Usa cookies quando a URL aponta para o domínio de produção
+const useCookies = API_BASE.includes('api.baitabriq.com.br');
 
 export function validateEndpoint(endpoint: string): string {
   if (!/^\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]*$/.test(endpoint)) {
@@ -14,11 +16,11 @@ export const httpClient = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: isProd, // cookies só em produção
+  withCredentials: useCookies,
 });
 
 // Em dev, injetar token do localStorage no header Authorization
-if (typeof window !== 'undefined' && !isProd) {
+if (typeof window !== 'undefined' && !useCookies) {
   httpClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -61,13 +63,15 @@ httpClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refreshToken = !isProd ? localStorage.getItem('refreshToken') : undefined;
+      // Em produção: cookie enviado automaticamente via withCredentials
+      // Em dev: refreshToken no body
+      const refreshToken = !useCookies ? localStorage.getItem('refreshToken') : undefined;
       const refreshRes = await httpClient.post(
         validateEndpoint('/auth/refresh'),
-        !isProd && refreshToken ? { refreshToken } : undefined,
+        !useCookies && refreshToken ? { refreshToken } : undefined,
       );
 
-      if (!isProd && refreshRes.data.accessToken) {
+      if (!useCookies && refreshRes.data.accessToken) {
         localStorage.setItem('accessToken', refreshRes.data.accessToken);
         localStorage.setItem('refreshToken', refreshRes.data.refreshToken);
       }
