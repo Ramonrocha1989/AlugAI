@@ -6,10 +6,14 @@ function getAuthSnapshot() {
     return { hasUser: false, hasToken: false };
   }
 
-  return {
-    hasUser: Boolean(localStorage.getItem('currentUser')),
-    hasToken: Boolean(getAccessToken()),
-  };
+  try {
+    return {
+      hasUser: Boolean(localStorage.getItem('currentUser')),
+      hasToken: Boolean(getAccessToken()),
+    };
+  } catch {
+    return { hasUser: false, hasToken: Boolean(getAccessToken()) };
+  }
 }
 
 export function useAuthReady() {

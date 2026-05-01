@@ -537,10 +537,15 @@ export const authService = {
 
   getCurrentUser: (): User | null => {
     if (typeof window === 'undefined') return null;
-    const stored = localStorage.getItem('currentUser');
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    return parsed.user || parsed;
+    try {
+      const stored = localStorage.getItem('currentUser');
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      return parsed.user || parsed;
+    } catch {
+      localStorage.removeItem('currentUser');
+      return null;
+    }
   },
 
   getMe: async (): Promise<User> => {

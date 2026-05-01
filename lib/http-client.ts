@@ -24,13 +24,25 @@ function isPublicAuthEndpoint(url?: string) {
   ].some((endpoint) => url.includes(endpoint));
 }
 
+function removeLegacyTokenKeysFromStorage() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  } catch {
+    /* ignore */
+  }
+}
+
 export function setAccessToken(token: string) {
   accessToken = token;
+  removeLegacyTokenKeysFromStorage();
   dispatchAuthTokenChanged();
 }
 
 export function clearAccessToken() {
   accessToken = null;
+  removeLegacyTokenKeysFromStorage();
   dispatchAuthTokenChanged();
 }
 
