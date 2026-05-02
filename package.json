@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -46,6 +48,7 @@
     "eslint-config-next": "^15.5.15",
     "postcss": "^8.5.12",
     "tailwindcss": "^3.4.19",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "@playwright/test": "^1.57.0"
   }
 }
