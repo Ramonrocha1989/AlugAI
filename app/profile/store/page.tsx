@@ -19,6 +19,7 @@ import {
   Image as ImageIcon, X,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { PlanId } from '@/types';
 
 const PLAN_LEVELS: Record<string, number> = { free: 0, basico: 1, profissional: 2, premium: 3 };
@@ -177,7 +178,7 @@ export default function StoreProfilePage() {
             <div className="flex items-center gap-4">
               {form.logo ? (
                 <div className="relative">
-                  <img src={form.logo} alt="Logo" className="w-24 h-24 object-contain rounded-lg border" />
+                  <Image src={form.logo} alt="Logo" width={96} height={96} className="w-24 h-24 object-contain rounded-lg border" />
                   <button onClick={() => setForm({ ...form, logo: '' })} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1">
                     <X className="h-3 w-3" />
                   </button>
@@ -216,8 +217,8 @@ export default function StoreProfilePage() {
             <div>
               <Label>Banner da loja (imagem de capa)</Label>
               {form.banner ? (
-                <div className="relative mt-2">
-                  <img src={form.banner} alt="Banner" className="w-full h-[150px] object-cover rounded-lg border" />
+                <div className="relative mt-2 h-[150px] w-full overflow-hidden rounded-lg border">
+                  <Image src={form.banner} alt="Banner" fill className="object-cover" sizes="(max-width: 768px) 100vw, 896px" />
                   <button onClick={() => setForm({ ...form, banner: '' })} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1">
                     <X className="h-3 w-3" />
                   </button>

@@ -20,6 +20,7 @@ import { ImageUpload } from '@/components/image-upload';
 import { analytics } from '@/lib/analytics';
 import dynamic from 'next/dynamic';
 import { Loader2, ArrowLeft, ArrowRight, Check, AlertCircle, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 const UpgradeLimitModal = dynamic(() => import('@/components/upgrade-limit-modal').then(m => ({ default: m.UpgradeLimitModal })), { ssr: false });
 import { getPlanConfig } from '@/services/machine-api';
 import { PlanId } from '@/types';
@@ -276,9 +277,11 @@ export default function NewMachinePage() {
                       }`}
                     >
                       {iconsMap[key] && (
-                        <img 
-                          src={iconsMap[key]} 
+                        <Image
+                          src={iconsMap[key]}
                           alt={label}
+                          width={48}
+                          height={48}
                           className="w-12 h-12 mx-auto mb-2 object-contain"
                         />
                       )}

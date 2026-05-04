@@ -86,7 +86,7 @@ export default function ProposalsClient() {
         }).catch(() => {});
       }
     }
-  }, [proposals, tab]);
+  }, [proposals, tab, queryClient]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {

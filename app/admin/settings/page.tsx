@@ -15,10 +15,11 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/toast-provider';
 import {
   Loader2, Trash2, Plus, Settings, CreditCard, FolderTree,
-  Image, Wrench, FileText, Save, Pencil, X, Upload,
+  Image as ImageIcon, Wrench, FileText, Save, Pencil, X, Upload,
 } from 'lucide-react';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState('geral');
@@ -37,7 +38,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="geral"><Settings className="h-4 w-4 mr-1" /> Geral</TabsTrigger>
           <TabsTrigger value="planos"><CreditCard className="h-4 w-4 mr-1" /> Planos</TabsTrigger>
           <TabsTrigger value="categorias"><FolderTree className="h-4 w-4 mr-1" /> Categorias</TabsTrigger>
-          <TabsTrigger value="banners"><Image className="h-4 w-4 mr-1" /> Banners</TabsTrigger>
+          <TabsTrigger value="banners"><ImageIcon className="h-4 w-4 mr-1" /> Banners</TabsTrigger>
           <TabsTrigger value="manutencao"><Wrench className="h-4 w-4 mr-1" /> Manutenção</TabsTrigger>
           <TabsTrigger value="termos"><FileText className="h-4 w-4 mr-1" /> Termos</TabsTrigger>
         </TabsList>
@@ -350,10 +351,10 @@ function CategoriasTab() {
                   <Label>Ícone</Label>
                   <div className="flex items-center gap-2 mt-1">
                     {newIconUrl ? (
-                      <img src={newIconUrl} alt="" className="w-10 h-10 object-contain rounded border" />
+                      <Image src={newIconUrl} alt="" width={40} height={40} className="w-10 h-10 object-contain rounded border" />
                     ) : (
                       <div className="w-10 h-10 bg-muted rounded border flex items-center justify-center">
-                        <Image className="h-4 w-4 text-muted-foreground" />
+                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
                     <label className="cursor-pointer">
@@ -391,7 +392,7 @@ function CategoriasTab() {
                   <div>
                     <Label>Ícone</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <img src={editIconUrl || cat.icon} alt="" className="w-10 h-10 object-contain rounded border" />
+                      <Image src={editIconUrl || cat.icon} alt="" width={40} height={40} className="w-10 h-10 object-contain rounded border" />
                       <label className="cursor-pointer">
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, 'edit')} disabled={uploading} />
                         <Button type="button" size="sm" variant="outline" asChild>
@@ -414,10 +415,10 @@ function CategoriasTab() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {cat.icon && cat.icon.startsWith('http') ? (
-                    <img src={cat.icon} alt={cat.name} className="w-10 h-10 object-contain" />
+                    <Image src={cat.icon} alt={cat.name} width={40} height={40} className="w-10 h-10 object-contain" />
                   ) : (
                     <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
-                      <Image className="h-4 w-4 text-muted-foreground" />
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
                     </div>
                   )}
                   <span className="font-medium">{cat.name}</span>
@@ -524,7 +525,7 @@ function BannersTab() {
         <Card key={banner.id}>
           <CardContent className="p-4 flex items-center gap-4">
             {banner.imageUrl && (
-              <img src={banner.imageUrl} alt="Banner" className="w-24 h-14 object-cover rounded border" />
+              <Image src={banner.imageUrl} alt="Banner" width={96} height={56} className="w-24 h-14 object-cover rounded border" />
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{banner.imageUrl}</p>
@@ -543,7 +544,7 @@ function BannersTab() {
           {/* Preview */}
           {newBannerUrl && (
             <div className="relative w-full h-[150px] rounded-lg overflow-hidden border">
-              <img src={newBannerUrl} alt="Preview" className="w-full h-full object-cover" />
+              <Image src={newBannerUrl} alt="Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 896px" />
               <button
                 onClick={() => setNewBannerUrl('')}
                 className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1"

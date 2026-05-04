@@ -35,7 +35,7 @@ function ConfirmDeleteContent() {
     } else {
       setStatus('error');
     }
-  }, [token]);
+  }, [token, confirmDelete]);
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-md">

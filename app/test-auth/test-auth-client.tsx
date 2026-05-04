@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/machine-api';
@@ -9,21 +9,21 @@ export function TestAuthClient() {
   const [user, setUser] = useState<any>(null);
   const [logs, setLogs] = useState<string[]>([]);
 
-  const addLog = (message: string) => {
+  const addLog = useCallback((message: string) => {
     setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
-  };
-
-  useEffect(() => {
-    addLog('Pagina carregada');
-    checkAuth();
   }, []);
 
-  const checkAuth = () => {
+  const checkAuth = useCallback(() => {
     addLog('Verificando autenticacao...');
     const currentUser = authService.getCurrentUser();
     addLog(`Usuario: ${JSON.stringify(currentUser)}`);
     setUser(currentUser);
-  };
+  }, [addLog]);
+
+  useEffect(() => {
+    addLog('Pagina carregada');
+    checkAuth();
+  }, [addLog, checkAuth]);
 
   const doLogin = async () => {
     try {
