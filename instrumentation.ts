@@ -1,45 +1,28 @@
-import * as Sentry from '@sentry/nextjs';
+/**
+ * Produção: SENTRY_NETLIFY_LITE=1 em .env.production + netlify.toml — não carrega o SDK Node
+ * do Sentry no servidor (evita OpenTelemetry/Prisma pesado e 502 no runtime Netlify).
+ */
+const sentryNetlifyLite = process.env.SENTRY_NETLIFY_LITE === '1';
 
 export async function register() {
-  try {
-    console.log('[instrumentation] register start', {
-      runtime: process.env.NEXT_RUNTIME,
-      node: process.version,
-      env: process.env.NODE_ENV,
-      hasSentryDsn: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
-    });
-
-    if (process.env.NEXT_RUNTIME === 'nodejs') {
-      await import('./sentry.server.config');
-      console.log('[instrumentation] loaded sentry.server.config');
-    }
-
-    if (process.env.NEXT_RUNTIME === 'edge') {
-      await import('./sentry.edge.config');
-      console.log('[instrumentation] loaded sentry.edge.config');
-    }
-
-    console.log('[instrumentation] register done');
-  } catch (err) {
-    // Never crash request handling because of observability bootstrap.
-    console.error('[instrumentation] Sentry register failed', err);
+  if (sentryNetlifyLite) {
+    console.log('[instrumentation] Sentry lite (Netlify): skipping server SDK bootstrap');
+    return;
   }
+
+  const { registerSentry } = await import('./instrumentation.sentry');
+  await registerSentry();
 }
 
-/** Server Components, middleware, etc. (Next.js 15 + @sentry/nextjs ≥ 8.28) */
-export const onRequestError = (...args: unknown[]) => {
-  try {
-    console.error('[instrumentation] onRequestError called', {
-      argsCount: args.length,
-      firstArgType: args.length > 0 ? typeof args[0] : 'none',
-    });
-
-    if (typeof Sentry.captureRequestError === 'function') {
-      return (Sentry.captureRequestError as (...params: unknown[]) => unknown)(...args);
+export const onRequestError = sentryNetlifyLite
+  ? (...args: unknown[]) => {
+      console.error('[instrumentation] onRequestError (lite mode)', {
+        argsCount: args.length,
+        firstArgType: args.length > 0 ? typeof args[0] : 'none',
+      });
     }
-
-    console.error('[instrumentation] captureRequestError is not a function');
-  } catch (err) {
-    console.error('[instrumentation] Sentry onRequestError failed', err);
-  }
-};
+  : (...args: unknown[]) => {
+      void import('./instrumentation.sentry')
+        .then((m) => m.forwardRequestError(...args))
+        .catch((err) => console.error('[instrumentation] failed to load instrumentation.sentry', err));
+    };

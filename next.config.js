@@ -1,4 +1,5 @@
-const { withSentryConfig } = require('@sentry/nextjs');
+/** Netlify: netlify.toml define SENTRY_NETLIFY_LITE=1 — sem wrapper webpack do Sentry (mais estável). */
+const sentryNetlifyLite = process.env.SENTRY_NETLIFY_LITE === '1';
 
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production';
@@ -57,10 +58,14 @@ const nextConfig = {
   },
 }
 
-module.exports = withSentryConfig(nextConfig, {
+const sentryWebpackOptions = {
   org: 'ramon-0w',
   project: 'baitabriq-web',
   silent: !process.env.CI,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   widenClientFileUpload: true,
-});
+};
+
+module.exports = sentryNetlifyLite
+  ? nextConfig
+  : require('@sentry/nextjs').withSentryConfig(nextConfig, sentryWebpackOptions);

@@ -1,6 +1,5 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import NextError from 'next/error';
 import { useEffect } from 'react';
 
@@ -10,7 +9,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    // Evita importar @sentry/nextjs aqui: o pacote puxa @sentry/node + OpenTelemetry e pode
+    // estourar memória / quebrar o runtime serverless da Netlify. Erros globais ainda vão
+    // para o Sentry via instrumentation / boundary server quando aplicável.
+    console.error('[global-error]', error);
   }, [error]);
 
   return (
