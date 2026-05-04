@@ -96,7 +96,7 @@ export default function ComoFuncionaPage() {
             <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
               <h3 className="font-semibold text-green-900 mb-2">3️⃣ Entre em Contato</h3>
               <p className="text-green-800 text-sm">
-                Clique em &quot;Falar no WhatsApp&quot; e negocie direto com o vendedor. 
+                Clique em "Falar no WhatsApp" e negocie direto com o vendedor. 
                 Tire dúvidas, agende visita, faça proposta.
               </p>
             </div>
