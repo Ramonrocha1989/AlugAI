@@ -14,6 +14,18 @@ import { MaintenanceGuard } from "@/components/maintenance-guard";
 
 const inter = Inter({ subsets: ["latin"] });
 
+function getSafeSiteUrl(): URL {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) return new URL("https://baitabriq.com.br");
+
+  try {
+    const normalized = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    return new URL(normalized);
+  } catch {
+    return new URL("https://baitabriq.com.br");
+  }
+}
+
 export const metadata: Metadata = {
   title: {
     default: "BaitaBriq - Máquinas Agrícolas Usadas RS, SC, PR | Tratores e Colheitadeiras",
@@ -42,7 +54,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://baitabriq.com.br'),
+  metadataBase: getSafeSiteUrl(),
   openGraph: {
     type: 'website',
     locale: 'pt_BR',

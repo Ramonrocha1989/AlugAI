@@ -16,24 +16,36 @@ function isPrefetchRequest(req: NextRequest): boolean {
 }
 
 export function middleware(req: NextRequest) {
-  const { pathname, search } = req.nextUrl;
+  try {
+    const { pathname, search } = req.nextUrl;
 
-  if (!isProtectedPath(pathname)) {
+    if (!isProtectedPath(pathname)) {
+      return NextResponse.next();
+    }
+
+    // Evita ruído de prefetch RSC (ERR_TOO_MANY_REDIRECTS) sem enfraquecer o acesso real.
+    if (isPrefetchRequest(req)) {
+      return NextResponse.next();
+    }
+
+    if (hasAuthCookie(req)) {
+      return NextResponse.next();
+    }
+
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('next', `${pathname}${search}`);
+
+    console.warn('[middleware] redirect unauthenticated request', {
+      pathname,
+      search,
+      userAgent: req.headers.get('user-agent') || 'unknown',
+    });
+
+    return NextResponse.redirect(loginUrl);
+  } catch (err) {
+    console.error('[middleware] unhandled error', err);
     return NextResponse.next();
   }
-
-  // Evita ruído de prefetch RSC (ERR_TOO_MANY_REDIRECTS) sem enfraquecer o acesso real.
-  if (isPrefetchRequest(req)) {
-    return NextResponse.next();
-  }
-
-  if (hasAuthCookie(req)) {
-    return NextResponse.next();
-  }
-
-  const loginUrl = new URL('/login', req.url);
-  loginUrl.searchParams.set('next', `${pathname}${search}`);
-  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
