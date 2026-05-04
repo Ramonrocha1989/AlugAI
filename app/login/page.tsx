@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, User, Building } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -98,10 +99,12 @@ export default function LoginPage() {
         <CardHeader className="text-center pb-2">
           {/* Logo e Nome */}
           <div className="flex flex-col items-center mb-4">
-            <img 
-              src="/logo-sem-fundo.png" 
-              alt="BaitaBriq" 
-              className="h-16 w-16 mb-3 bg-transparent mix-blend-multiply" 
+            <Image
+              src="/logo-sem-fundo.png"
+              alt="BaitaBriq"
+              width={64}
+              height={64}
+              className="h-16 w-16 mb-3 bg-transparent mix-blend-multiply"
             />
             <h1 className="text-2xl font-bold mb-1">
               <span style={{ color: '#B81212' }}>baita</span>

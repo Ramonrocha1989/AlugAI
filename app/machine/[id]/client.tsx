@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -36,14 +36,16 @@ export default function MachineDetailsClient({ params }: { params: { id: string 
 
   const { data: machine, isLoading } = useMachine(id);
   const incrementViews = useIncrementViews();
+  const trackedViewForId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (machine) {
-      incrementViews.mutate(machine.id);
-      analytics.trackMachineView(machine.id, machine.name, machine.category);
-      analytics.trackViewItem(machine.id, machine.name, machine.price, machine.category);
-    }
-  }, [machine?.id]);
+    if (!machine?.id) return;
+    if (trackedViewForId.current === machine.id) return;
+    trackedViewForId.current = machine.id;
+    incrementViews.mutate(machine.id);
+    analytics.trackMachineView(machine.id, machine.name, machine.category);
+    analytics.trackViewItem(machine.id, machine.name, machine.price, machine.category);
+  }, [machine, incrementViews]);
 
   if (isLoading) {
     return (

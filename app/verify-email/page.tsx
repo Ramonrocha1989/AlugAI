@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,21 @@ function VerifyEmailContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
+  const verifyEmail = useCallback(
+    async (verificationToken: string) => {
+      try {
+        await authService.verifyEmail(verificationToken);
+        setStatus('success');
+        setMessage('Email verificado com sucesso! Redirecionando para o login...');
+        setTimeout(() => router.push('/login'), 2000);
+      } catch {
+        setStatus('error');
+        setMessage('Token inválido ou expirado. Solicite um novo email de verificação.');
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     if (!token) {
       setStatus('error');
@@ -23,19 +38,7 @@ function VerifyEmailContent() {
     }
 
     verifyEmail(token);
-  }, [token]);
-
-  const verifyEmail = async (token: string) => {
-    try {
-      await authService.verifyEmail(token);
-      setStatus('success');
-      setMessage('Email verificado com sucesso! Redirecionando para o login...');
-      setTimeout(() => router.push('/login'), 2000);
-    } catch (error) {
-      setStatus('error');
-      setMessage('Token inválido ou expirado. Solicite um novo email de verificação.');
-    }
-  };
+  }, [token, verifyEmail]);
 
   return (
     <div className="container mx-auto px-4 py-16 flex justify-center">
