@@ -21,6 +21,7 @@ import { useMounted } from '@/hooks/use-mounted';
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
+  const isHome = pathname === '/';
   const logout = useLogout();
   const { data: user, isLoading: userLoading } = useUser();
   const { data: favorites = [], isError: favoritesError } = useFavorites();
@@ -91,9 +92,9 @@ export function Header() {
   ];
 
   return (
-    <header className="border-b fixed top-0 left-0 right-0 bg-white z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center flex-shrink-0 py-1">
+    <header className={`${isHome ? 'absolute top-0 left-0 right-0 z-50 border-transparent bg-transparent text-white' : 'fixed top-0 left-0 right-0 z-50 border-b bg-white'}`}>
+      <div className="container mx-auto px-4 py-3 flex items-center">
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0 py-1 mr-6">
           <Image
             src="/logo-sem-fundo.png"
             alt="BaitaBriq"
@@ -102,10 +103,14 @@ export function Header() {
             priority
             className="h-12 md:h-16 w-auto bg-transparent mix-blend-multiply"
           />
+          <p className="hidden xl:inline text-xl md:text-2xl font-bold leading-none">
+            <span style={{ color: '#B81212' }}>baita</span>
+            <span style={{ color: '#11813F' }}>briq</span>
+          </p>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-4 flex-row ml-auto">
+        <nav className="hidden xl:flex items-center justify-end gap-2 xl:gap-4 ml-auto pl-8">
           <Link href="/">
             <Button variant="ghost" size="sm">Início</Button>
           </Link>
@@ -260,7 +265,11 @@ export function Header() {
               <div className="2xl:hidden">
                 <Tooltip content="Dashboard">
                   <Link href="/dashboard">
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={isHome ? 'text-white/90 hover:text-white hover:bg-white/10' : ''}
+                    >
                       <LayoutDashboard className="h-4 w-4 2xl:mr-2" />
                       <span className="hidden 2xl:inline">Dashboard</span>
                     </Button>
@@ -269,7 +278,11 @@ export function Header() {
               </div>
               <div className="hidden 2xl:block">
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={isHome ? 'text-white/90 hover:text-white hover:bg-white/10' : ''}
+                  >
                     <LayoutDashboard className="h-4 w-4 2xl:mr-2" />
                     <span className="hidden 2xl:inline">Dashboard</span>
                   </Button>
@@ -291,8 +304,9 @@ export function Header() {
                     premium: '👑',
                   };
                   return (
-                    <Badge variant={badgeVariant[user.plan] || 'secondary'} className="flex items-center gap-1">
-                      {planIcon[user.plan]} {planConfig.name}
+                    <Badge variant={badgeVariant[user.plan] || 'secondary'} className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 leading-none">
+                      <span className="leading-none">{planIcon[user.plan]}</span>
+                      <span className="leading-none">{planConfig.name}</span>
                     </Badge>
                   );
                 })()}
@@ -311,16 +325,26 @@ export function Header() {
               )}
               <div className="2xl:hidden">
                 <Tooltip content="Sair">
-                  <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    className={isHome ? 'bg-black/35 border-white/60 text-white hover:bg-black/50 hover:text-white' : ''}
+                  >
                     <LogOut className="h-4 w-4 2xl:mr-2" />
-                    <span className="hidden 2xl:inline">Sair</span>
+                    <span className="hidden min-[1700px]:inline">Sair</span>
                   </Button>
                 </Tooltip>
               </div>
               <div className="hidden 2xl:block">
-                <Button variant="outline" size="sm" onClick={handleLogout}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className={isHome ? 'bg-black/35 border-white/60 text-white hover:bg-black/50 hover:text-white' : ''}
+                >
                   <LogOut className="h-4 w-4 2xl:mr-2" />
-                  <span className="hidden 2xl:inline">Sair</span>
+                  <span className="hidden min-[1700px]:inline">Sair</span>
                 </Button>
               </div>
             </>
@@ -332,7 +356,7 @@ export function Header() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden flex items-center gap-1 ml-auto">
+        <div className="xl:hidden flex items-center gap-1 ml-auto">
           {user && <NotificationsDropdown />}
           <Button
             variant="ghost"
@@ -347,8 +371,8 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t bg-background animate-in slide-in-from-top-2 duration-200 block">
-          <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
+        <div className="xl:hidden border-t bg-background text-foreground animate-in slide-in-from-top-2 duration-200 block">
+          <nav className="container mx-auto px-4 py-4 flex flex-col gap-2 text-foreground">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" className="w-full justify-start min-h-[48px]">Início</Button>
             </Link>
