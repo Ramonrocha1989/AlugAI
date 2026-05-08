@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mercadoPagoService } from '@/services/mercadopago';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+
+function getBackendApiBase(): string {
+  const explicitApi = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (explicitApi) return explicitApi.replace(/\/$/, '');
+
+  const backendUrl = process.env.BACKEND_URL?.trim();
+  if (backendUrl) return `${backendUrl.replace(/\/$/, '')}/api`;
+
+  return 'http://localhost:8000/api';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,23 +32,33 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    let userId: string;
-    let decoded: JwtPayload;
+    const backendApiBase = getBackendApiBase();
+    const meResponse = await fetch(`${backendApiBase}/auth/me`, {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: 'application/json',
+      },
+      cache: 'no-store',
+    });
 
-    try {
-      const secret = process.env.JWT_SECRET;
-      if (!secret) throw new Error('JWT_SECRET não configurado');
-      decoded = jwt.verify(token, secret) as JwtPayload;
-      userId = decoded.userId || decoded.sub || '';
-      if (!userId) throw new Error('UserId não encontrado no token');
-    } catch {
+    if (!meResponse.ok) {
       return NextResponse.json(
         { error: 'Token inválido' },
         { status: 401 }
       );
     }
 
-    const email = payerEmail || decoded.email || '';
+    const me = await meResponse.json();
+    const userId = me?.id || me?.userId || me?.sub || '';
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Usuário inválido no token' },
+        { status: 401 }
+      );
+    }
+
+    const email = payerEmail || me?.email || '';
 
     const subscription = await mercadoPagoService.createSubscription(
       planName,
