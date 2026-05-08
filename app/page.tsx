@@ -287,24 +287,37 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="mb-4 text-white bg-black/35 border border-white/40 hover:bg-black/50 hover:text-white"
-            >
-              {showAdvanced ? (
-                <>
-                  <ChevronUp className="h-4 w-4 mr-2" />
-                  Ocultar filtros avançados
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4 mr-2" />
-                  Mostrar filtros avançados
-                </>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="text-white bg-black/35 border border-white/40 hover:bg-black/50 hover:text-white"
+              >
+                {showAdvanced ? (
+                  <>
+                    <ChevronUp className="h-4 w-4 mr-2" />
+                    Ocultar filtros avançados
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4 mr-2" />
+                    Mostrar filtros avançados
+                  </>
+                )}
+              </Button>
+
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="text-white border-white/50 bg-black/20 hover:bg-black/35 hover:text-white"
+                >
+                  Limpar todos os filtros
+                </Button>
               )}
-            </Button>
+            </div>
 
             {showAdvanced && (
               <div className="border-t border-white/30 pt-4 space-y-4 text-white">
@@ -439,11 +452,6 @@ export default function HomePage() {
               </div>
             )}
 
-            {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={handleClearFilters} className="mt-4">
-                Limpar todos os filtros
-              </Button>
-            )}
           </div>
         </div>
 
