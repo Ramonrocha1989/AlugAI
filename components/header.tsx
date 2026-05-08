@@ -110,7 +110,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden xl:flex items-center justify-end gap-2 xl:gap-4 ml-auto pl-8">
+        <nav className="hidden lg:flex items-center justify-end gap-2 xl:gap-4 ml-auto pl-8">
           <Link href="/">
             <Button variant="ghost" size="sm">Início</Button>
           </Link>
@@ -356,7 +356,7 @@ export function Header() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="xl:hidden flex items-center gap-1 ml-auto">
+        <div className="lg:hidden flex items-center gap-1 ml-auto">
           {user && <NotificationsDropdown />}
           <Button
             variant="ghost"
@@ -371,7 +371,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t bg-background text-foreground animate-in slide-in-from-top-2 duration-200 block">
+        <div className="lg:hidden border-t bg-background text-foreground animate-in slide-in-from-top-2 duration-200 block">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2 text-foreground">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" className="w-full justify-start min-h-[48px]">Início</Button>
