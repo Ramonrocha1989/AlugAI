@@ -182,8 +182,38 @@ export default function HomePage() {
     <>
       <WebsiteSchema />
       <FAQSchema />
-      <div className="container mx-auto px-4 pt-0 md:pt-0 pb-2 md:pb-4 max-w-[1920px] md:-mt-24">
+      <div className="container mx-auto px-4 py-2 md:py-4 max-w-[1920px]">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2">
+            <span style={{ color: '#B81212' }}>baita</span>
+            <span style={{ color: '#11813F' }}>briq</span>
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Compre, venda ou troca máquinas agrícolas e de construção
+          </p>
+        </div>
+
         <BannerCarousel />
+
+        <div className="mb-4 md:mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs md:text-sm font-medium">🌾 Filtro por Cultura:</span>
+            <Badge variant="secondary" className="text-xs">Diferencial do Sul</Badge>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {CULTURES.map((culture) => (
+              <Button
+                key={culture}
+                variant={selectedCulture === culture ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleCultureFilter(culture)}
+                className="text-xs md:text-sm"
+              >
+                {culture}
+              </Button>
+            ))}
+          </div>
+        </div>
 
         {/* Botão para expandir filtros no mobile */}
         <div className="md:hidden mb-4">
@@ -199,138 +229,82 @@ export default function HomePage() {
         </div>
 
         {/* Filtros - sempre visíveis no desktop, colapsáveis no mobile */}
-        <div
-          className={`${showFilters ? 'block' : 'hidden'} md:block relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border rounded-none p-6 md:p-10 mb-8 md:mb-10 md:min-h-[420px] md:flex md:items-start`}
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(6,22,33,0.72), rgba(6,22,33,0.58)), url('/hero-bg.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        >
-          <div className="max-w-6xl mx-auto w-full pt-20 md:pt-20">
-            <div className="text-center mb-5 md:mb-6">
-              <h1 className="text-white font-bold text-2xl md:text-4xl leading-tight max-w-4xl mx-auto">
-                As melhores oportunidades em máquinas agrícolas e pesadas, em um só lugar
-              </h1>
+        <div className={`${showFilters ? 'block' : 'hidden'} md:block bg-card border rounded-lg p-4 md:p-6 mb-6 md:mb-8`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar máquina..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
             </div>
 
-            <div className="space-y-4 mb-4">
-              <div className="relative max-w-3xl mx-auto">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar máquina..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-12 h-12 text-base bg-white border-white/80 rounded-lg shadow-md"
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
-                {Object.entries(categoriesMap).slice(0, 6).map(([key, label]) => (
-                  <Button
-                    key={key}
-                    type="button"
-                    size="sm"
-                    variant={category === key ? 'default' : 'outline'}
-                    onClick={() => setCategory(key)}
-                    className={category === key
-                      ? 'h-8 text-xs md:text-sm'
-                      : 'h-8 text-xs md:text-sm bg-black/35 border-white/45 text-white hover:bg-black/50 hover:text-white'}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todas as categorias</option>
-                {Object.entries(categoriesMap).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-                </select>
-
-                <select
-                  value={businessType}
-                  onChange={(e) => setBusinessType(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todos os tipos</option>
-                {Object.entries(BUSINESS_TYPES).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-                </select>
-
-                <select
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todos os estados</option>
-                {STATES_SUL.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-                </select>
-
-                <Button onClick={handleSearch} className="w-full h-11 rounded-lg md:col-span-2 lg:col-span-1 shadow-sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtrar
-                </Button>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="mb-4 text-white bg-black/35 border border-white/40 hover:bg-black/50 hover:text-white"
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {showAdvanced ? (
-                <>
-                  <ChevronUp className="h-4 w-4 mr-2" />
-                  Ocultar filtros avançados
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4 mr-2" />
-                  Mostrar filtros avançados
-                </>
-              )}
+              <option value="">Todas as categorias</option>
+              {Object.entries(categoriesMap).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+
+            <select
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Todos os tipos</option>
+              {Object.entries(BUSINESS_TYPES).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Todos os estados</option>
+              {STATES_SUL.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+
+            <Button onClick={handleSearch} className="w-full md:col-span-2 lg:col-span-1">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtrar
             </Button>
+          </div>
 
-            {showAdvanced && (
-              <div className="border-t border-white/30 pt-4 space-y-4 text-white">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs md:text-sm font-medium text-white">🌾 Filtro por Cultura:</span>
-                  <Badge variant="secondary" className="text-xs">Diferencial do Sul</Badge>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {CULTURES.map((culture) => (
-                    <Button
-                      key={culture}
-                      variant={selectedCulture === culture ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleCultureFilter(culture)}
-                      className="text-xs md:text-sm"
-                    >
-                      {culture}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="mb-4"
+          >
+            {showAdvanced ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Ocultar filtros avançados
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Mostrar filtros avançados
+              </>
+            )}
+          </Button>
 
+          {showAdvanced && (
+            <div className="border-t pt-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white">Faixa de Preço</label>
+                  <label className="text-sm font-medium mb-2 block">Faixa de Preço</label>
                   <div className="grid grid-cols-2 gap-2">
                     <CurrencyInput
                       placeholder="Mínimo"
@@ -346,7 +320,7 @@ export default function HomePage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white">Ano do Modelo</label>
+                  <label className="text-sm font-medium mb-2 block">Ano do Modelo</label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="number"
@@ -366,7 +340,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white">
+                  <label className="text-sm font-medium mb-2 block">
                     ⭐ Horas de Motor
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -386,7 +360,7 @@ export default function HomePage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block text-white">Potência (cv)</label>
+                  <label className="text-sm font-medium mb-2 block">Potência (cv)</label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="number"
@@ -405,46 +379,45 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block text-white">Opções de Negociação</label>
+                <label className="text-sm font-medium mb-2 block">Opções de Negociação</label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-white">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={acceptsTradeDown}
                       onChange={(e) => setAcceptsTradeDown(e.target.checked)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-white">Aceita troca</span>
+                    <span className="text-sm">Aceita troca</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-white">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={acceptsGrains}
                       onChange={(e) => setAcceptsGrains(e.target.checked)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-white">Aceita grãos como pagamento</span>
+                    <span className="text-sm">Aceita grãos como pagamento</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-white">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isVerifiedSeller}
                       onChange={(e) => setIsVerifiedSeller(e.target.checked)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-white">Apenas vendedores verificados</span>
+                    <span className="text-sm">Apenas vendedores verificados</span>
                   </label>
                 </div>
               </div>
-              </div>
-            )}
+            </div>
+          )}
 
-            {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={handleClearFilters} className="mt-4">
-                Limpar todos os filtros
-              </Button>
-            )}
-          </div>
+          {hasActiveFilters && (
+            <Button variant="outline" size="sm" onClick={handleClearFilters} className="mt-4">
+              Limpar todos os filtros
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

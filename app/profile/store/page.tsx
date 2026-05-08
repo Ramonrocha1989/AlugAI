@@ -21,7 +21,6 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlanId } from '@/types';
-import { useUser } from '@/hooks/use-user';
 
 const PLAN_LEVELS: Record<string, number> = { free: 0, basico: 1, profissional: 2, premium: 3 };
 
@@ -49,10 +48,10 @@ export default function StoreProfilePage() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { categoriesMap } = useCategories();
-  const { data: user } = useUser();
   const [uploading, setUploading] = useState<string | null>(null);
 
-  const userPlan = (user?.plan || authService.getCurrentUser()?.plan || 'free') as PlanId;
+  const user = authService.getCurrentUser();
+  const userPlan = (user?.plan || 'free') as PlanId;
 
   const { data: company, isLoading } = useQuery({
     queryKey: ['my-company'],

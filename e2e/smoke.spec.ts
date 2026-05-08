@@ -3,12 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('smoke', () => {
   test('home loads with main heading', async ({ page }) => {
     await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(
-      page.getByRole('heading', {
-        level: 1,
-        name: 'As melhores oportunidades em máquinas agrícolas e pesadas, em um só lugar',
-        exact: true,
-      })
+      page.getByText('Compre, venda ou troca máquinas agrícolas e de construção')
     ).toBeVisible();
   });
 
@@ -52,6 +49,7 @@ test.describe('smoke', () => {
 
   test('login page loads', async ({ page }) => {
     await page.goto('/login');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Entrar na sua conta', exact: true })
     ).toBeVisible();
