@@ -22,12 +22,19 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
     analytics.trackAddToCart(planName, planPrice, planType);
 
     try {
-      const { data } = await httpClient.post(validateEndpoint('/api/create-preference'), {
-        planName,
-        planPrice,
-        planDescription,
-        planType,
-      });
+      const endpoint = validateEndpoint('/api/create-preference');
+      const { data } = await httpClient.post(
+        endpoint,
+        {
+          planName,
+          planPrice,
+          planDescription,
+          planType,
+        },
+        {
+          baseURL: window.location.origin,
+        }
+      );
 
       if (data.init_point) {
         const url = new URL(data.init_point);
