@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
-import { httpClient, validateEndpoint } from '@/lib/http-client';
+import { httpClient } from '@/lib/http-client';
 import { PlanId } from '@/types';
 
 interface CheckoutButtonProps {
@@ -22,7 +22,8 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
     analytics.trackAddToCart(planName, planPrice, planType);
 
     try {
-      const { data } = await httpClient.post(validateEndpoint('/api/create-preference'), {
+      const endpoint = `${window.location.origin}/api/create-preference`;
+      const { data } = await httpClient.post(endpoint, {
         planName,
         planPrice,
         planDescription,

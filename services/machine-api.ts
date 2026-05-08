@@ -550,6 +550,9 @@ export const authService = {
 
   getMe: async (): Promise<User> => {
     const data = await apiRequest('/auth/me', { method: 'GET' });
+    if (typeof window !== 'undefined' && data) {
+      localStorage.setItem('currentUser', JSON.stringify(data));
+    }
     return data;
   },
 
