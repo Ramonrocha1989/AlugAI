@@ -103,10 +103,10 @@ export function Header() {
             priority
             className="h-12 md:h-16 w-auto bg-transparent mix-blend-multiply"
           />
-          <h1 className="hidden xl:inline text-xl md:text-2xl font-bold leading-none">
+          <p className="hidden xl:inline text-xl md:text-2xl font-bold leading-none">
             <span style={{ color: '#B81212' }}>baita</span>
             <span style={{ color: '#11813F' }}>briq</span>
-          </h1>
+          </p>
         </Link>
 
         {/* Desktop Navigation */}
