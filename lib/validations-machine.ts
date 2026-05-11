@@ -63,16 +63,7 @@ export const createMachineSchema = z.object({
 // Schema para filtros de busca
 export const machineFiltersSchema = z.object({
   search: z.string().optional(),
-  category: z.enum([
-    'TRACTORS',
-    'HARVESTERS',
-    'PLANTING',
-    'SPRAYING',
-    'HAYMAKING',
-    'IMPLEMENTS',
-    'LIVESTOCK',
-    'CONSTRUCTION',
-  ]).optional(),
+  category: z.string().optional(),
   businessType: z.enum(['SALE', 'RENTAL', 'EXCHANGE', 'SERVICE']).optional(),
   manufacturer: z.string().optional(),
   state: z.string().optional(),
@@ -88,6 +79,7 @@ export const machineFiltersSchema = z.object({
   acceptsTradeDown: z.boolean().optional(),
   acceptsTradeUp: z.boolean().optional(),
   acceptsGrains: z.boolean().optional(),
+  acceptsFinancing: z.boolean().optional(),
   isVerifiedSeller: z.boolean().optional(),
   page: z.number().optional(),
   limit: z.number().optional(),

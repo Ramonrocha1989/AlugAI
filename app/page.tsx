@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { useInfiniteMachines } from '@/hooks/use-infinite-machines';
 import { MachineCard } from '@/components/machine-card';
 import { MachineSkeletonGrid } from '@/components/machine-skeleton';
@@ -10,14 +10,38 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MachineFilters } from '@/types/machine';
 import { analytics } from '@/lib/analytics';
-import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
+import axios from 'axios';
+import { Search, Loader2, Filter, ChevronDown, ChevronUp, ArrowUpDown, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BUSINESS_TYPES, STATES_SUL, CULTURES } from '@/lib/constants';
 import { useCategories } from '@/hooks/use-categories';
 import { WebsiteSchema } from '@/components/structured-data';
 import { FAQSchema } from '@/components/faq-schema';
 import { BannerCarousel } from '@/components/banner-carousel';
+import { parseMachineSearchBox } from '@/lib/machine-search-query';
+import { shouldMirrorFreeSearchToCity } from '@/lib/mirror-free-search-to-city';
 
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'hours-asc' | 'year-desc';
+
+/** Inputs no hero herdam text-white do bloco; forçar texto escuro no fundo branco. */
+const heroFieldClass =
+  'bg-white border-white/80 text-neutral-900 placeholder:text-neutral-500 shadow-sm focus-visible:ring-offset-0';
+
+function getMachinesListErrorMessage(err: unknown): string {
+  if (!axios.isAxiosError(err)) {
+    return 'Não foi possível carregar as máquinas.';
+  }
+  const data = err.response?.data;
+  if (data && typeof data === 'object') {
+    const raw = (data as Record<string, unknown>).message;
+    if (Array.isArray(raw)) return raw.map(String).join(' ');
+    if (typeof raw === 'string' && raw.trim()) return raw;
+  }
+  if (err.response?.status === 400) {
+    return 'Algum filtro está inválido (por exemplo, categoria inativa ou slug incorreto). Ajuste os filtros e tente de novo.';
+  }
+  return 'Não foi possível carregar as máquinas.';
+}
 
 const getSortByParam = (sort: SortOption): string => {
   const mapping: Record<SortOption, string> = {
@@ -34,6 +58,7 @@ export default function HomePage() {
   const { categoriesMap } = useCategories();
   const [search, setSearch] = useState('');
   const [state, setState] = useState('');
+  const [city, setCity] = useState('');
   const [category, setCategory] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -51,18 +76,169 @@ export default function HomePage() {
   const [maxPower, setMaxPower] = useState('');
   const [acceptsTradeDown, setAcceptsTradeDown] = useState(false);
   const [acceptsGrains, setAcceptsGrains] = useState(false);
+  const [acceptsFinancing, setAcceptsFinancing] = useState(false);
   const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
-  
-  const [filters, setFilters] = useState<MachineFilters>({});
+
+  /** Valor de busca enviado à API (com debounce; Enter aplica na hora). */
+  const [appliedSearch, setAppliedSearch] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  /** Tamanho base da fonte (px) na faixa de chips; encolhe para caber na largura sem cortar. */
+  const chipToolbarOuterRef = useRef<HTMLDivElement>(null);
+  const chipToolbarInnerRef = useRef<HTMLDivElement>(null);
+  const [chipToolbarFontPx, setChipToolbarFontPx] = useState(13);
+  const categoryChips = useMemo(() => Object.entries(categoriesMap).slice(0, 6), [categoriesMap]);
+  const categoryKeysSig = useMemo(() => categoryChips.map(([k]) => k).join(','), [categoryChips]);
+
+  const hasActiveFilters = useMemo(
+    () =>
+      !!(
+        search ||
+        state ||
+        city ||
+        category ||
+        businessType ||
+        minPrice ||
+        maxPrice ||
+        minYear ||
+        maxYear ||
+        minEngineHours ||
+        maxEngineHours ||
+        minPower ||
+        maxPower ||
+        acceptsTradeDown ||
+        acceptsGrains ||
+        acceptsFinancing ||
+        isVerifiedSeller ||
+        selectedCulture
+      ),
+    [
+      search,
+      state,
+      city,
+      category,
+      businessType,
+      minPrice,
+      maxPrice,
+      minYear,
+      maxYear,
+      minEngineHours,
+      maxEngineHours,
+      minPower,
+      maxPower,
+      acceptsTradeDown,
+      acceptsGrains,
+      acceptsFinancing,
+      isVerifiedSeller,
+      selectedCulture,
+    ]
+  );
+
+  useLayoutEffect(() => {
+    const outer = chipToolbarOuterRef.current;
+    const inner = chipToolbarInnerRef.current;
+    if (!outer || !inner) return;
+
+    const BASE = 13;
+    const MIN = 9;
+
+    const fit = () => {
+      const avail = outer.clientWidth;
+      if (avail <= 0) return;
+      const needed = inner.scrollWidth;
+      if (!needed) return;
+      if (needed <= avail) {
+        setChipToolbarFontPx(BASE);
+        return;
+      }
+      const next = Math.max(MIN, Math.min(BASE, Math.floor((BASE * avail) / needed)));
+      setChipToolbarFontPx(next);
+      requestAnimationFrame(() => {
+        if (inner.scrollWidth > avail && inner.scrollWidth > 0) {
+          const refined = Math.max(MIN, Math.floor((next * avail) / inner.scrollWidth));
+          if (refined < next) setChipToolbarFontPx(refined);
+        }
+      });
+    };
+
+    fit();
+    const ro = new ResizeObserver(() => requestAnimationFrame(fit));
+    ro.observe(outer);
+    return () => ro.disconnect();
+  }, [categoryKeysSig, showAdvanced, hasActiveFilters, category]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setAppliedSearch(search.trim()), 300);
+    return () => window.clearTimeout(id);
+  }, [search]);
+
+  const parsedSearchBox = useMemo(
+    () => parseMachineSearchBox(appliedSearch),
+    [appliedSearch]
+  );
+
+  const machineQueryFilters = useMemo<MachineFilters>(
+    () => {
+      const freeSearch = parsedSearchBox.search;
+      const cityFromAdvanced = city.trim() || undefined;
+      const mirrorCityOnly =
+        !cityFromAdvanced &&
+        !!freeSearch &&
+        shouldMirrorFreeSearchToCity(freeSearch);
+
+      return {
+      search: mirrorCityOnly ? undefined : freeSearch,
+      state: parsedSearchBox.stateFromSearch || state || undefined,
+      city: cityFromAdvanced || (mirrorCityOnly ? freeSearch : undefined),
+      category: (category || undefined) as MachineFilters['category'],
+      businessType: (businessType || undefined) as MachineFilters['businessType'],
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      minYear: minYear ? Number(minYear) : undefined,
+      maxYear: maxYear ? Number(maxYear) : undefined,
+      minEngineHours: minEngineHours ? Number(minEngineHours) : undefined,
+      maxEngineHours: maxEngineHours ? Number(maxEngineHours) : undefined,
+      minPower: minPower ? Number(minPower) : undefined,
+      maxPower: maxPower ? Number(maxPower) : undefined,
+      acceptsTradeDown: acceptsTradeDown || undefined,
+      acceptsGrains: acceptsGrains || undefined,
+      acceptsFinancing: acceptsFinancing || undefined,
+      isVerifiedSeller: isVerifiedSeller || undefined,
+      sortBy: getSortByParam(sortBy),
+    };
+    },
+    [
+      parsedSearchBox,
+      state,
+      city,
+      category,
+      businessType,
+      minPrice,
+      maxPrice,
+      minYear,
+      maxYear,
+      minEngineHours,
+      maxEngineHours,
+      minPower,
+      maxPower,
+      acceptsTradeDown,
+      acceptsGrains,
+      acceptsFinancing,
+      isVerifiedSeller,
+      sortBy,
+    ]
+  );
 
   const { 
     data, 
     isLoading, 
+    isError,
+    error,
+    refetch,
     fetchNextPage, 
     hasNextPage, 
     isFetchingNextPage 
-  } = useInfiniteMachines({ ...filters, sortBy: getSortByParam(sortBy) });
+  } = useInfiniteMachines(machineQueryFilters);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -84,37 +260,13 @@ export default function HomePage() {
   const allMachines = data?.pages.flatMap(page => page.data) || [];
   const totalMachines = data?.pages[0]?.meta.total || 0;
 
+  const lastTrackedSearch = useRef<string | undefined>(undefined);
   useEffect(() => {
-    setFilters(prev => ({ ...prev, sortBy: getSortByParam(sortBy) }));
-  }, [sortBy]);
-
-  const handleSearch = () => {
-    const newFilters: MachineFilters = {
-      search: search || undefined,
-      state: state || undefined,
-      category: category as any || undefined,
-      businessType: businessType as any || undefined,
-      minPrice: minPrice || undefined,
-      maxPrice: maxPrice || undefined,
-      minYear: minYear ? Number(minYear) : undefined,
-      maxYear: maxYear ? Number(maxYear) : undefined,
-      minEngineHours: minEngineHours ? Number(minEngineHours) : undefined,
-      maxEngineHours: maxEngineHours ? Number(maxEngineHours) : undefined,
-      minPower: minPower ? Number(minPower) : undefined,
-      maxPower: maxPower ? Number(maxPower) : undefined,
-      acceptsTradeDown: acceptsTradeDown || undefined,
-      acceptsGrains: acceptsGrains || undefined,
-      isVerifiedSeller: isVerifiedSeller || undefined,
-    };
-    
-    setFilters(newFilters);
-    
-    if (search) analytics.trackSearch(search);
-    if (category) analytics.trackFilterUsed('category', category);
-    if (state) analytics.trackFilterUsed('state', state);
-    if (businessType) analytics.trackFilterUsed('businessType', businessType);
-    if (minPrice || maxPrice) analytics.trackFilterUsed('price', `${minPrice || 0}-${maxPrice || 'max'}`);
-  };
+    if (appliedSearch && appliedSearch !== lastTrackedSearch.current) {
+      analytics.trackSearch(appliedSearch);
+    }
+    lastTrackedSearch.current = appliedSearch || undefined;
+  }, [appliedSearch]);
 
   const handleCultureFilter = (culture: string) => {
     setSelectedCulture(culture);
@@ -145,17 +297,15 @@ export default function HomePage() {
     
     setCategory(categoryFilter);
     setSearch(searchTerm);
-    setFilters({
-      category: categoryFilter as any || undefined,
-      search: searchTerm || undefined,
-    });
-    
+    setAppliedSearch(searchTerm.trim());
+
     analytics.trackFilterUsed('culture', culture);
   };
 
   const handleClearFilters = () => {
     setSearch('');
     setState('');
+    setCity('');
     setCategory('');
     setBusinessType('');
     setMinPrice(0);
@@ -168,15 +318,12 @@ export default function HomePage() {
     setMaxPower('');
     setAcceptsTradeDown(false);
     setAcceptsGrains(false);
+    setAcceptsFinancing(false);
     setIsVerifiedSeller(false);
     setSelectedCulture('');
-    setFilters({});
+    setAppliedSearch('');
     setSortBy('recent');
   };
-
-  const hasActiveFilters = search || state || category || businessType || minPrice || maxPrice || 
-    minYear || maxYear || minEngineHours || maxEngineHours || minPower || maxPower || 
-    acceptsTradeDown || acceptsGrains || isVerifiedSeller || selectedCulture;
 
   return (
     <>
@@ -220,107 +367,163 @@ export default function HomePage() {
               <div className="relative max-w-3xl mx-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar máquina..."
+                  placeholder="Cidade, UF, modelo, marca ou descrição (cidade também na busca livre)..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-12 h-12 text-base bg-white border-white/80 rounded-lg shadow-md"
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className={`pl-12 h-12 text-base rounded-lg shadow-md ${heroFieldClass}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      setAppliedSearch(search.trim());
+                    }
+                  }}
                 />
               </div>
 
-              <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
-                {Object.entries(categoriesMap).slice(0, 6).map(([key, label]) => (
-                  <Button
-                    key={key}
-                    type="button"
-                    size="sm"
-                    variant={category === key ? 'default' : 'outline'}
-                    onClick={() => setCategory(key)}
-                    className={category === key
-                      ? 'h-8 text-xs md:text-sm'
-                      : 'h-8 text-xs md:text-sm bg-black/35 border-white/45 text-white hover:bg-black/50 hover:text-white'}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todas as categorias</option>
-                {Object.entries(categoriesMap).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-                </select>
-
-                <select
-                  value={businessType}
-                  onChange={(e) => setBusinessType(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todos os tipos</option>
-                {Object.entries(BUSINESS_TYPES).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-                </select>
-
-                <select
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="flex h-11 w-full rounded-lg border border-white/80 bg-white px-3 py-2 text-sm ring-offset-background shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                <option value="">Todos os estados</option>
-                {STATES_SUL.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-                </select>
-
-                <Button onClick={handleSearch} className="w-full h-11 rounded-lg md:col-span-2 lg:col-span-1 shadow-sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtrar
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className="text-white bg-black/35 border border-white/40 hover:bg-black/50 hover:text-white"
+              <div
+                ref={chipToolbarOuterRef}
+                className="w-full max-w-5xl mx-auto min-w-0 overflow-visible px-0.5"
               >
-                {showAdvanced ? (
-                  <>
-                    <ChevronUp className="h-4 w-4 mr-2" />
-                    Ocultar filtros avançados
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4 mr-2" />
-                    Mostrar filtros avançados
-                  </>
-                )}
-              </Button>
-
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearFilters}
-                  className="text-white border-white/50 bg-black/20 hover:bg-black/35 hover:text-white"
+                <div
+                  ref={chipToolbarInnerRef}
+                  role="toolbar"
+                  aria-label="Filtros rápidos"
+                  style={{ fontSize: `${chipToolbarFontPx}px` }}
+                  className="mx-auto flex w-max max-w-full flex-nowrap items-center justify-center gap-x-[0.45em] py-0.5"
                 >
-                  Limpar todos os filtros
-                </Button>
-              )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    aria-expanded={showAdvanced}
+                    className={
+                      showAdvanced
+                        ? 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center gap-x-[0.35em] whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-white/15 border-white/55 text-white hover:bg-white/25 hover:text-white'
+                        : 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center gap-x-[0.35em] whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-black/35 border-dashed border-white/50 text-white hover:bg-black/50 hover:text-white'
+                    }
+                  >
+                    {showAdvanced ? (
+                      <>
+                        <ChevronUp className="h-[1.1em] w-[1.1em] shrink-0" />
+                        <span className="hidden min-[420px]:inline">Ocultar filtros avançados</span>
+                        <span className="min-[420px]:hidden">Menos</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-[1.1em] w-[1.1em] shrink-0" />
+                        <span className="hidden min-[420px]:inline">Filtros avançados</span>
+                        <span className="min-[420px]:hidden">Filtros</span>
+                      </>
+                    )}
+                  </Button>
+
+                  {hasActiveFilters && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearFilters}
+                      className="inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight text-white border-white/50 bg-black/20 hover:bg-black/35 hover:text-white"
+                    >
+                      <span className="hidden min-[380px]:inline">Limpar filtros</span>
+                      <span className="inline min-[380px]:hidden">Limpar</span>
+                    </Button>
+                  )}
+
+                  <span
+                    className="mx-[0.2em] hidden h-[1.35em] w-px shrink-0 self-center bg-white/25 sm:block"
+                    aria-hidden={true}
+                  />
+
+                  {categoryChips.map(([key, label]) => (
+                    <Button
+                      key={key}
+                      type="button"
+                      size="sm"
+                      variant={category === key ? 'default' : 'outline'}
+                      onClick={() => setCategory(key)}
+                      className={
+                        category === key
+                          ? 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight'
+                          : 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-black/35 border-white/45 text-white hover:bg-black/50 hover:text-white'
+                      }
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {showAdvanced && (
               <div className="border-t border-white/30 pt-4 space-y-4 text-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div>
+                  <label htmlFor="filter-category" className="text-sm font-medium mb-2 block text-white">
+                    Categoria
+                  </label>
+                  <select
+                    id="filter-category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className={`flex h-11 w-full rounded-lg px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${heroFieldClass}`}
+                  >
+                    <option value="">Todas as categorias</option>
+                    {Object.entries(categoriesMap).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="filter-business-type" className="text-sm font-medium mb-2 block text-white">
+                    Tipo
+                  </label>
+                  <select
+                    id="filter-business-type"
+                    value={businessType}
+                    onChange={(e) => setBusinessType(e.target.value)}
+                    className={`flex h-11 w-full rounded-lg px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${heroFieldClass}`}
+                  >
+                    <option value="">Todos os tipos</option>
+                    {Object.entries(BUSINESS_TYPES).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="filter-state" className="text-sm font-medium mb-2 block text-white">
+                    Estado
+                  </label>
+                  <select
+                    id="filter-state"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    className={`flex h-11 w-full rounded-lg px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${heroFieldClass}`}
+                  >
+                    <option value="">Todos os estados</option>
+                    {STATES_SUL.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="filter-city" className="text-sm font-medium mb-2 block text-white">
+                    Cidade
+                  </label>
+                  <Input
+                    id="filter-city"
+                    placeholder="Ex.: Pelotas"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className={`h-11 rounded-lg ${heroFieldClass}`}
+                  />
+                  <p className="text-xs text-white/70 mt-1.5">
+                    Filtro por cidade do anúncio. Se a busca principal não achar, use este campo.
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs md:text-sm font-medium text-white">🌾 Filtro por Cultura:</span>
@@ -349,11 +552,13 @@ export default function HomePage() {
                       placeholder="Mínimo"
                       value={minPrice}
                       onChange={(v) => setMinPrice(v)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                     <CurrencyInput
                       placeholder="Máximo"
                       value={maxPrice}
                       onChange={(v) => setMaxPrice(v)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                   </div>
                 </div>
@@ -366,12 +571,14 @@ export default function HomePage() {
                       placeholder="De (ex: 2015)"
                       value={minYear}
                       onChange={(e) => setMinYear(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                     <Input
                       type="number"
                       placeholder="Até (ex: 2024)"
                       value={maxYear}
                       onChange={(e) => setMaxYear(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                   </div>
                 </div>
@@ -388,12 +595,14 @@ export default function HomePage() {
                       placeholder="Mínimo (ex: 0)"
                       value={minEngineHours}
                       onChange={(e) => setMinEngineHours(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                     <Input
                       type="number"
                       placeholder="Máximo (ex: 5000)"
                       value={maxEngineHours}
                       onChange={(e) => setMaxEngineHours(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                   </div>
                 </div>
@@ -406,12 +615,14 @@ export default function HomePage() {
                       placeholder="Mínimo (ex: 75)"
                       value={minPower}
                       onChange={(e) => setMinPower(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                     <Input
                       type="number"
                       placeholder="Máximo (ex: 200)"
                       value={maxPower}
                       onChange={(e) => setMaxPower(e.target.value)}
+                      className={`h-11 rounded-lg ${heroFieldClass}`}
                     />
                   </div>
                 </div>
@@ -441,6 +652,15 @@ export default function HomePage() {
                   <label className="flex items-center gap-2 cursor-pointer text-white">
                     <input
                       type="checkbox"
+                      checked={acceptsFinancing}
+                      onChange={(e) => setAcceptsFinancing(e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">Aceita financiamento</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-white">
+                    <input
+                      type="checkbox"
                       checked={isVerifiedSeller}
                       onChange={(e) => setIsVerifiedSeller(e.target.checked)}
                       className="w-4 h-4"
@@ -459,6 +679,8 @@ export default function HomePage() {
           <div className="text-sm text-muted-foreground">
             {isLoading ? (
               'Carregando...'
+            ) : isError ? (
+              'Não foi possível carregar o total.'
             ) : (
               <>
                 <span className="font-semibold text-foreground">{totalMachines}</span> máquinas encontradas
@@ -474,7 +696,7 @@ export default function HomePage() {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring w-full sm:w-auto"
             >
-              <option value="recent">Mais recentes</option>
+              <option value="recent">Destaques e mais recentes</option>
               <option value="price-asc">Menor preço</option>
               <option value="price-desc">Maior preço</option>
               <option value="hours-asc">Menos horas de uso</option>
@@ -485,6 +707,24 @@ export default function HomePage() {
 
         {isLoading ? (
           <MachineSkeletonGrid count={6} />
+        ) : isError ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro ao buscar máquinas</AlertTitle>
+            <AlertDescription className="flex flex-col gap-3">
+              <p>{getMachinesListErrorMessage(error)}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
+                  Tentar novamente
+                </Button>
+                {hasActiveFilters && (
+                  <Button type="button" variant="outline" size="sm" onClick={handleClearFilters}>
+                    Limpar filtros
+                  </Button>
+                )}
+              </div>
+            </AlertDescription>
+          </Alert>
         ) : allMachines.length > 0 ? (
           <>
             {/* Grid com altura fixa otimizada */}

@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { httpClient } from '@/lib/http-client';
+import { compactQueryParams } from '@/lib/compact-query-params';
 import { Machine, MachineFilters } from '@/types/machine';
 
 interface MachinesPageResponse {
@@ -17,11 +18,11 @@ export function useInfiniteMachines(filters?: MachineFilters) {
     queryKey: ['machines-infinite', filters],
     queryFn: async ({ pageParam = 1 }) => {
       const { data } = await httpClient.get<MachinesPageResponse>('/machines', {
-        params: {
+        params: compactQueryParams({
           ...filters,
           page: pageParam,
           limit: 20,
-        },
+        }),
       });
       return data;
     },

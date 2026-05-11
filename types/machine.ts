@@ -193,6 +193,7 @@ export interface MachineFilters {
   acceptsTradeDown?: boolean;
   acceptsTradeUp?: boolean;
   acceptsGrains?: boolean;
+  acceptsFinancing?: boolean;
   isVerifiedSeller?: boolean;
   page?: number;
   limit?: number;

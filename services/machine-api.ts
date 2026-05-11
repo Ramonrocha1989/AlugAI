@@ -27,11 +27,13 @@ const applyFilters = (machines: Machine[], filters?: MachineFilters): Machine[] 
   return machines.filter(machine => {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         machine.name.toLowerCase().includes(searchLower) ||
         machine.description.toLowerCase().includes(searchLower) ||
         machine.manufacturer.toLowerCase().includes(searchLower) ||
-        machine.model.toLowerCase().includes(searchLower);
+        machine.model.toLowerCase().includes(searchLower) ||
+        machine.city.toLowerCase().includes(searchLower) ||
+        machine.state.toLowerCase().includes(searchLower);
       if (!matchesSearch) return false;
     }
 
@@ -55,6 +57,7 @@ const applyFilters = (machines: Machine[], filters?: MachineFilters): Machine[] 
     if (filters.acceptsTradeDown && !machine.acceptsTradeDown) return false;
     if (filters.acceptsTradeUp && !machine.acceptsTradeUp) return false;
     if (filters.acceptsGrains && !machine.acceptsGrains) return false;
+    if (filters.acceptsFinancing && !machine.acceptsFinancing) return false;
     if (filters.isVerifiedSeller && !machine.isVerifiedSeller) return false;
 
     return true;
