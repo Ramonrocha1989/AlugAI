@@ -62,7 +62,8 @@ export default function HomePage() {
   const [category, setCategory] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  /** Mobile: área de busca começa aberta para não esconder filtros avançados. */
+  const [showFilters, setShowFilters] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedCulture, setSelectedCulture] = useState('');
   
@@ -142,8 +143,17 @@ export default function HomePage() {
     const BASE = 13;
     const MIN = 9;
 
+    const MD = 768;
+
     const fit = () => {
-      const avail = outer.clientWidth;
+      if (typeof window !== 'undefined' && window.innerWidth < MD) {
+        setChipToolbarFontPx(BASE);
+        return;
+      }
+      const row1 = inner.previousElementSibling as HTMLElement | null;
+      const gapBetween = 10;
+      const usedRow1 = row1 ? row1.getBoundingClientRect().width + gapBetween : 0;
+      const avail = Math.max(0, outer.clientWidth - usedRow1);
       if (avail <= 0) return;
       const needed = inner.scrollWidth;
       if (!needed) return;
@@ -164,7 +174,12 @@ export default function HomePage() {
     fit();
     const ro = new ResizeObserver(() => requestAnimationFrame(fit));
     ro.observe(outer);
-    return () => ro.disconnect();
+    const onResize = () => requestAnimationFrame(fit);
+    window.addEventListener('resize', onResize);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
   }, [categoryKeysSig, showAdvanced, hasActiveFilters, category]);
 
   useEffect(() => {
@@ -367,7 +382,7 @@ export default function HomePage() {
               <div className="relative max-w-3xl mx-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
-                  placeholder="Cidade, UF, modelo, marca ou descrição (cidade também na busca livre)..."
+                  placeholder="Buscar máquina, cidade ou UF..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className={`pl-12 h-12 text-base rounded-lg shadow-md ${heroFieldClass}`}
@@ -382,15 +397,10 @@ export default function HomePage() {
 
               <div
                 ref={chipToolbarOuterRef}
-                className="w-full max-w-5xl mx-auto min-w-0 overflow-visible px-0.5"
+                className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-3 px-0.5 md:flex-row md:flex-nowrap md:items-center md:justify-center md:gap-x-[0.45em]"
               >
-                <div
-                  ref={chipToolbarInnerRef}
-                  role="toolbar"
-                  aria-label="Filtros rápidos"
-                  style={{ fontSize: `${chipToolbarFontPx}px` }}
-                  className="mx-auto flex w-max max-w-full flex-nowrap items-center justify-center gap-x-[0.45em] py-0.5"
-                >
+                {/* Mobile: ações principais em destaque; desktop: mesma linha dos chips */}
+                <div className="flex w-full min-w-0 gap-2 md:w-auto md:shrink-0">
                   <Button
                     type="button"
                     variant="outline"
@@ -399,21 +409,21 @@ export default function HomePage() {
                     aria-expanded={showAdvanced}
                     className={
                       showAdvanced
-                        ? 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center gap-x-[0.35em] whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-white/15 border-white/55 text-white hover:bg-white/25 hover:text-white'
-                        : 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center gap-x-[0.35em] whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-black/35 border-dashed border-white/50 text-white hover:bg-black/50 hover:text-white'
+                        ? 'inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium leading-tight text-white bg-white/15 border-white/55 hover:bg-white/25 hover:text-white md:h-[2.12em] md:min-h-[26px] md:flex-none md:gap-x-[0.35em] md:px-[0.55em] md:py-0 md:text-[1em]'
+                        : 'inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-dashed px-3 py-2 text-sm font-medium leading-tight bg-black/35 border-white/50 text-white hover:bg-black/50 hover:text-white md:h-[2.12em] md:min-h-[26px] md:flex-none md:gap-x-[0.35em] md:px-[0.55em] md:py-0 md:text-[1em]'
                     }
                   >
                     {showAdvanced ? (
                       <>
-                        <ChevronUp className="h-[1.1em] w-[1.1em] shrink-0" />
-                        <span className="hidden min-[420px]:inline">Ocultar filtros avançados</span>
-                        <span className="min-[420px]:hidden">Menos</span>
+                        <ChevronUp className="h-4 w-4 shrink-0 md:h-[1.1em] md:w-[1.1em]" />
+                        <span className="md:hidden">Ocultar filtros</span>
+                        <span className="hidden md:inline">Ocultar filtros avançados</span>
                       </>
                     ) : (
                       <>
-                        <ChevronDown className="h-[1.1em] w-[1.1em] shrink-0" />
-                        <span className="hidden min-[420px]:inline">Filtros avançados</span>
-                        <span className="min-[420px]:hidden">Filtros</span>
+                        <ChevronDown className="h-4 w-4 shrink-0 md:h-[1.1em] md:w-[1.1em]" />
+                        <span className="md:hidden">Filtros avançados</span>
+                        <span className="hidden md:inline">Filtros avançados</span>
                       </>
                     )}
                   </Button>
@@ -424,18 +434,20 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={handleClearFilters}
-                      className="inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight text-white border-white/50 bg-black/20 hover:bg-black/35 hover:text-white"
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center whitespace-nowrap rounded-md border px-3 py-2 text-sm font-medium leading-tight text-white border-white/50 bg-black/20 hover:bg-black/35 hover:text-white md:h-[2.12em] md:min-h-[26px] md:flex-none md:px-[0.55em] md:py-0 md:text-[1em]"
                     >
-                      <span className="hidden min-[380px]:inline">Limpar filtros</span>
-                      <span className="inline min-[380px]:hidden">Limpar</span>
+                      Limpar filtros
                     </Button>
                   )}
+                </div>
 
-                  <span
-                    className="mx-[0.2em] hidden h-[1.35em] w-px shrink-0 self-center bg-white/25 sm:block"
-                    aria-hidden={true}
-                  />
-
+                <div
+                  ref={chipToolbarInnerRef}
+                  role="toolbar"
+                  aria-label="Categorias rápidas"
+                  style={{ fontSize: `${chipToolbarFontPx}px` }}
+                  className="flex w-full min-w-0 flex-wrap justify-center gap-2 md:w-max md:max-w-full md:flex-nowrap md:gap-x-[0.45em] md:py-0.5"
+                >
                   {categoryChips.map(([key, label]) => (
                     <Button
                       key={key}
@@ -445,8 +457,8 @@ export default function HomePage() {
                       onClick={() => setCategory(key)}
                       className={
                         category === key
-                          ? 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight'
-                          : 'inline-flex h-[2.12em] min-h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border px-[0.55em] py-0 text-[1em] leading-tight bg-black/35 border-white/45 text-white hover:bg-black/50 hover:text-white'
+                          ? 'inline-flex min-h-[40px] items-center justify-center whitespace-nowrap rounded-md border px-3 py-1.5 text-sm leading-tight md:h-[2.12em] md:min-h-[26px] md:px-[0.55em] md:py-0 md:text-[1em]'
+                          : 'inline-flex min-h-[40px] items-center justify-center whitespace-nowrap rounded-md border px-3 py-1.5 text-sm leading-tight md:h-[2.12em] md:min-h-[26px] md:px-[0.55em] md:py-0 md:text-[1em] bg-black/35 border-white/45 text-white hover:bg-black/50 hover:text-white'
                       }
                     >
                       {label}
