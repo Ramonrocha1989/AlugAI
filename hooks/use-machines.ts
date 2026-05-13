@@ -29,6 +29,7 @@ export function useMyMachines() {
     queryKey: ['my-machines'],
     queryFn: () => machineService.getMyMachines(),
     enabled: isAuthenticated,
+    staleTime: 1000 * 60,
     retry: false,
   });
 }

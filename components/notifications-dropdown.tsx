@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDeleteNotification } from '@/hooks/use-notifications';
+import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead, useDeleteNotification } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/tooltip';
@@ -13,13 +13,13 @@ import { cn } from '@/lib/utils';
 
 export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data, isLoading } = useNotifications({ limit: 10 });
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data, isLoading } = useNotifications({ limit: 10 }, { enabled: isOpen });
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
 
   const notifications = data?.notifications || [];
-  const unreadCount = data?.unreadCount || 0;
 
   const handleMarkAsRead = (id: string, e: React.MouseEvent) => {
     e.preventDefault();

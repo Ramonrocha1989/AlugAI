@@ -220,7 +220,7 @@ export default function VerificationPage() {
                 </div>
 
                 <div>
-                  <Label>N\u00famero do Documento</Label>
+                  <Label>Número do Documento</Label>
                   <Input
                     value={formData.documentNumber}
                     onChange={(e) => handleDocChange(e.target.value)}

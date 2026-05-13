@@ -3,27 +3,31 @@ import { proposalsService } from '@/services/proposals-api';
 import { CreateProposalData, CounterProposalData } from '@/types/proposal';
 import { useAuthReady } from './use-auth-ready';
 
+type ProposalsQueryOpts = { enabled?: boolean };
+
 // Hook para listar propostas recebidas
-export function useReceivedProposals() {
+export function useReceivedProposals(opts?: ProposalsQueryOpts) {
   const { isAuthenticated, isBootstrapping } = useAuthReady();
+  const allowFetch = opts?.enabled !== false;
 
   return useQuery({
     queryKey: ['proposals', 'received'],
     queryFn: () => proposalsService.getAll('received'),
-    enabled: isAuthenticated && !isBootstrapping,
+    enabled: isAuthenticated && !isBootstrapping && allowFetch,
     retry: false,
     refetchOnWindowFocus: false,
   });
 }
 
 // Hook para listar propostas enviadas
-export function useSentProposals() {
+export function useSentProposals(opts?: ProposalsQueryOpts) {
   const { isAuthenticated, isBootstrapping } = useAuthReady();
+  const allowFetch = opts?.enabled !== false;
 
   return useQuery({
     queryKey: ['proposals', 'sent'],
     queryFn: () => proposalsService.getAll('sent'),
-    enabled: isAuthenticated && !isBootstrapping,
+    enabled: isAuthenticated && !isBootstrapping && allowFetch,
     retry: false,
     refetchOnWindowFocus: false,
   });

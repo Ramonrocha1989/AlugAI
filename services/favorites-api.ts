@@ -34,7 +34,7 @@ export const favoritesService = {
   // Adicionar favorito
   add: async (machineId: string): Promise<void> => {
     if (USE_MOCK) {
-      await delay(300);
+      await delay(120);
       const favorites = getFavorites();
       if (!favorites.includes(machineId)) {
         favorites.push(machineId);
@@ -49,7 +49,7 @@ export const favoritesService = {
   // Remover favorito
   remove: async (machineId: string): Promise<void> => {
     if (USE_MOCK) {
-      await delay(300);
+      await delay(120);
       const favorites = getFavorites();
       const filtered = favorites.filter(id => id !== machineId);
       saveFavorites(filtered);
@@ -62,7 +62,7 @@ export const favoritesService = {
   // Listar favoritos com dados completos das máquinas
   listWithMachines: async (): Promise<Machine[]> => {
     if (USE_MOCK) {
-      await delay(300);
+      await delay(120);
       return [];
     }
     
@@ -73,7 +73,7 @@ export const favoritesService = {
   // Listar apenas IDs dos favoritos
   list: async (): Promise<string[]> => {
     if (USE_MOCK) {
-      await delay(300);
+      await delay(120);
       return getFavorites();
     }
     

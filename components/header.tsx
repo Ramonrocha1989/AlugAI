@@ -22,11 +22,52 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const isHome = pathname === '/';
+  const onProposalsRoute = pathname?.startsWith('/proposals') ?? false;
+  const [loadProposalsAfterIdle, setLoadProposalsAfterIdle] = useState(false);
+
+  useEffect(() => {
+    if (onProposalsRoute) {
+      setLoadProposalsAfterIdle(true);
+      return;
+    }
+    let cancelled = false;
+    const w = typeof window !== 'undefined' ? window : undefined;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    if (w && 'requestIdleCallback' in w) {
+      idleId = w.requestIdleCallback(
+        () => {
+          if (!cancelled) setLoadProposalsAfterIdle(true);
+        },
+        { timeout: 2200 }
+      );
+    } else {
+      timeoutId = setTimeout(() => {
+        if (!cancelled) setLoadProposalsAfterIdle(true);
+      }, 1600);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined && w && 'cancelIdleCallback' in w) {
+        w.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [onProposalsRoute]);
+
+  const proposalsQueryEnabled = onProposalsRoute || loadProposalsAfterIdle;
+
   const logout = useLogout();
   const { data: user, isLoading: userLoading } = useUser();
   const { data: favorites = [], isError: favoritesError } = useFavorites();
-  const { data: receivedProposals = [], isError: receivedError } = useReceivedProposals();
-  const { data: sentProposals = [], isError: sentError } = useSentProposals();
+  const { data: receivedProposals = [], isError: receivedError } = useReceivedProposals({
+    enabled: proposalsQueryEnabled,
+  });
+  const { data: sentProposals = [], isError: sentError } = useSentProposals({
+    enabled: proposalsQueryEnabled,
+  });
   
   // Propostas recebidas não vistas e pendentes
   const pendingReceived = !receivedError && receivedProposals ? receivedProposals.filter(p => 

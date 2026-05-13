@@ -10,6 +10,7 @@ export function useFavorites() {
     queryKey: ['favorites'],
     queryFn: () => favoritesService.list(),
     enabled: isAuthenticated && !isBootstrapping,
+    staleTime: 1000 * 60,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -27,11 +28,22 @@ export function useAddFavorite() {
 
   return useMutation({
     mutationFn: (machineId: string) => favoritesService.add(machineId),
-    onSuccess: () => {
+    onMutate: async (machineId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['favorites'] });
+      const previous = queryClient.getQueryData<string[]>(['favorites']);
+      queryClient.setQueryData<string[]>(['favorites'], (old = []) =>
+        old.includes(machineId) ? old : [...old, machineId]
+      );
+      return { previous };
+    },
+    onError: (_err, _machineId, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(['favorites'], context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['favorited-machines'] });
-      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
-      queryClient.invalidateQueries({ queryKey: ['analytics-summary'] });
     },
   });
 }
@@ -42,11 +54,20 @@ export function useRemoveFavorite() {
 
   return useMutation({
     mutationFn: (machineId: string) => favoritesService.remove(machineId),
-    onSuccess: () => {
+    onMutate: async (machineId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['favorites'] });
+      const previous = queryClient.getQueryData<string[]>(['favorites']);
+      queryClient.setQueryData<string[]>(['favorites'], (old = []) => old.filter((id) => id !== machineId));
+      return { previous };
+    },
+    onError: (_err, _machineId, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(['favorites'], context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['favorited-machines'] });
-      queryClient.invalidateQueries({ queryKey: ['my-machines'] });
-      queryClient.invalidateQueries({ queryKey: ['analytics-summary'] });
     },
   });
 }
@@ -77,6 +98,7 @@ export function useFavoritedMachines() {
     queryKey: ['favorited-machines'],
     queryFn: () => favoritesService.listWithMachines(),
     enabled: isAuthenticated && !isBootstrapping,
+    staleTime: 1000 * 60,
     retry: false,
     refetchOnWindowFocus: false,
     select: (data) => ({
