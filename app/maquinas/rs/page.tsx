@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Máquinas Agrícolas Usadas no Rio Grande do Sul | BaitaBriq',
     description: 'Encontre máquinas agrícolas usadas no RS. Tratores, colheitadeiras e implementos com preços especiais.',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }]
   }
 };
 

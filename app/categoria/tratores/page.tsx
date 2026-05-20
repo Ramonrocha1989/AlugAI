@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Tratores Usados no Sul do Brasil | BaitaBriq',
     description: 'Encontre o trator ideal para sua propriedade. Marcas líderes, preços competitivos e financiamento disponível.',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }]
   }
 };
 

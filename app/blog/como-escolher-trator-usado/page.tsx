@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Como Escolher o Trator Usado Ideal - Guia Completo',
     description: 'Tudo que você precisa saber antes de comprar um trator usado. Dicas de especialistas.',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }]
   }
 };
 

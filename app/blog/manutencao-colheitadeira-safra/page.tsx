@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Manutenção de Colheitadeira: Prepare-se para a Safra',
     description: 'Checklist completo para manter sua colheitadeira em perfeito estado.',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }]
   }
 };
 

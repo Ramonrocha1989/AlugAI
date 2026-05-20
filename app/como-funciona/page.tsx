@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: 'Como Funciona o BaitaBriq - Marketplace de Máquinas Agrícolas',
     description: 'Conectamos vendedores e compradores de máquinas agrícolas no Sul do Brasil',
     type: 'website',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }],
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }],
   },
   alternates: {
     canonical: '/como-funciona',

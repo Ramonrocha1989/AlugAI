@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: 'BaitaBriq',
         images: [
           {
-            url: machine.images[0] || '/logo.jpeg',
+            url: machine.images[0] || '/logo-og.jpeg',
             width: 1200,
             height: 630,
             alt: `${machine.name} ${machine.yearModel}`,
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: 'summary_large_image',
         title,
         description,
-        images: [machine.images[0] || '/logo.jpeg'],
+        images: [machine.images[0] || '/logo-og.jpeg'],
       },
       alternates: {
         canonical: url,

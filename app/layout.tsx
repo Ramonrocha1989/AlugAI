@@ -64,9 +64,9 @@ export const metadata: Metadata = {
     description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
     images: [
       {
-        url: '/logo.jpeg',
-        width: 1200,
-        height: 630,
+        url: '/logo-og.jpeg',
+        width: 500,
+        height: 500,
         alt: 'BaitaBriq',
       },
     ],
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'BaitaBriq - Compra, Venda e Troca de Máquinas Agrícolas',
     description: 'Marketplace de máquinas agrícolas no Sul do Brasil',
-    images: ['/logo.jpeg'],
+    images: ['/logo-og.jpeg'],
   },
   robots: {
     index: true,

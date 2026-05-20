@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Colheitadeiras Usadas no Sul do Brasil | BaitaBriq',
     description: 'Colheitadeiras para todas as culturas. Case IH, John Deere, New Holland com preços competitivos.',
-    images: [{ url: '/logo.jpeg', width: 1200, height: 630 }]
+    images: [{ url: '/logo-og.jpeg', width: 500, height: 500 }]
   }
 };
 
