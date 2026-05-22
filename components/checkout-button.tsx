@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
 import { httpClient, validateEndpoint } from '@/lib/http-client';
+import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { PlanId } from '@/types';
 
 interface CheckoutButtonProps {
@@ -15,6 +17,7 @@ interface CheckoutButtonProps {
 }
 
 export function CheckoutButton({ planName, planPrice, planDescription, planType }: CheckoutButtonProps) {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -42,10 +45,10 @@ export function CheckoutButton({ planName, planPrice, planDescription, planType 
         analytics.trackBeginCheckout(planName, planPrice, planType);
         window.location.href = url.toString();
       } else {
-        alert('Erro ao criar pagamento');
+        showToast('Erro ao criar pagamento', 'error');
       }
-    } catch (error) {
-      alert('Erro ao processar pagamento');
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao processar pagamento'), 'error');
     } finally {
       setLoading(false);
     }

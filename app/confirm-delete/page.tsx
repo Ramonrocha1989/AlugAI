@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { authService } from '@/services/machine-api';
+import { getApiErrorMessage } from '@/lib/error-handler';
 
 function ConfirmDeleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const confirmDelete = useMutation({
     mutationFn: (token: string) => authService.confirmDeleteAccount(token),
@@ -24,7 +26,8 @@ function ConfirmDeleteContent() {
         router.push('/');
       }, 3000);
     },
-    onError: () => {
+    onError: (error: unknown) => {
+      setErrorMessage(getApiErrorMessage(error, 'Não foi possível confirmar a exclusão'));
       setStatus('error');
     },
   });
@@ -89,7 +92,8 @@ function ConfirmDeleteContent() {
               </div>
               <Alert className="bg-destructive/10 border-destructive/20">
                 <p className="text-sm">
-                  O link pode estar expirado ou inválido. Tente solicitar a exclusão novamente.
+                  {errorMessage ||
+                    'O link pode estar expirado ou inválido. Tente solicitar a exclusão novamente.'}
                 </p>
               </Alert>
               <Button onClick={() => router.push('/profile')} className="w-full">

@@ -7,6 +7,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage, getApiErrorStatus } from '@/lib/error-handler';
 import { useDeleteMachine, useUpdateMachine } from '@/hooks/use-machines';
 import { getPlanConfig } from '@/services/machine-api';
 import { Machine } from '@/types/machine';
@@ -66,11 +67,11 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
       await deleteMachine.mutateAsync(machine.id);
       showToast('Máquina deletada com sucesso!', 'success');
       setShowDeleteDialog(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast(
-        error.response?.status === 403
-          ? 'Você não tem permissão para deletar esta máquina'
-          : 'Erro ao deletar máquina',
+        getApiErrorStatus(error) === 403
+          ? getApiErrorMessage(error, 'Você não tem permissão para deletar esta máquina')
+          : getApiErrorMessage(error, 'Erro ao deletar máquina'),
         'error'
       );
     }
@@ -84,11 +85,11 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
         data: { isPremium: !machine.isPremium },
       });
       showToast(machine.isPremium ? 'Premium desativado!' : '🏆 Premium ativado!', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast(
-        error.response?.status === 403
-          ? error.response?.data?.message || 'Limite de anúncios Premium atingido'
-          : 'Erro ao atualizar Premium',
+        getApiErrorStatus(error) === 403
+          ? getApiErrorMessage(error, 'Limite de anúncios Premium atingido')
+          : getApiErrorMessage(error, 'Erro ao atualizar Premium'),
         'error'
       );
     }
@@ -101,11 +102,11 @@ export function MachineListItem({ machine, user }: MachineListItemProps) {
         data: { isFeatured: !machine.isFeatured },
       });
       showToast(machine.isFeatured ? 'Destaque desativado!' : '⭐ Destaque ativado!', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast(
-        error.response?.status === 403
-          ? error.response?.data?.message || 'Limite de anúncios em Destaque atingido'
-          : 'Erro ao atualizar Destaque',
+        getApiErrorStatus(error) === 403
+          ? getApiErrorMessage(error, 'Limite de anúncios em Destaque atingido')
+          : getApiErrorMessage(error, 'Erro ao atualizar Destaque'),
         'error'
       );
     }

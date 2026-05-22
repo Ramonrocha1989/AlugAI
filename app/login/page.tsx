@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin, useRegister } from '@/hooks/use-api';
 import { useToast } from '@/components/toast-provider';
 import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from '@/lib/validations';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -75,8 +76,8 @@ export default function LoginPage() {
       showToast('Login realizado com sucesso!', 'success');
       await new Promise(resolve => setTimeout(resolve, 500));
       window.location.href = '/';
-    } catch (error: any) {
-      const message = error.data?.message || error.message || 'Erro ao fazer login';
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, 'Erro ao fazer login');
       const toastType = getToastType(message);
       showToast(message, toastType);
     }
@@ -86,8 +87,8 @@ export default function LoginPage() {
     try {
       await register.mutateAsync(data);
       setShowVerificationMessage(true);
-    } catch (error: any) {
-      const message = error.data?.message || error.message || 'Erro ao fazer cadastro';
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, 'Erro ao fazer cadastro');
       const toastType = getToastType(message);
       showToast(message, toastType);
     }

@@ -1,3 +1,43 @@
+const AXIOS_GENERIC_MESSAGE = /^Request failed with status code \d+$/;
+
+type AxiosErrorLike = {
+  response?: {
+    status?: number;
+    data?: { message?: string | string[] };
+  };
+};
+
+function getAxiosResponse(error: unknown): AxiosErrorLike['response'] | undefined {
+  if (error && typeof error === 'object' && 'response' in error) {
+    return (error as AxiosErrorLike).response;
+  }
+  return undefined;
+}
+
+/** Status HTTP de erros Axios (ex.: 403, 400). */
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return getAxiosResponse(error)?.status;
+}
+
+/** Extrai mensagem legível de erros Axios/NestJS (ex.: "Email ou senha inválidos"). */
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  const response = getAxiosResponse(error);
+  if (response?.status && response.status >= 500) return fallback;
+
+  const msg = response?.data?.message;
+  if (typeof msg === 'string' && msg.trim()) return msg;
+  if (Array.isArray(msg) && msg.length > 0) return msg.join(', ');
+
+  if (
+    error instanceof Error &&
+    error.message &&
+    !AXIOS_GENERIC_MESSAGE.test(error.message)
+  ) {
+    return error.message;
+  }
+  return fallback;
+}
+
 // Mapear erros do backend para mensagens em português
 const errorMessages: Record<string, string> = {
   'Number must be greater than 0': 'Deve ser maior que 0',

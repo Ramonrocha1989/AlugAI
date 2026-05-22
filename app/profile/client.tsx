@@ -17,6 +17,7 @@ import { PlanId } from '@/types';
 import { apiRequest } from '@/lib/api';
 import dynamic from 'next/dynamic';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 const DeleteAccountModal = dynamic(() => import('@/components/delete-account-modal').then(m => ({ default: m.DeleteAccountModal })), { ssr: false });
 import Link from 'next/link';
 
@@ -52,8 +53,8 @@ export default function ProfileClient() {
       setIsEditing(false);
       showToast('Perfil atualizado com sucesso!', 'success');
     },
-    onError: () => {
-      showToast('Erro ao atualizar perfil. Tente novamente.', 'error');
+    onError: (error: unknown) => {
+      showToast(getApiErrorMessage(error, 'Erro ao atualizar perfil. Tente novamente.'), 'error');
     },
   });
 

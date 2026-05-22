@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Button } from '@/components/ui/button';
 import { X, Upload, Loader2 } from 'lucide-react';
 
@@ -47,8 +48,8 @@ export function ImageUpload({ images, onChange, maxImages = 5 }: ImageUploadProp
 
       const uploadedUrls = await Promise.all(uploadPromises);
       onChange([...images, ...uploadedUrls]);
-    } catch (error: any) {
-      alert(error.message || 'Erro ao fazer upload das imagens');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Erro ao fazer upload das imagens'));
     } finally {
       setUploading(false);
       setUploadProgress(0);

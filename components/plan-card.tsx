@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Loader2, ArrowUpRight } from 'lucide-react';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { useCancelSubscription } from '@/hooks/use-subscription';
 import { getPlanConfig } from '@/services/machine-api';
 import { User, PlanId } from '@/types';
@@ -83,8 +84,8 @@ export function PlanCard({ user }: PlanCardProps) {
       await cancelSubscription.mutateAsync();
       showToast('Assinatura cancelada. Seu plano fica ativo até o fim do período.', 'success');
       setShowCancelDialog(false);
-    } catch {
-      showToast('Erro ao cancelar assinatura', 'error');
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao cancelar assinatura'), 'error');
     }
   };
 

@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForgotPassword } from '@/hooks/use-api';
 import { useToast } from '@/components/toast-provider';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,8 +29,8 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword.mutateAsync(data.email);
       setSuccess(true);
-    } catch (error) {
-      showToast('Erro ao solicitar recuperação de senha', 'error');
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao solicitar recuperação de senha'), 'error');
     }
   };
 

@@ -12,6 +12,8 @@ import { Alert } from '@/components/ui/alert';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { authService } from '@/services/machine-api';
 import { deleteAccountSchema, DeleteAccountFormData } from '@/lib/validations';
+import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 
 interface DeleteAccountModalProps {
   open: boolean;
@@ -19,6 +21,7 @@ interface DeleteAccountModalProps {
 }
 
 export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
+  const { showToast } = useToast();
   const [step, setStep] = useState<'confirm' | 'success'>('confirm');
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<DeleteAccountFormData>({
@@ -31,8 +34,8 @@ export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
       setStep('success');
       reset();
     },
-    onError: () => {
-      // Erro tratado pelo apiRequest com toast
+    onError: (error: unknown) => {
+      showToast(getApiErrorMessage(error, 'Erro ao solicitar exclusão da conta'), 'error');
     },
   });
 

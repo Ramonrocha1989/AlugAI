@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Loader2, CheckCircle, XCircle, Shield, FileText, Phone, Mail, Building2, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
@@ -49,7 +50,7 @@ export default function AdminVerificationsPage() {
         setConfirmAction(null);
         showToast('Vendedor verificado com sucesso!', 'success');
       },
-      onError: () => showToast('Erro ao aprovar', 'error'),
+      onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao aprovar'), 'error'),
     });
   };
 
@@ -61,7 +62,7 @@ export default function AdminVerificationsPage() {
         setRejectReason('');
         showToast('Solicitação rejeitada', 'success');
       },
-      onError: () => showToast('Erro ao rejeitar', 'error'),
+      onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao rejeitar'), 'error'),
     });
   };
 
