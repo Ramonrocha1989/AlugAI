@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/services/machine-api';
 import { adminService } from '@/services/admin-api';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,8 +86,8 @@ export default function VerificationPage() {
     try {
       await adminService.requestVerification(formData);
       setSubmitted(true);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || 'Erro ao enviar solicitação', 'error');
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao enviar solicitação'), 'error');
     } finally {
       setLoading(false);
     }

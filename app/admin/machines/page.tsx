@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import {
   Loader2, Star, Trash2, CheckCircle, XCircle, Search,
   Eye, MousePointerClick, MapPin, Calendar, Package,
@@ -88,7 +89,8 @@ export default function AdminMachinesPage() {
       setConfirmAction(null);
       showToast('Ação realizada com sucesso!', 'success');
     };
-    const onError = () => showToast('Erro ao executar ação', 'error');
+    const onError = (error: unknown) =>
+      showToast(getApiErrorMessage(error, 'Erro ao executar ação'), 'error');
 
     switch (type) {
       case 'approve':

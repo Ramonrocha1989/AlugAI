@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import {
   Loader2, Trash2, Plus, Settings, CreditCard, FolderTree,
   Image as ImageIcon, Wrench, FileText, Save, Pencil, X, Upload,
@@ -70,7 +71,7 @@ function GeralTab() {
       queryClient.invalidateQueries({ queryKey: ['public-settings'] });
       showToast('Configurações salvas!', 'success');
     },
-    onError: () => showToast('Erro ao salvar configurações', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao salvar configurações'), 'error'),
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -153,7 +154,7 @@ function PlanosTab() {
       setEditingId(null);
       showToast('Plano atualizado!', 'success');
     },
-    onError: () => showToast('Erro ao atualizar plano', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao atualizar plano'), 'error'),
   });
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>, id: string) => {
@@ -259,7 +260,7 @@ function CategoriasTab() {
       setNewIconUrl('');
       showToast('Categoria criada!', 'success');
     },
-    onError: () => showToast('Erro ao criar categoria', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao criar categoria'), 'error'),
   });
 
   const updateCat = useMutation({
@@ -271,7 +272,7 @@ function CategoriasTab() {
       setEditIconUrl('');
       showToast('Categoria atualizada!', 'success');
     },
-    onError: () => showToast('Erro ao atualizar categoria', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao atualizar categoria'), 'error'),
   });
 
   const deleteCat = useMutation({
@@ -282,7 +283,7 @@ function CategoriasTab() {
       setDeleteId(null);
       showToast('Categoria removida!', 'success');
     },
-    onError: () => showToast('Erro ao remover categoria', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao remover categoria'), 'error'),
   });
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => {
@@ -294,7 +295,9 @@ function CategoriasTab() {
       const url = await uploadToCloudinary(file);
       if (target === 'new') setNewIconUrl(url);
       else setEditIconUrl(url);
-    } catch { showToast('Erro ao fazer upload', 'error'); }
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao fazer upload'), 'error');
+    }
     finally { setUploading(false); }
   };
 
@@ -481,7 +484,7 @@ function BannersTab() {
       setNewBannerLink('');
       showToast('Banner adicionado!', 'success');
     },
-    onError: () => showToast('Erro ao adicionar banner', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao adicionar banner'), 'error'),
   });
 
   const remove = useMutation({
@@ -492,7 +495,7 @@ function BannersTab() {
       setDeleteId(null);
       showToast('Banner removido!', 'success');
     },
-    onError: () => showToast('Erro ao remover banner', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao remover banner'), 'error'),
   });
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -504,7 +507,9 @@ function BannersTab() {
       const url = await uploadToCloudinary(file);
       setNewBannerUrl(url);
       showToast('Imagem carregada!', 'success');
-    } catch { showToast('Erro ao fazer upload', 'error'); }
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao fazer upload'), 'error');
+    }
     finally { setUploading(false); }
   };
 
@@ -626,7 +631,7 @@ function ManutencaoTab() {
       queryClient.invalidateQueries({ queryKey: ['public-settings'] });
       showToast('Configurações de manutenção salvas!', 'success');
     },
-    onError: () => showToast('Erro ao salvar', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao salvar'), 'error'),
   });
 
   // Sincronizar apenas uma vez quando os dados carregam
@@ -699,7 +704,7 @@ function TermosTab() {
       queryClient.invalidateQueries({ queryKey: ['public-settings'] });
       showToast('Textos salvos!', 'success');
     },
-    onError: () => showToast('Erro ao salvar', 'error'),
+    onError: (error) => showToast(getApiErrorMessage(error, 'Erro ao salvar'), 'error'),
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

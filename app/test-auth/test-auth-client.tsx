@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/machine-api';
+import { getApiErrorMessage } from '@/lib/error-handler';
 
 export function TestAuthClient() {
   const [user, setUser] = useState<any>(null);
@@ -34,8 +35,8 @@ export function TestAuthClient() {
       });
       addLog(`Login OK: ${JSON.stringify(result)}`);
       checkAuth();
-    } catch (error: any) {
-      addLog(`Erro: ${error.message}`);
+    } catch (error: unknown) {
+      addLog(`Erro: ${getApiErrorMessage(error, 'Falha no login')}`);
     }
   };
 

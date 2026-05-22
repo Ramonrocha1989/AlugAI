@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import {
   Dialog,
   DialogContent,
@@ -50,8 +51,8 @@ export function PaymentModal({ open, onOpenChange, planId, planName, planPrice }
       
       onOpenChange(false);
       router.push('/dashboard');
-    } catch (error) {
-      alert('Erro ao processar pagamento');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Erro ao processar pagamento'));
     } finally {
       setLoading(false);
     }

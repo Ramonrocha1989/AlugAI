@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMachine, useUpdateMachine } from '@/hooks/use-machines';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage, getApiErrorStatus } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { CurrencyInput } from '@/components/ui/currency-input';
@@ -92,11 +93,11 @@ export default function EditMachinePage({ params }: { params: Promise<{ id: stri
       await updateMachine.mutateAsync({ id, data: cleanData });
       showToast('Máquina atualizada com sucesso!', 'success');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast(
-        error.response?.status === 403
-          ? 'Você não tem permissão para editar esta máquina'
-          : 'Erro ao atualizar máquina',
+        getApiErrorStatus(error) === 403
+          ? getApiErrorMessage(error, 'Você não tem permissão para editar esta máquina')
+          : getApiErrorMessage(error, 'Erro ao atualizar máquina'),
         'error'
       );
     }

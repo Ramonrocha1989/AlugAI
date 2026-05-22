@@ -7,6 +7,7 @@ import { authService } from '@/services/machine-api';
 import { useCategories } from '@/hooks/use-categories';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { useToast } from '@/components/toast-provider';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,8 +82,8 @@ export default function StoreProfilePage() {
       queryClient.invalidateQueries({ queryKey: ['my-company'] });
       showToast('Perfil da loja atualizado!', 'success');
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Erro ao atualizar perfil', 'error');
+    onError: (error: unknown) => {
+      showToast(getApiErrorMessage(error, 'Erro ao atualizar perfil'), 'error');
     },
   });
 
@@ -94,7 +95,9 @@ export default function StoreProfilePage() {
     try {
       const url = await uploadToCloudinary(file);
       setForm((prev: any) => ({ ...prev, [field]: url }));
-    } catch { showToast('Erro ao fazer upload', 'error'); }
+    } catch (error: unknown) {
+      showToast(getApiErrorMessage(error, 'Erro ao fazer upload'), 'error');
+    }
     finally { setUploading(null); }
   };
 

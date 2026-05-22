@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useResetPassword } from '@/hooks/use-api';
 import { useToast } from '@/components/toast-provider';
 import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/validations';
+import { getApiErrorMessage } from '@/lib/error-handler';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,8 +39,11 @@ function ResetPasswordForm() {
       await resetPassword.mutateAsync({ token: data.token, password: data.password });
       showToast('✅ Senha alterada com sucesso!', 'success');
       setTimeout(() => router.push('/login'), 1500);
-    } catch (error) {
-      showToast('Erro ao redefinir senha. Token pode estar expirado.', 'error');
+    } catch (error: unknown) {
+      showToast(
+        getApiErrorMessage(error, 'Erro ao redefinir senha. Token pode estar expirado.'),
+        'error'
+      );
     }
   };
 

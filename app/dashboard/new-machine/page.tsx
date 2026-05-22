@@ -7,7 +7,7 @@ import { authService, machineService } from '@/services/machine-api';
 import { useToast } from '@/components/toast-provider';
 import { useRealTimeValidation } from '@/hooks/use-validation';
 import { ValidationSummary } from '@/components/validation-summary';
-import { showBackendErrors } from '@/lib/error-handler';
+import { getApiErrorMessage, getApiErrorStatus, showBackendErrors } from '@/lib/error-handler';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ValidatedInput } from '@/components/ui/validated-input';
@@ -73,9 +73,9 @@ export default function NewMachinePage() {
           setLimitError(`Limite de ${planConfig.maxAds} anúncios atingido no plano ${planConfig.name}. Faça upgrade para anunciar mais.`);
           setShowUpgradeModal(true);
         }
-      } catch (error: any) {
-        if (error.response?.status === 403) {
-          setLimitError(error.response?.data?.message || 'Limite de anúncios atingido');
+      } catch (error: unknown) {
+        if (getApiErrorStatus(error) === 403) {
+          setLimitError(getApiErrorMessage(error, 'Limite de anúncios atingido'));
           setShowUpgradeModal(true);
         }
       } finally {
@@ -138,17 +138,23 @@ export default function NewMachinePage() {
       }
       
       router.push('/dashboard');
-    } catch (error: any) {
-      if (error.response?.status === 403) {
-        const message = error.response?.data?.message || 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.';
-        setLimitError(message);
+    } catch (error: unknown) {
+      const validationErrors =
+        error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { errors?: Parameters<typeof showBackendErrors>[0] } } })
+              .response?.data?.errors
+          : undefined;
+
+      if (getApiErrorStatus(error) === 403) {
+        setLimitError(
+          getApiErrorMessage(error, 'Limite de anúncios atingido. Faça upgrade para o plano Lojista.')
+        );
         setShowUpgradeModal(true);
-      } else if (error.response?.status === 400 && error.response?.data?.errors) {
-        // Tratar erros de validação do backend
-        const backendErrors = showBackendErrors(error.response.data.errors, showToast);
+      } else if (getApiErrorStatus(error) === 400 && validationErrors) {
+        const backendErrors = showBackendErrors(validationErrors, showToast);
         setErrors(backendErrors);
       } else {
-        showToast('Erro ao cadastrar máquina', 'error');
+        showToast(getApiErrorMessage(error, 'Erro ao cadastrar máquina'), 'error');
       }
     }
   };
